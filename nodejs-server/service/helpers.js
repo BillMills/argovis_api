@@ -36,3 +36,13 @@ module.exports.geoWeightedSum = function(terms){
 
     return sum
 }
+
+module.exports.arrayinflate = function(keys, measarray){
+  // keys: array of strings to be interpreted as the keys of corresponding measurements, in order
+  // measarray: array of arrays of measurements. Subarrays must present measurements in same order as listed in keys
+  let meas = {}
+  for(let i=0; i<keys.length; i++){
+    meas[keys[i]] = measarray[i]
+  }
+  return meas
+}
