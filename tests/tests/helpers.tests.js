@@ -36,9 +36,11 @@ $RefParser.dereference(rawspec, (err, schema) => {
     describe("arrayinflate", function () {
       it("reinflates basic minification format to legacy argovis format", async function () {
         const keys = ['psal', 'pres', 'temp']
-        const measurements = [[34.358,242,-1.9]]
+        const measurements = [34.358,242,-1.9]
         const reinflated = helpers.arrayinflate(keys, measurements)
-        expect(reinflated).to.deep.equal({"psal": 34.358, "pres": 242, "temp": -1.9})  
+        expect(reinflated).to.deep.equal({"psal": 34.358, "pres": 242, "temp": -1.9}) 
+      });
+    }); 
 
     describe("validlonlat", function () {
       it("flags an invalid longitude", async function () {
