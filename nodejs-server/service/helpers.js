@@ -39,9 +39,17 @@ module.exports.geoWeightedSum = function(terms){
 
 module.exports.arrayinflate = function(keys, measarray){
   let meas = {}
-  for(let i=0; i<keys.length; i++){
-    meas[keys[i]] = measarray[i]
+  let mask = measarray.shift()
+  let index = 0
+  for(i=0; i<mask.length; i++){
+    for(j=0; j<32; j++){
+        if(mask[i] & (1<<j)){
+            meas[keys[index+j]] = measarray.shift()
+        }
+    }
+    index += 32
   }
+
   return meas
 }
 
