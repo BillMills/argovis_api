@@ -1344,6 +1344,9 @@
                   "$ref": "#/components/parameters/platform_type"
                },
                {
+                  "$ref": "#/components/parameters/positionqc"
+               },
+               {
                   "$ref": "#/components/parameters/profileSource"
                },
                {
@@ -3050,6 +3053,15 @@
             "schema": {
                "type": "string",
                "example": "PALACE"
+            }
+         },
+         "positionqc": {
+            "in": "query",
+            "name": "positionqc",
+            "description": "Argo's position QC",
+            "schema": {
+               "type": "number",
+               "example": 1
             }
          },
          "polygon": {
