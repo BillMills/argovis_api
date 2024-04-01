@@ -138,8 +138,8 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
     if(metadata){
       local_filter['$match']['metadata'] = metadata
     }
-    if(positionqc || positionqc===0){
-      local_filter['$match']['geolocation_argoqc'] = positionqc
+    if(positionqc){
+      local_filter['$match']['geolocation_argoqc'] = {'$in': positionqc}
     }
     if(Object.keys(local_filter['$match']).length > 0){
       local_filter = [local_filter]
