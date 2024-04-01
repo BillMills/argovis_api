@@ -3058,10 +3058,16 @@
          "positionqc": {
             "in": "query",
             "name": "positionqc",
-            "description": "Argo's position QC",
+            "description": "Argo position qc flag.",
+            "style": "form",
+            "explode": false,
+            "allowReserved": true,
             "schema": {
-               "type": "number",
-               "example": 1
+               "type": "array",
+               "items": {
+                  "type": "number"
+               },
+               "example": "1,2"
             }
          },
          "polygon": {

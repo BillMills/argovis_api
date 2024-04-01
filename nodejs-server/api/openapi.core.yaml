@@ -2197,13 +2197,16 @@ paths:
           example: PALACE
       - name: positionqc
         in: query
-        description: Argo's position QC
+        description: Argo position qc flag.
         required: false
         style: form
-        explode: true
+        explode: false
+        allowReserved: true
         schema:
-          type: number
-          example: 1
+          type: array
+          example: "1,2"
+          items:
+            type: number
       - name: source
         in: query
         description: Experimental program source(s) to search for; document must match
@@ -4364,13 +4367,16 @@ components:
     positionqc:
       name: positionqc
       in: query
-      description: Argo's position QC
+      description: Argo position qc flag.
       required: false
       style: form
-      explode: true
+      explode: false
+      allowReserved: true
       schema:
-        type: number
-        example: 1
+        type: array
+        example: "1,2"
+        items:
+          type: number
     polygon:
       name: polygon
       in: query
