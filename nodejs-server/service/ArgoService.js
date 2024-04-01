@@ -120,6 +120,7 @@ exports.argoVocab = function(parameter) {
  * metadata String metadata pointer (optional)
  * platform String Unique platform ID to search for. (optional)
  * platform_type String Make/model of platform (optional)
+ * positionqc BigDecimal Argo's position QC (optional)
  * source List Experimental program source(s) to search for; document must match all sources to be returned. Accepts ~ negation to filter out documents. See /<data route>/vocabulary?parameter=source for list of options. (optional)
  * compression String Data minification strategy to apply. (optional)
  * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
@@ -128,7 +129,7 @@ exports.argoVocab = function(parameter) {
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findArgo = function(id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,metadata,platform,platform_type,source,compression,mostrecent,data,presRange,batchmeta) {
+exports.findArgo = function(id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
