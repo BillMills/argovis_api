@@ -99,6 +99,7 @@ exports.argoVocab = function(parameter) {
  * metadata String metadata pointer (optional)
  * platform String Unique platform ID to search for. (optional)
  * platform_type String Make/model of platform (optional)
+ * positionqc List Argo position qc flag. (optional)
  * source List Experimental program source(s) to search for; document must match all sources to be returned. Accepts ~ negation to filter out documents. See /<data route>/vocabulary?parameter=source for list of options. (optional)
  * compression String Data minification strategy to apply. (optional)
  * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
@@ -107,8 +108,7 @@ exports.argoVocab = function(parameter) {
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-
-exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,metadata,platform,platform_type,source,compression,mostrecent,data,presRange,batchmeta) {
+exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
     let params = helpers.parameter_sanitization('argo',id,startDate,endDate,polygon,multipolygon,box,winding,center,radius)
@@ -137,6 +137,9 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
     }
     if(metadata){
       local_filter['$match']['metadata'] = metadata
+    }
+    if(positionqc){
+      local_filter['$match']['geolocation_argoqc'] = {'$in': positionqc}
     }
     if(Object.keys(local_filter['$match']).length > 0){
       local_filter = [local_filter]

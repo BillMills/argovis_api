@@ -1344,6 +1344,9 @@
                   "$ref": "#/components/parameters/platform_type"
                },
                {
+                  "$ref": "#/components/parameters/positionqc"
+               },
+               {
                   "$ref": "#/components/parameters/profileSource"
                },
                {
@@ -3050,6 +3053,21 @@
             "schema": {
                "type": "string",
                "example": "PALACE"
+            }
+         },
+         "positionqc": {
+            "in": "query",
+            "name": "positionqc",
+            "description": "Argo position qc flag.",
+            "style": "form",
+            "explode": false,
+            "allowReserved": true,
+            "schema": {
+               "type": "array",
+               "items": {
+                  "type": "number"
+               },
+               "example": "1,2"
             }
          },
          "polygon": {
