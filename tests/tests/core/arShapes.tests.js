@@ -40,6 +40,13 @@ $RefParser.dereference(rawspec, (err, schema) => {
         const response_nodl = await request.get("/extended/ar?box=[[-179,-55],[179,-54]]").set({'x-argokey': 'developer'});
         expect(response_nodl.body.length).to.eql(1); 
       });
+    });
+
+    describe("GET /extended/ar", function () {
+      it("check basic minimal stub response", async function () {
+        const response = await request.get("/extended/ar?id=2000.01.01.03.0_5&compression=minimal").set({'x-argokey': 'developer'});
+        expect(response.body.length).to.eql(1); 
+      });
     }); 
   }
 })

@@ -448,7 +448,7 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
 
   if(projection){
     // drop documents with no data before they come out of the DB, and project out only the listed data document keys
-    aggPipeline.push({$match: {'data.0':{$exists:true}}})
+    aggPipeline.push({$match: {$or: [{'data.0':{$exists:true}}, {'raster.0':{$exists:true}}]}})
     project = {}
     for(let i=0;i<projection.length;i++){
       project[projection[i]] = 1
@@ -498,6 +498,7 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
   // returns chunk mutated into its final, user-facing form
   // or return false to drop this item from the stream
   // nothing to do if we're just passing meta docs through for a bulk metadata match
+
   if(pp_params.batchmeta){
     return chunk
   }
@@ -709,10 +710,8 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
 
 module.exports.post_xform = function(metaModel, pp_params, search_result, res, stub){
   let nDocs = 0
-
   let postprocess = pp_params.suppress_meta ? 
     pipe(async chunk => {
-
       // munge the chunk and push it downstream if it isn't rejected.
       let doc = null
       if(!pp_params.mostrecent || nDocs < pp_params.mostrecent){
@@ -749,7 +748,7 @@ module.exports.post_xform = function(metaModel, pp_params, search_result, res, s
         }
       }
       return null
-    }, 16)  
+    }, 16)
 
   return postprocess
 }
