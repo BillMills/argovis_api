@@ -7,7 +7,7 @@ var helpers = require('../helpers/helpers')
 
 module.exports.extendedVocab = function extendedVocab (req, res, next, extendedName) {
 
-  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: timeseriesName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
+  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: extendedName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
   
   Extended.extendedVocab(extendedName)
     .then(function (response) {
