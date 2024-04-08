@@ -44,7 +44,7 @@ exports.findExtended = function(extendedName,id,startDate,endDate,polygon,multip
     var examples = {};
     examples['application/json'] = [ {
   "metadata" : [ "metadata", "metadata" ],
-  "raster" : [ [ "", "" ], [ "", "" ] ],
+  "data" : [ [ "", "" ], [ "", "" ] ],
   "flags" : [ "flags", "flags" ],
   "_id" : "_id",
   "basins" : [ 6, 6 ],
@@ -55,7 +55,7 @@ exports.findExtended = function(extendedName,id,startDate,endDate,polygon,multip
   "timestamp" : "2000-01-23T04:56:07.000+00:00"
 }, {
   "metadata" : [ "metadata", "metadata" ],
-  "raster" : [ [ "", "" ], [ "", "" ] ],
+  "data" : [ [ "", "" ], [ "", "" ] ],
   "flags" : [ "flags", "flags" ],
   "_id" : "_id",
   "basins" : [ 6, 6 ],
