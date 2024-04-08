@@ -23,7 +23,7 @@ const extendedSchema = Schema({
   metadata: {type: [String], required: true},
   geolocation: {type: geolocation, required: true},
   true_geolocation: {type: geolocation, required: false},
-  raster: {type: [Schema.Types.Mixed], required: false},
+  data: [{type: [Number], required: false}],
   basin: {type: [Number], required: true}
 });
 

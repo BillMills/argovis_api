@@ -843,7 +843,7 @@ module.exports.earliest_records = function(dataset){
     'noaasst': new Date("1989-12-31T00:00:00.000Z"),
     'copernicussla': new Date("1993-01-03T00:00:00Z"),
     'ccmpwind': new Date("1993-01-03T00:00:00Z"),
-    'glodap': new Date('0001-01-01T00:00:00Z'),
+    'glodap': new Date('1000-01-01T00:00:00Z'),
     'ar': new Date("2000-01-01T00:00:00Z"),
     'easyocean': new Date("1983-10-08T00:00:00Z")
   }
@@ -867,7 +867,7 @@ module.exports.final_records = function(dataset){
     'noaasst': new Date("2023-01-29T00:00:01Z"),
     'copernicussla': new Date("2022-07-31T00:00:01Z"),
     'ccmpwind': new Date("2019-12-29T00:00:01Z"),
-    'glodap': new Date('0001-01-01T00:00:01Z'),
+    'glodap': new Date('1000-01-01T00:00:01Z'),
     'ar': new Date("2022-01-01T00:00:01Z"),
     'easyocean': new Date("2022-10-16T00:00:01Z")
   }

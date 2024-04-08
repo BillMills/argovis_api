@@ -33,13 +33,13 @@ exports.extendedVocab = function(extendedName) {
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * compression String Data minification strategy to apply. (optional)
  * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
+ * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
 
-exports.findExtended = function(res,id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,compression,mostrecent,extendedName,batchmeta) {
+exports.findExtended = function(res,id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,compression,mostrecent,extendedName,batchmeta,data) {
   return new Promise(function(resolve, reject) {
-    // generic helper for all timeseries search and filter routes
     // input sanitization
 
     // extended objects must be geo-searched by $geoIntersects, which is only supported on 2dsphere indexes; 
@@ -90,6 +90,7 @@ exports.findExtended = function(res,id,startDate,endDate,polygon,multipolygon,bo
     // postprocessing parameters
     let pp_params = {
         compression: compression,
+        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         dateRange: [params.startDate, params.endDate],
         mostrecent: mostrecent,
         suppress_meta: compression=='minimal' || batchmeta,
