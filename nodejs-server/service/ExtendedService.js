@@ -40,7 +40,6 @@ exports.extendedVocab = function(extendedName) {
 
 exports.findExtended = function(res,id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,compression,mostrecent,extendedName,batchmeta,data) {
   return new Promise(function(resolve, reject) {
-    // generic helper for all timeseries search and filter routes
     // input sanitization
 
     // extended objects must be geo-searched by $geoIntersects, which is only supported on 2dsphere indexes; 

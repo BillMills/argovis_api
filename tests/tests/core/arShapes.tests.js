@@ -48,5 +48,19 @@ $RefParser.dereference(rawspec, (err, schema) => {
         expect(response.body.length).to.eql(1); 
       });
     }); 
+
+    describe("GET /extended/ar?_id", function () {
+      it("check basic extended data filtering", async function () {
+        const response = await request.get("/extended/ar?id=2000.01.01.03.0_5&data=ivt").set({'x-argokey': 'developer'});
+        expect(response.body[0]['data'][0][0]).to.eql(253.9530792236328);
+      });
+    });
+
+    describe("GET /extended/ar?_id", function () {
+      it("make sure except-data-values doesnt melt down", async function () {
+        const response = await request.get("/extended/ar?id=2000.01.01.03.0_5&data=except-data-values").set({'x-argokey': 'developer'});
+        expect(response.body.length).to.eql(1)
+      });
+    });
   }
 })

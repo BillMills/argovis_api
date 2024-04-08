@@ -3907,7 +3907,6 @@ components:
       - basins
       - geolocation
       - metadata
-      - raster
       - timestamp
       type: object
       properties:
@@ -3924,16 +3923,6 @@ components:
         timestamp:
           type: string
           format: date-time
-        raster:
-          type: array
-          items:
-            type: array
-            items:
-              anyOf:
-              - type: number
-              - type: array
-                items:
-                  type: number
         basins:
           type: array
           items:
@@ -3942,16 +3931,18 @@ components:
           type: array
           items:
             type: string
+        data:
+          $ref: '#/components/schemas/data'
       example:
         metadata:
         - metadata
         - metadata
+        data:
+        - - ""
+          - ""
+        - - ""
+          - ""
         true_geolocation: null
-        raster:
-        - - ""
-          - ""
-        - - ""
-          - ""
         flags:
         - flags
         - flags

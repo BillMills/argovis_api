@@ -2780,7 +2780,7 @@
          },
          "genericExtended": {
             "type": "object",
-            "required": ["_id", "metadata", "geolocation", "timestamp", "raster", "basins"],
+            "required": ["_id", "metadata", "geolocation", "timestamp", "basins"],
             "properties": {
                "_id": {
                   "type": "string"
@@ -2801,25 +2801,6 @@
                   "type": "string",
                   "format": "date-time"
                },
-               "raster": {
-                  "type": "array",
-                  "items": {
-                     "type": "array",
-                     "items":{
-                        "anyOf": [
-                           {
-                              "type": "number"
-                           },
-                           {
-                              "type": "array",
-                              "items": {
-                                 "type": "number"
-                              }
-                           }
-                        ]
-                     }
-                  }
-               },
                "basins": {
                   "type": "array",
                   "items": {
@@ -2831,8 +2812,10 @@
                   "items": {
                      "type": "string"
                   }
+               },
+               "data": {
+                  "$ref": "#/components/schemas/data"
                }
-               
             }
          },
          "genericExtendedMeta": {
