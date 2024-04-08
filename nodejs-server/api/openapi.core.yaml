@@ -1258,6 +1258,21 @@ paths:
         explode: true
         schema:
           type: number
+      - name: data
+        in: query
+        description: "Keys of data to include. Return only documents that have all\
+          \ data requested, within the pressure range if specified. Accepts ~ negation\
+          \ to filter out documents including the specified data. Omission of this\
+          \ parameter will result in metadata only responses."
+        required: false
+        style: form
+        explode: false
+        allowReserved: true
+        schema:
+          type: array
+          example: "longitude,latitude,ivt"
+          items:
+            type: string
       - name: batchmeta
         in: query
         description: return the metadata documents corresponding to a temporospatial
