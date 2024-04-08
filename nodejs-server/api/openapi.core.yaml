@@ -1258,6 +1258,21 @@ paths:
         explode: true
         schema:
           type: number
+      - name: data
+        in: query
+        description: "Keys of data to include. Return only documents that have all\
+          \ data requested, within the pressure range if specified. Accepts ~ negation\
+          \ to filter out documents including the specified data. Omission of this\
+          \ parameter will result in metadata only responses."
+        required: false
+        style: form
+        explode: false
+        allowReserved: true
+        schema:
+          type: array
+          example: "longitude,latitude,ivt"
+          items:
+            type: string
       - name: batchmeta
         in: query
         description: return the metadata documents corresponding to a temporospatial
@@ -3892,7 +3907,6 @@ components:
       - basins
       - geolocation
       - metadata
-      - raster
       - timestamp
       type: object
       properties:
@@ -3909,16 +3923,6 @@ components:
         timestamp:
           type: string
           format: date-time
-        raster:
-          type: array
-          items:
-            type: array
-            items:
-              anyOf:
-              - type: number
-              - type: array
-                items:
-                  type: number
         basins:
           type: array
           items:
@@ -3927,16 +3931,18 @@ components:
           type: array
           items:
             type: string
+        data:
+          $ref: '#/components/schemas/data'
       example:
         metadata:
         - metadata
         - metadata
+        data:
+        - - ""
+          - ""
+        - - ""
+          - ""
         true_geolocation: null
-        raster:
-        - - ""
-          - ""
-        - - ""
-          - ""
         flags:
         - flags
         - flags

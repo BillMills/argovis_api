@@ -807,6 +807,21 @@
                   "$ref": "#/components/parameters/mostrecent"
                },
                {
+                  "name": "data",
+                  "in": "query",
+                  "description": "Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses.",
+                  "style": "form",
+                  "explode": false,
+                  "allowReserved": true,
+                  "schema": {
+                     "type": "array",
+                     "items": {
+                        "type": "string"
+                     },
+                     "example": "longitude,latitude,ivt"
+                  }
+               },
+               {
                   "$ref": "#/components/parameters/batchMeta" 
                }
             ],
@@ -2765,7 +2780,7 @@
          },
          "genericExtended": {
             "type": "object",
-            "required": ["_id", "metadata", "geolocation", "timestamp", "raster", "basins"],
+            "required": ["_id", "metadata", "geolocation", "timestamp", "basins"],
             "properties": {
                "_id": {
                   "type": "string"
@@ -2786,25 +2801,6 @@
                   "type": "string",
                   "format": "date-time"
                },
-               "raster": {
-                  "type": "array",
-                  "items": {
-                     "type": "array",
-                     "items":{
-                        "anyOf": [
-                           {
-                              "type": "number"
-                           },
-                           {
-                              "type": "array",
-                              "items": {
-                                 "type": "number"
-                              }
-                           }
-                        ]
-                     }
-                  }
-               },
                "basins": {
                   "type": "array",
                   "items": {
@@ -2816,8 +2812,10 @@
                   "items": {
                      "type": "string"
                   }
+               },
+               "data": {
+                  "$ref": "#/components/schemas/data"
                }
-               
             }
          },
          "genericExtendedMeta": {
