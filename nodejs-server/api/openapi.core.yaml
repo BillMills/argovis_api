@@ -509,6 +509,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - name
           - data
           - metadata
@@ -819,6 +820,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - data
       responses:
         "200":
@@ -1112,6 +1114,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - data
       responses:
         "200":
@@ -1401,6 +1404,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - data
       responses:
         "200":
@@ -1750,6 +1754,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - woceline
           - cchdo_cruise
           - source
@@ -2073,6 +2078,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - woceline
           - data
           - metadata
@@ -2419,6 +2425,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - platform
           - source
           - data
@@ -2815,6 +2822,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - platform
           - data
           - metadata
