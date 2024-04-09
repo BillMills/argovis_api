@@ -8,9 +8,10 @@ const summaries = require('../models/summary');
  * Vocab data for the named extended object.
  *
  * extendedName String 
+ * parameter String categorical extended object search and filter parameters
  * returns List
  **/
-exports.extendedVocab = function(extendedName) {
+exports.extendedVocab = function(extendedName,parameter) {
   return new Promise(function(resolve, reject) {
       const query = summaries.find({"_id":extendedName+"summary"}).lean()
       query.exec(helpers.queryCallback.bind(null,x=>x, resolve, reject))
