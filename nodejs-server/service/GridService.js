@@ -111,9 +111,10 @@ exports.findgridMeta = function(id) {
  * List data and lattice for the requested grid.
  *
  * gridName String 
+ * parameter String categorical grid search and filter parameters
  * returns List
  **/
-exports.gridVocab = function(gridName) {
+exports.gridVocab = function(gridName,parameter) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];

@@ -810,6 +810,16 @@ paths:
           - rg09
           - kg21
           - glodap
+      - name: parameter
+        in: query
+        description: categorical grid search and filter parameters
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - data
       responses:
         "200":
           description: OK
@@ -1093,6 +1103,16 @@ paths:
           - noaasst
           - copernicussla
           - ccmpwind
+      - name: parameter
+        in: query
+        description: categorical timeseries search and filter parameters
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - data
       responses:
         "200":
           description: OK
@@ -1372,6 +1392,16 @@ paths:
           type: string
           enum:
           - ar
+      - name: parameter
+        in: query
+        description: categorical extended object search and filter parameters
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - data
       responses:
         "200":
           description: OK
@@ -2394,6 +2424,7 @@ paths:
           - data
           - metadata
           - platform_type
+          - position_qc
       responses:
         "200":
           description: OK
@@ -2785,6 +2816,8 @@ paths:
           type: string
           enum:
           - platform
+          - data
+          - metadata
       responses:
         "200":
           description: OK

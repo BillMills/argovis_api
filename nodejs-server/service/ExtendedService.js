@@ -5,9 +5,10 @@
  * Vocab data for the named extended object.
  *
  * extendedName String 
+ * parameter String categorical extended object search and filter parameters
  * returns List
  **/
-exports.extendedVocab = function(extendedName) {
+exports.extendedVocab = function(extendedName,parameter) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
