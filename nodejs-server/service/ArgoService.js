@@ -73,7 +73,7 @@ exports.argoVocab = function(parameter) {
     }
 
     let model = null
-    if(parameter=='position_qc'){
+    if(parameter=='position_qc' || parameter == 'metadata'){
       model = argo['argo']
     } else {
       model = argo['argoMeta']
