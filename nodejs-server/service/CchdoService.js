@@ -181,6 +181,11 @@ exports.findCCHDOmeta = function(res, id,woceline,cchdo_cruise) {
  **/
 exports.cchdoVocab = function(parameter) {
   return new Promise(function(resolve, reject) {
+    if(parameter == 'enum'){
+      resolve(["woceline", "cchdo_cruise", "source", "data", "metadata"])
+      return
+    }
+
     if(parameter == 'data'){
       // data_keys is a summary lookup
       const query = summaries.find({"_id":"cchdo_data_keys"}).lean()

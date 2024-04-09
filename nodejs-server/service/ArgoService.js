@@ -50,6 +50,11 @@ exports.argoOverview = function() {
  **/
 exports.argoVocab = function(parameter) {
   return new Promise(function(resolve, reject) {
+    if(parameter == 'enum'){
+      resolve(["platform", "source", "data", "metadata", "platform_type", "position_qc"])
+      return
+    }
+
     if(parameter == 'source'){
       resolve(['argo_core', 'argo_bgc', 'argo_deep'])
       return

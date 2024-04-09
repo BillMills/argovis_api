@@ -13,6 +13,11 @@ const summaries = require('../models/summary');
  **/
 exports.extendedVocab = function(extendedName,parameter) {
   return new Promise(function(resolve, reject) {
+    if(parameter == 'enum'){
+      resolve(["data"])
+      return
+    }
+
     if(parameter == 'data'){
       resolve({
         'ar': ['longitude', 'latitude', 'ivt']

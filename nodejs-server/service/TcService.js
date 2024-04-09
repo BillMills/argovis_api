@@ -145,6 +145,12 @@ exports.findTCmeta = function(res, id,name) {
  **/
 exports.tcVocab = function(parameter) {
   return new Promise(function(resolve, reject) {
+    if(parameter == 'enum'){
+      resolve(["name", "data", "metadata"])
+      return
+    }
+
+
     if(parameter == 'data'){
       resolve(["surface_pressure", "wind"])
       return

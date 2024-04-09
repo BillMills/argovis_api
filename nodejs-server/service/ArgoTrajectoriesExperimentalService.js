@@ -10,6 +10,11 @@ const trajectories = require('../models/trajectories');
  **/
 exports.argotrajectoryVocab = function(parameter) {
   return new Promise(function(resolve, reject) {
+    if(parameter == 'enum'){
+      resolve(["platform", "data", "metadata"])
+      return
+    }
+
 
     let lookup = {
       'platform': 'platform', // <parameter value> : <corresponding key in metadata document>

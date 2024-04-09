@@ -133,6 +133,11 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,multipolyg
  **/
 exports.gridVocab = function(gridName,parameter) {
   return new Promise(function(resolve, reject) {
+    if(parameter == 'enum'){
+      resolve(["data"])
+      return
+    }
+
 
     let lookup = {
       'data': 'data_info.0'
