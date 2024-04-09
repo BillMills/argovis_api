@@ -136,8 +136,15 @@ exports.findtimeseriesMeta = function(res, id) {
  **/
 exports.timeseriesVocab = function(timeseriesName,parameter) {
   return new Promise(function(resolve, reject) {
-      const query = summaries.find({"_id":timeseriesName+"summary"}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x, resolve, reject))
+
+      let metaid = {
+        "noaasst":"noaa-oi-sst-v2", 
+        "copernicussla":"copernicussla", 
+        "ccmpwind":"ccmpwind"
+      }[timeseriesName]
+
+      const query = summaries.find({"_id":metaid}).lean()
+      query.exec(helpers.queryCallback.bind(null,x=>x['data_info'][0], resolve, reject))
   });
 }
 

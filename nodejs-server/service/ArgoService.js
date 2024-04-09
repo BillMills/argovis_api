@@ -62,12 +62,13 @@ exports.argoVocab = function(parameter) {
     let lookup = {
         'platform': 'platform', // <parameter value> : <corresponding key in metadata document>
         'source': 'source.source',
-        'metadata': 'metadata',
-        'platform_type': 'platform_type'
+        'metadata': '_id',
+        'platform_type': 'platform_type',
+        'position_qc': 'geolocation_argoqc'
     }
 
     let model = null
-    if(parameter=='metadata'){
+    if(parameter=='position_qc'){
       model = argo['argo']
     } else {
       model = argo['argoMeta']

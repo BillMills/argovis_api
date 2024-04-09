@@ -615,6 +615,13 @@ $RefParser.dereference(rawspec, (err, schema) => {
       });
     });
 
+    describe("GET /argo/vocabulary", function () {
+      it("basic position qc vocab enumeration", async function () {
+        const qcs = await request.get("/argo/vocabulary?parameter=position_qc").set({'x-argokey': 'developer'});
+        expect(qcs.body).to.eql([1]);
+      });
+    });
+
     describe("GET /cchdo", function () {
       it("explicitly asking for cchdo qc information", async function () {
         const response = await request.get("/cchdo?id=expo_08PD0196_1_sta_016_cast_001_type_ctd&data=doxy,temperature,temperature_woceqc").set({'x-argokey': 'developer'});

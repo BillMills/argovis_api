@@ -13,8 +13,12 @@ const summaries = require('../models/summary');
  **/
 exports.extendedVocab = function(extendedName,parameter) {
   return new Promise(function(resolve, reject) {
-      const query = summaries.find({"_id":extendedName+"summary"}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x, resolve, reject))
+    if(parameter == 'data'){
+      resolve({
+        'ar': ['longitude', 'latitude', 'ivt']
+      }[extendedName])
+      return
+    }
   });
 }
 

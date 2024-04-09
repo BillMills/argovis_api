@@ -133,7 +133,18 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,multipolyg
  **/
 exports.gridVocab = function(gridName,parameter) {
   return new Promise(function(resolve, reject) {
-      const query = summaries.find({"_id":gridName+"summary"}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x, resolve, reject))
+
+    let lookup = {
+      'data': 'data_info.0'
+    }
+
+    Grid[gridName+'Meta'].find().distinct(lookup[parameter], function (err, vocab) {
+      if (err){
+        reject({"code": 500, "message": "Server error"});
+        return;
+      }
+      resolve(vocab)
+    })
+
   });
 }
