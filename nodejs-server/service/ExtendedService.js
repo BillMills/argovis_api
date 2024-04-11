@@ -5,9 +5,10 @@
  * Vocab data for the named extended object.
  *
  * extendedName String 
+ * parameter String categorical extended object search and filter parameters
  * returns List
  **/
-exports.extendedVocab = function(extendedName) {
+exports.extendedVocab = function(extendedName,parameter) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
@@ -85,6 +86,14 @@ exports.findextendedMeta = function(id) {
     var examples = {};
     examples['application/json'] = [ {
   "data_info" : [ "", "" ],
+  "lattice" : {
+    "minLon" : 5.637376656633329,
+    "spacing" : [ 1.4658129805029452, 1.4658129805029452 ],
+    "maxLat" : 2.3021358869347655,
+    "minLat" : 5.962133916683182,
+    "center" : [ 6.027456183070403, 6.027456183070403 ],
+    "maxLon" : 7.061401241503109
+  },
   "data_type" : "data_type",
   "_id" : "_id",
   "source" : [ {
@@ -101,6 +110,14 @@ exports.findextendedMeta = function(id) {
   "date_updated_argovis" : "2000-01-23T04:56:07.000+00:00"
 }, {
   "data_info" : [ "", "" ],
+  "lattice" : {
+    "minLon" : 5.637376656633329,
+    "spacing" : [ 1.4658129805029452, 1.4658129805029452 ],
+    "maxLat" : 2.3021358869347655,
+    "minLat" : 5.962133916683182,
+    "center" : [ 6.027456183070403, 6.027456183070403 ],
+    "maxLon" : 7.061401241503109
+  },
   "data_type" : "data_type",
   "_id" : "_id",
   "source" : [ {

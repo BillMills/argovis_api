@@ -65,6 +65,14 @@ exports.findgridMeta = function(id) {
     var examples = {};
     examples['application/json'] = [ {
   "data_info" : [ "", "" ],
+  "lattice" : {
+    "minLon" : 5.637376656633329,
+    "spacing" : [ 1.4658129805029452, 1.4658129805029452 ],
+    "maxLat" : 2.3021358869347655,
+    "minLat" : 5.962133916683182,
+    "center" : [ 6.027456183070403, 6.027456183070403 ],
+    "maxLon" : 7.061401241503109
+  },
   "data_type" : "data_type",
   "_id" : "_id",
   "source" : [ {
@@ -82,6 +90,14 @@ exports.findgridMeta = function(id) {
   "levels" : [ 0.8008281904610115, 0.8008281904610115 ]
 }, {
   "data_info" : [ "", "" ],
+  "lattice" : {
+    "minLon" : 5.637376656633329,
+    "spacing" : [ 1.4658129805029452, 1.4658129805029452 ],
+    "maxLat" : 2.3021358869347655,
+    "minLat" : 5.962133916683182,
+    "center" : [ 6.027456183070403, 6.027456183070403 ],
+    "maxLon" : 7.061401241503109
+  },
   "data_type" : "data_type",
   "_id" : "_id",
   "source" : [ {
@@ -111,9 +127,10 @@ exports.findgridMeta = function(id) {
  * List data and lattice for the requested grid.
  *
  * gridName String 
+ * parameter String categorical grid search and filter parameters
  * returns List
  **/
-exports.gridVocab = function(gridName) {
+exports.gridVocab = function(gridName,parameter) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];

@@ -3,8 +3,8 @@
 var utils = require('../utils/writer.js');
 var Extended = require('../service/ExtendedService');
 
-module.exports.extendedVocab = function extendedVocab (req, res, next, extendedName) {
-  Extended.extendedVocab(extendedName)
+module.exports.extendedVocab = function extendedVocab (req, res, next, extendedName, parameter) {
+  Extended.extendedVocab(extendedName, parameter)
     .then(function (response) {
       utils.writeJson(res, response);
     })

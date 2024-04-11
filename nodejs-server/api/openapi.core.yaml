@@ -509,6 +509,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - name
           - data
           - metadata
@@ -810,6 +811,17 @@ paths:
           - rg09
           - kg21
           - glodap
+      - name: parameter
+        in: query
+        description: categorical grid search and filter parameters
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - enum
+          - data
       responses:
         "200":
           description: OK
@@ -1093,6 +1105,17 @@ paths:
           - noaasst
           - copernicussla
           - ccmpwind
+      - name: parameter
+        in: query
+        description: categorical timeseries search and filter parameters
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - enum
+          - data
       responses:
         "200":
           description: OK
@@ -1372,6 +1395,17 @@ paths:
           type: string
           enum:
           - ar
+      - name: parameter
+        in: query
+        description: categorical extended object search and filter parameters
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - enum
+          - data
       responses:
         "200":
           description: OK
@@ -1720,6 +1754,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - woceline
           - cchdo_cruise
           - source
@@ -2043,6 +2078,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - woceline
           - data
           - metadata
@@ -2389,11 +2425,13 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - platform
           - source
           - data
           - metadata
           - platform_type
+          - position_qc
       responses:
         "200":
           description: OK
@@ -2784,7 +2822,10 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - platform
+          - data
+          - metadata
       responses:
         "200":
           description: OK
@@ -3154,6 +3195,7 @@ components:
       - data_info
       - data_type
       - date_updated_argovis
+      - lattice
       - levels
       - source
       type: object
@@ -3175,10 +3217,23 @@ components:
             type: number
         data_info:
           $ref: '#/components/schemas/data_info'
+        lattice:
+          $ref: '#/components/schemas/generic_lattice'
       example:
         data_info:
         - ""
         - ""
+        lattice:
+          minLon: 5.63737665663332876420099637471139430999755859375
+          spacing:
+          - 1.46581298050294517310021547018550336360931396484375
+          - 1.46581298050294517310021547018550336360931396484375
+          maxLat: 2.3021358869347654518833223846741020679473876953125
+          minLat: 5.962133916683182377482808078639209270477294921875
+          center:
+          - 6.02745618307040320615897144307382404804229736328125
+          - 6.02745618307040320615897144307382404804229736328125
+          maxLon: 7.061401241503109105224211816675961017608642578125
         data_type: data_type
         _id: _id
         source:
@@ -3309,6 +3364,40 @@ components:
         - source
         url: url
         doi: doi
+    generic_lattice:
+      type: object
+      properties:
+        center:
+          type: array
+          items:
+            maxItems: 2
+            minItems: 2
+            type: number
+        spacing:
+          type: array
+          items:
+            maxItems: 2
+            minItems: 2
+            type: number
+        minLat:
+          type: number
+        minLon:
+          type: number
+        maxLat:
+          type: number
+        maxLon:
+          type: number
+      example:
+        minLon: 5.63737665663332876420099637471139430999755859375
+        spacing:
+        - 1.46581298050294517310021547018550336360931396484375
+        - 1.46581298050294517310021547018550336360931396484375
+        maxLat: 2.3021358869347654518833223846741020679473876953125
+        minLat: 5.962133916683182377482808078639209270477294921875
+        center:
+        - 6.02745618307040320615897144307382404804229736328125
+        - 6.02745618307040320615897144307382404804229736328125
+        maxLon: 7.061401241503109105224211816675961017608642578125
     timeseries:
       type: array
       items:
@@ -3859,6 +3948,7 @@ components:
       - data_info
       - data_type
       - date_updated_argovis
+      - lattice
       - source
       - timeseries
       type: object
@@ -3878,6 +3968,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/generic_source_info'
+        lattice:
+          $ref: '#/components/schemas/generic_lattice'
       example:
         data_info:
         - ""
@@ -3885,6 +3977,17 @@ components:
         timeseries:
         - 2010-01-01T00:00:00Z
         - 2010-01-01T00:00:00Z
+        lattice:
+          minLon: 5.63737665663332876420099637471139430999755859375
+          spacing:
+          - 1.46581298050294517310021547018550336360931396484375
+          - 1.46581298050294517310021547018550336360931396484375
+          maxLat: 2.3021358869347654518833223846741020679473876953125
+          minLat: 5.962133916683182377482808078639209270477294921875
+          center:
+          - 6.02745618307040320615897144307382404804229736328125
+          - 6.02745618307040320615897144307382404804229736328125
+          maxLon: 7.061401241503109105224211816675961017608642578125
         data_type: data_type
         _id: _id
         source:
@@ -3976,6 +4079,7 @@ components:
       - data_info
       - data_type
       - date_updated_argovis
+      - lattice
       - source
       type: object
       properties:
@@ -3992,10 +4096,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/generic_source_info'
+        lattice:
+          $ref: '#/components/schemas/generic_lattice'
       example:
         data_info:
         - ""
         - ""
+        lattice:
+          minLon: 5.63737665663332876420099637471139430999755859375
+          spacing:
+          - 1.46581298050294517310021547018550336360931396484375
+          - 1.46581298050294517310021547018550336360931396484375
+          maxLat: 2.3021358869347654518833223846741020679473876953125
+          minLat: 5.962133916683182377482808078639209270477294921875
+          center:
+          - 6.02745618307040320615897144307382404804229736328125
+          - 6.02745618307040320615897144307382404804229736328125
+          maxLon: 7.061401241503109105224211816675961017608642578125
         data_type: data_type
         _id: _id
         source:

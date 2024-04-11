@@ -63,6 +63,14 @@ exports.findtimeseriesMeta = function(id) {
     examples['application/json'] = [ {
   "data_info" : [ "", "" ],
   "timeseries" : [ "2010-01-01T00:00:00Z", "2010-01-01T00:00:00Z" ],
+  "lattice" : {
+    "minLon" : 5.637376656633329,
+    "spacing" : [ 1.4658129805029452, 1.4658129805029452 ],
+    "maxLat" : 2.3021358869347655,
+    "minLat" : 5.962133916683182,
+    "center" : [ 6.027456183070403, 6.027456183070403 ],
+    "maxLon" : 7.061401241503109
+  },
   "data_type" : "data_type",
   "_id" : "_id",
   "source" : [ {
@@ -80,6 +88,14 @@ exports.findtimeseriesMeta = function(id) {
 }, {
   "data_info" : [ "", "" ],
   "timeseries" : [ "2010-01-01T00:00:00Z", "2010-01-01T00:00:00Z" ],
+  "lattice" : {
+    "minLon" : 5.637376656633329,
+    "spacing" : [ 1.4658129805029452, 1.4658129805029452 ],
+    "maxLat" : 2.3021358869347655,
+    "minLat" : 5.962133916683182,
+    "center" : [ 6.027456183070403, 6.027456183070403 ],
+    "maxLon" : 7.061401241503109
+  },
   "data_type" : "data_type",
   "_id" : "_id",
   "source" : [ {
@@ -108,9 +124,10 @@ exports.findtimeseriesMeta = function(id) {
  * List data and lattice for the requested timeseries.
  *
  * timeseriesName String 
+ * parameter String categorical timeseries search and filter parameters
  * returns List
  **/
-exports.timeseriesVocab = function(timeseriesName) {
+exports.timeseriesVocab = function(timeseriesName,parameter) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
