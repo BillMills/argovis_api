@@ -10,16 +10,26 @@ const trajectories = require('../models/trajectories');
  **/
 exports.argotrajectoryVocab = function(parameter) {
   return new Promise(function(resolve, reject) {
-
-    if(parameter == 'platform'){
-      trajectories['argotrajectoriesMeta'].find().distinct('platform', function (err, vocab) {
-        if (err){
-          reject({"code": 500, "message": "Server error"});
-          return;
-        }
-        resolve(vocab)
-      })
+    if(parameter == 'enum'){
+      resolve(["platform", "data", "metadata"])
+      return
     }
+
+
+    let lookup = {
+      'platform': 'platform', // <parameter value> : <corresponding key in metadata document>
+      'metadata': '_id',
+      'data': 'data_info.0'
+    }
+
+    trajectories['argotrajectoriesMeta'].find().distinct(lookup[parameter], function (err, vocab) {
+      if (err){
+        reject({"code": 500, "message": "Server error"});
+        return;
+      }
+      resolve(vocab)
+    })
+
   });
 }
 

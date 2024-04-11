@@ -50,6 +50,11 @@ exports.argoOverview = function() {
  **/
 exports.argoVocab = function(parameter) {
   return new Promise(function(resolve, reject) {
+    if(parameter == 'enum'){
+      resolve(["platform", "source", "data", "metadata", "platform_type", "position_qc"])
+      return
+    }
+
     if(parameter == 'source'){
       resolve(['argo_core', 'argo_bgc', 'argo_deep'])
       return
@@ -63,11 +68,12 @@ exports.argoVocab = function(parameter) {
         'platform': 'platform', // <parameter value> : <corresponding key in metadata document>
         'source': 'source.source',
         'metadata': 'metadata',
-        'platform_type': 'platform_type'
+        'platform_type': 'platform_type',
+        'position_qc': 'geolocation_argoqc'
     }
 
     let model = null
-    if(parameter=='metadata'){
+    if(parameter=='position_qc' || parameter == 'metadata'){
       model = argo['argo']
     } else {
       model = argo['argoMeta']

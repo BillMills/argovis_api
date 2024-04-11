@@ -41,7 +41,8 @@ const GridMetaSchema = Schema({
   date_updated_argovis: {type: Date, required: true},
   source: {type: sourceinfo, required: true},
   levels: {type: [Number], required: true},
-  data_info: [{type:[Schema.Types.Mixed], required: false}]
+  data_info: [{type:[Schema.Types.Mixed], required: false}],
+  lattice: [{type:[Schema.Types.Mixed], required: true}]
 });
 
 module.exports = {}

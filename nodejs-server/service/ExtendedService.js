@@ -8,12 +8,22 @@ const summaries = require('../models/summary');
  * Vocab data for the named extended object.
  *
  * extendedName String 
+ * parameter String categorical extended object search and filter parameters
  * returns List
  **/
-exports.extendedVocab = function(extendedName) {
+exports.extendedVocab = function(extendedName,parameter) {
   return new Promise(function(resolve, reject) {
-      const query = summaries.find({"_id":extendedName+"summary"}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x, resolve, reject))
+    if(parameter == 'enum'){
+      resolve(["data"])
+      return
+    }
+
+    if(parameter == 'data'){
+      resolve({
+        'ar': ['longitude', 'latitude', 'ivt']
+      }[extendedName])
+      return
+    }
   });
 }
 

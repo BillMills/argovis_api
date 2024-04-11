@@ -128,11 +128,28 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,multipolyg
  * List data and lattice for the requested grid.
  *
  * gridName String 
+ * parameter String categorical grid search and filter parameters
  * returns List
  **/
-exports.gridVocab = function(gridName) {
+exports.gridVocab = function(gridName,parameter) {
   return new Promise(function(resolve, reject) {
-      const query = summaries.find({"_id":gridName+"summary"}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x, resolve, reject))
+    if(parameter == 'enum'){
+      resolve(["data"])
+      return
+    }
+
+
+    let lookup = {
+      'data': 'data_info.0'
+    }
+
+    Grid[gridName+'Meta'].find().distinct(lookup[parameter], function (err, vocab) {
+      if (err){
+        reject({"code": 500, "message": "Server error"});
+        return;
+      }
+      resolve(vocab)
+    })
+
   });
 }

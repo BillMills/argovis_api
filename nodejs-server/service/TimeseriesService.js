@@ -131,12 +131,24 @@ exports.findtimeseriesMeta = function(res, id) {
  * List data and lattice for the requested timeseries.
  *
  * timeseriesName String 
+ * parameter String categorical timeseries search and filter parameters
  * returns List
  **/
-exports.timeseriesVocab = function(timeseriesName) {
+exports.timeseriesVocab = function(timeseriesName,parameter) {
   return new Promise(function(resolve, reject) {
-      const query = summaries.find({"_id":timeseriesName+"summary"}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x, resolve, reject))
+    if(parameter == 'enum'){
+      resolve(["data"])
+      return
+    }
+
+    let metaid = {
+      "noaasst":"noaasst", 
+      "copernicussla":"copernicussla", 
+      "ccmpwind":"ccmpwind"
+    }[timeseriesName]
+
+    const query = Timeseries['timeseriesMeta'].find({"_id":metaid}).lean()
+    query.exec(helpers.queryCallback.bind(null,x=>x[0]["data_info"][0], resolve, reject))
   });
 }
 

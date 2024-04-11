@@ -33,11 +33,11 @@ module.exports.findtimeseriesMeta = function findtimeseriesMeta (req, res, next,
     });
 };
 
-module.exports.timeseriesVocab = function timeseriesVocab (req, res, next, timeseriesName) {
+module.exports.timeseriesVocab = function timeseriesVocab (req, res, next, parameter, timeseriesName) {
   
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: timeseriesName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
-  Timeseries.timeseriesVocab(timeseriesName)
+  Timeseries.timeseriesVocab(timeseriesName, parameter)
     .then(function (response) {
       utils.writeJson(res, response);
     },
