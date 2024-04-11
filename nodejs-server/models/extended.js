@@ -32,7 +32,8 @@ const extendedMetaSchema = Schema({
   data_type: {type: String, required: true},
   data_info: [{type:[Schema.Types.Mixed], required: false}],
   date_updated_argovis: {type: Date, required: true},
-  source: {type: sourceinfo, required: true}
+  source: {type: sourceinfo, required: true},
+  lattice: [{type:[Schema.Types.Mixed], required: true}]
 });
 
 module.exports = {}

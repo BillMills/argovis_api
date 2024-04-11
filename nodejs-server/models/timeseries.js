@@ -38,7 +38,8 @@ const tsMetaSchema = Schema({
   data_info: [{type:[Schema.Types.Mixed], required: false}],
   date_updated_argovis: {type: Date, required: true},
   timeseries: {type: [Date], required: true},
-  source: {type: sourceinfo, required: true}
+  source: {type: sourceinfo, required: true},
+  lattice: [{type:[Schema.Types.Mixed], required: true}]
 });
 
 module.exports = {}
