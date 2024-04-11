@@ -19,10 +19,8 @@ exports.extendedVocab = function(extendedName,parameter) {
     }
 
     if(parameter == 'data'){
-      resolve({
-        'ar': ['longitude', 'latitude', 'ivt']
-      }[extendedName])
-      return
+      const query = Extended['extendedMeta'].find({"_id":extendedName}).lean()
+      query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_keys'], resolve, reject))
     }
   });
 }
