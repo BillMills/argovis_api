@@ -32,7 +32,7 @@ module.exports.findgridMeta = function findgridMeta (req, res, next, id) {
     });
 };
 
-module.exports.gridVocab = function gridVocab (req, res, next, gridName, parameter) {
+module.exports.gridVocab = function gridVocab (req, res, next, parameter, gridName) {
   
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: gridName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
   

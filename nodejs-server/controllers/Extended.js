@@ -5,7 +5,7 @@ var utils = require('../utils/writer.js');
 var Extended = require('../service/ExtendedService');
 var helpers = require('../helpers/helpers')
 
-module.exports.extendedVocab = function extendedVocab (req, res, next, extendedName, parameter) {
+module.exports.extendedVocab = function extendedVocab (req, res, next, parameter, extendedName) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: extendedName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
   

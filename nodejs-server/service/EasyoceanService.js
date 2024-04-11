@@ -12,7 +12,7 @@ const helpers = require('../helpers/helpers')
 exports.easyoceanVocab = function(parameter) {
   return new Promise(function(resolve, reject) {
     if(parameter == 'enum'){
-      resolve(["name", "data", "metadata"])
+      resolve(["woceline", "data", "metadata"])
       return
     }
 
@@ -20,7 +20,7 @@ exports.easyoceanVocab = function(parameter) {
       const query = easyocean['easyoceanMeta'].find({},{"_id": 1}).lean()
       query.exec(helpers.queryCallback.bind(null,(arr) => arr.map(obj => obj._id), resolve, reject))
     } else if(parameter == 'data'){
-      resolve(["woceline", "data", "metadata"])
+      resolve(["pressure","ctd_temperature","ctd_salinity","doxy","conservative_temperature","absolute_salinity"])
       return
     }
   });

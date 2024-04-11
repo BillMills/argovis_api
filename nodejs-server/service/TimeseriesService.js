@@ -147,8 +147,8 @@ exports.timeseriesVocab = function(timeseriesName,parameter) {
       "ccmpwind":"ccmpwind"
     }[timeseriesName]
 
-    const query = summaries.find({"_id":metaid}).lean()
-    query.exec(helpers.queryCallback.bind(null,x=>x['data_info'][0], resolve, reject))
+    const query = Timeseries['timeseriesMeta'].find({"_id":metaid}).lean()
+    query.exec(helpers.queryCallback.bind(null,x=>x[0]["data_info"][0], resolve, reject))
   });
 }
 
