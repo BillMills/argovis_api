@@ -156,6 +156,11 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,multipolygon,b
  **/
 exports.drifterVocab = function(parameter) {
   return new Promise(function(resolve, reject) {
+    if(parameter == 'enum'){
+      resolve(["wmo", "platform", "data", "metadata"])
+      return
+    }
+
     if(parameter == 'data'){
       const query = summaries.find({"_id":"drifter_data_keys"}).lean()
       query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_keys'], resolve, reject))
