@@ -349,6 +349,7 @@ paths:
         schema:
           type: string
           enum:
+          - enum
           - wmo
           - platform
           - data
