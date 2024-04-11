@@ -142,7 +142,7 @@ exports.timeseriesVocab = function(timeseriesName,parameter) {
     }
 
     let metaid = {
-      "noaasst":"noaa-oi-sst-v2", 
+      "noaasst":"noaasst", 
       "copernicussla":"copernicussla", 
       "ccmpwind":"ccmpwind"
     }[timeseriesName]
