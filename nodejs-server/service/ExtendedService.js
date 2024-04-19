@@ -20,7 +20,7 @@ exports.extendedVocab = function(extendedName,parameter) {
 
     if(parameter == 'data'){
       const query = Extended['extendedMeta'].find({"_id":extendedName}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_keys'], resolve, reject))
+      query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_info'][0], resolve, reject))
     }
   });
 }
