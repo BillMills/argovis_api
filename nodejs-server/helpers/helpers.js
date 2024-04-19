@@ -317,7 +317,11 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
 
   // set up aggregation and return promise to evaluate:
   let aggPipeline = proxMatch.concat(spacetimeMatch).concat(local_filter).concat(foreignMatch)
-  aggPipeline.push({$sort: {'timestamp':-1}})
+
+  if(params.compression !== 'minimal'){
+    // some stub requests are allowed that would swamp mongo's default sorting limits.
+    aggPipeline.push({$sort: {'timestamp':-1}})
+  }
 
   // optionally filter off data before pulling documents out of mongo; currently only supports data documents that include data_info
   if(data_filter){

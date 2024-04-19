@@ -36,6 +36,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,multipolygon,box,w
       return
     }
     params.batchmeta = batchmeta
+    params.compression = compression
 
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,multipolygon,(center && radius),cchdo_cruise,woceline].some(x=>x)){
