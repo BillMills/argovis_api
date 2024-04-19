@@ -397,10 +397,10 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
     let lowIndex = 0
     let highIndex = params.timeseries.length-1
     if(params.timeseries[0] > params.endDate){
-      return false // requested date range that is completely before dates available
+      return Promise.resolve([]) // requested date range that is completely before dates available
     }
     if(params.timeseries[highIndex] < params.startDate){
-      return false // requested date range that is completely after dates available
+      return Promise.resolve([]) // requested date range that is completely after dates available
     }
     while(lowIndex < highIndex && params.timeseries[lowIndex] < params.startDate){
       lowIndex++
@@ -923,7 +923,7 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
         ///// cost out request; timeseries limited only by geography since entire time span for each matched lat/long must be pulled off disk in any case.
         let geospan = module.exports.geoarea(params.polygon,params.multipolygon,params.box,qString.get('winding'),params.radius) / 13000 // 1 sq degree is about 13k sq km at eq
         let dayspan = Math.round(Math.abs((params.endDate - params.startDate) / (24*60*60*1000) )); // n days of request
-        if( (path[0]=='timeseries' && path.length==2 && geospan > maxbulk_timeseries) || (path[0]!='timeseries' && geospan*dayspan > maxbulk) ){
+        if((!url.includes('compression=minimal')) && (path[0]=='timeseries' && path.length==2 && geospan > maxbulk_timeseries) || (path[0]!='timeseries' && geospan*dayspan > maxbulk) ){
           return {"code": 413, "message": "The temporospatial extent of your request is very large and likely to crash our API. Please request a smaller region or shorter timespan, or both."}
         }
         if(path[0] == 'timeseries'){
