@@ -19,7 +19,7 @@ module.exports.tokenbucket = function (req, res, next) {
 	let requestCost = 1 //default cost, for except-data-values requests
 	let cellprice = 0.0001 // token cost of 1 sq deg day
 	let metaDiscount = 100 // scaledown factor to discount except-data-values request by relative to data requests
-	let maxbulk = 1000000 // maximum allowed size of ndays x area[sq km]/13000sqkm; set to prevent OOM crashes
+	let maxbulk = 2000000 // maximum allowed size of ndays x area[sq km]/13000sqkm; set to prevent OOM crashes
 	let maxbulk_timeseries = 50 // maximum allowed size of area[sq km]/13000sqkm for timeseries; set to prevent OOM crashes
 	let argokey = 'guest'
 	if(req.headers['x-argokey']){
