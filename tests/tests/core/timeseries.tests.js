@@ -85,6 +85,13 @@ $RefParser.dereference(rawspec, (err, schema) => {
       });
     }); 
 
+    describe("GET /timeseries/noaasst", function () {
+      it("check behavior when time bracket is out of range", async function () {
+        const response = await request.get("/timeseries/noaasst?center=-46.5,35.5&radius=1&startDate=2089-12-31T00:00:00Z&endDate=2090-01-28T00:00:00Z&data=all").set({'x-argokey': 'developer'});
+        expect(response.status).to.eql(404);       
+      });
+    });
+
   }
 })
 
