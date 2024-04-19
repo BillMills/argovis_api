@@ -34,6 +34,7 @@ exports.findTC = function(res,id,startDate,endDate,polygon,multipolygon,box,wind
       return
     }
     params.batchmeta = batchmeta
+    params.compression = compression
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.multipolygon, params.box) 

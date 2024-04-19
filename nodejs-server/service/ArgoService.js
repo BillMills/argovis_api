@@ -124,6 +124,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
       return
     }
     params.batchmeta = batchmeta
+    params.compression = compression
 
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,multipolygon,(center && radius),platform].some(x=>x)){

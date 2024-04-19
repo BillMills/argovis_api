@@ -36,6 +36,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
 
     params.mostrecent = mostrecent
     params.batchmeta = batchmeta
+    params.compression = compression
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.multipolygon, params.box) 
@@ -62,7 +63,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
         presRange: null,
         dateRange: [params.startDate, params.endDate],
         //mostrecent: mostrecent, // mostrecent filtering done in mongo during stream for timeseries
-        suppress_meta: compression=='minimal' || batchmeta,
+        suppress_meta: batchmeta,
         batchmeta : batchmeta
     }
 
