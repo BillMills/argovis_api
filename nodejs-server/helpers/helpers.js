@@ -397,10 +397,10 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
     let lowIndex = 0
     let highIndex = params.timeseries.length-1
     if(params.timeseries[0] > params.endDate){
-      return false // requested date range that is completely before dates available
+      return Promise.resolve([]) // requested date range that is completely before dates available
     }
     if(params.timeseries[highIndex] < params.startDate){
-      return false // requested date range that is completely after dates available
+      return Promise.resolve([]) // requested date range that is completely after dates available
     }
     while(lowIndex < highIndex && params.timeseries[lowIndex] < params.startDate){
       lowIndex++
