@@ -310,7 +310,7 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
   }
 
   /// construct filter for matching metadata docs if required; timeseries never filter on metadata docs
-  if(!isTimeseries && foreign_docs.length > 0 && foreign_docs[0]._id !== null){
+  if(!isTimeseries && params.metafilter){
     let metaIDs = new Set(foreign_docs.map(x => x['_id']))
     foreignMatch.push({$match:{'metadata':{$in:Array.from(metaIDs)}}})
   }

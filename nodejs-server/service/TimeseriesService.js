@@ -75,6 +75,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
 
     // always fetch the metadata doc so we can pull the full list of timesteps off of it
     let metafilter = Timeseries['timeseriesMeta'].aggregate([{$match: {"_id": timeseriesName}}]).exec()
+    params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Timeseries[timeseriesName], params, local_filter, projection, null))

@@ -101,7 +101,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,multipolygon,b
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
     let metafilter = Promise.resolve([])
-    let metacomplete = false
+    params.metafilter = false
     if(wmo||platform){
         let match = {
             'wmo': wmo,
@@ -110,7 +110,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,multipolygon,b
         Object.keys(match).forEach((k) => match[k] === undefined && delete match[k]);
 
         metafilter = Drifter['drifterMeta'].aggregate([{$match: match}]).exec()
-        metacomplete = true
+        params.metafilter = true
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
