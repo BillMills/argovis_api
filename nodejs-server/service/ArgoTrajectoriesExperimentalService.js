@@ -105,10 +105,10 @@ exports.findArgoTrajectory = function(res, id,startDate,endDate,polygon,multipol
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
     let metafilter = Promise.resolve([])
-    let metacomplete = false
+    params.metafilter = false
     if(platform){
         metafilter = trajectories['argotrajectoriesMeta'].aggregate([{$match: {'platform': platform}}]).exec()
-        metacomplete = true
+        params.metafilter = true
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection

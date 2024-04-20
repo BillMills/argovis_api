@@ -99,7 +99,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,multipolygon,box,w
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
     let metafilter = Promise.resolve([])
-    let metacomplete = false
+    params.metafilter = false
     if(woceline||cchdo_cruise){
         let match = {
             'woce_lines': woceline,
@@ -108,7 +108,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,multipolygon,box,w
         Object.keys(match).forEach((k) => match[k] === undefined && delete match[k]);
 
         metafilter = cchdo['cchdoMeta'].aggregate([{$match: match}]).exec()
-        metacomplete = true
+        params.metafilter = true
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection

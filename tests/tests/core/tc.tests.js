@@ -84,6 +84,13 @@ $RefParser.dereference(rawspec, (err, schema) => {
       });
     });    
 
+    describe("GET /tc?startDate&endDate", function () {
+      it("same as last test, but ensure metafilter is dropping profiles without matching metadata", async function () {
+        const response = await request.get("/tc?startDate=1851-06-24T23:00:00Z&endDate=1851-06-25T01:00:00Z&data=wind&name=pixel").set({'x-argokey': 'developer'});
+        expect(response.body).to.be.jsonSchema(schema.paths['/tc'].get.responses['200'].content['application/json'].schema);   
+      });
+    });  
+
     describe("GET /tc?name", function () {
       it("should be 4 records for the DEMO TC", async function () {
         const response = await request.get("/tc?name=DEMO").set({'x-argokey': 'developer'});

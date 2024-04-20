@@ -191,7 +191,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
     let metafilter = Promise.resolve([])
-    let metacomplete = false
+    params.metafilter = false
     if(platform || platform_type){
         let match = {
             'platform': platform,
@@ -200,7 +200,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
         Object.keys(match).forEach((k) => match[k] === undefined && delete match[k]);
 
         metafilter = argo['argoMeta'].aggregate([{$match: match}]).exec()
-        metacomplete = true
+        params.metafilter = true
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection

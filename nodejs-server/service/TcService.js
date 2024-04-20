@@ -75,10 +75,10 @@ exports.findTC = function(res,id,startDate,endDate,polygon,multipolygon,box,wind
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
     let metafilter = Promise.resolve([])
-    let metacomplete = false
+    params.metafilter = false
     if(name){
         metafilter = tc['tcMeta'].aggregate([{$match: {'name': name}}]).exec()
-        metacomplete = true
+        params.metafilter = true
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection

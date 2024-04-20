@@ -68,7 +68,7 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
 
     // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
     let metafilter = Promise.resolve([])
-    let metacomplete = false
+    params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argone['argone'], {batchmeta:batchmeta}, local_filter, projection, null))
