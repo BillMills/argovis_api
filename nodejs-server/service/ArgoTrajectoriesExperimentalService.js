@@ -13,22 +13,21 @@ exports.argotrajectoryVocab = function(parameter) {
     if(parameter == 'enum'){
       resolve(["platform", "data", "metadata"])
       return
-    }
-
-
-    let lookup = {
-      'platform': 'platform', // <parameter value> : <corresponding key in metadata document>
-      'metadata': '_id',
-      'data': 'data_info.0'
-    }
-
-    trajectories['argotrajectoriesMeta'].find().distinct(lookup[parameter], function (err, vocab) {
-      if (err){
-        reject({"code": 500, "message": "Server error"});
-        return;
+    } else{
+      let lookup = {
+        'platform': 'platform', // <parameter value> : <corresponding key in metadata document>
+        'metadata': '_id',
+        'data': 'data_info.0'
       }
-      resolve(vocab)
-    })
+
+      trajectories['argotrajectoriesMeta'].find().distinct(lookup[parameter], function (err, vocab) {
+        if (err){
+          reject({"code": 500, "message": "Server error"});
+          return;
+        }
+        resolve(vocab)
+      })
+    }
 
   });
 }

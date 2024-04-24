@@ -160,14 +160,10 @@ exports.drifterVocab = function(parameter) {
     if(parameter == 'enum'){
       resolve(["wmo", "platform", "data", "metadata"])
       return
-    }
-
-    if(parameter == 'data'){
+    } else if(parameter == 'data'){
       const query = summaries.find({"_id":"drifter_data_keys"}).lean()
       query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_keys'], resolve, reject))
-    }
-
-    if(parameter == 'metadata'){
+    } else if(parameter == 'metadata'){
       Drifter['drifter'].find().distinct('metadata', function (err, vocab) {
         if (err){
           reject({"code": 500, "message": "Server error"});
@@ -175,21 +171,21 @@ exports.drifterVocab = function(parameter) {
         }
         resolve(vocab)
       })
-    }
-
-    if(parameter =='wmo' || parameter == 'platform'){
-      let lookup = {
-          'wmo': 'wmo', // <parameter value> : <corresponding key in metadata document>
-          'platform': 'platform'
-      }
-
-      Drifter['drifterMeta'].find().distinct(lookup[parameter], function (err, vocab) {
-        if (err){
-          reject({"code": 500, "message": "Server error"});
-          return;
+    } else {
+      if(parameter =='wmo' || parameter == 'platform'){
+        let lookup = {
+            'wmo': 'wmo', // <parameter value> : <corresponding key in metadata document>
+            'platform': 'platform'
         }
-        resolve(vocab)
-      })
+
+        Drifter['drifterMeta'].find().distinct(lookup[parameter], function (err, vocab) {
+          if (err){
+            reject({"code": 500, "message": "Server error"});
+            return;
+          }
+          resolve(vocab)
+        })
+      }
     }
   });
 }
