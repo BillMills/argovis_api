@@ -141,16 +141,16 @@ exports.timeseriesVocab = function(timeseriesName,parameter) {
     if(parameter == 'enum'){
       resolve(["data"])
       return
+    } else{
+      let metaid = {
+        "noaasst":"noaasst", 
+        "copernicussla":"copernicussla", 
+        "ccmpwind":"ccmpwind"
+      }[timeseriesName]
+
+      const query = Timeseries['timeseriesMeta'].find({"_id":metaid}).lean()
+      query.exec(helpers.queryCallback.bind(null,x=>x[0]["data_info"][0], resolve, reject))
     }
-
-    let metaid = {
-      "noaasst":"noaasst", 
-      "copernicussla":"copernicussla", 
-      "ccmpwind":"ccmpwind"
-    }[timeseriesName]
-
-    const query = Timeseries['timeseriesMeta'].find({"_id":metaid}).lean()
-    query.exec(helpers.queryCallback.bind(null,x=>x[0]["data_info"][0], resolve, reject))
   });
 }
 

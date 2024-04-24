@@ -149,15 +149,10 @@ exports.tcVocab = function(parameter) {
     if(parameter == 'enum'){
       resolve(["name", "data", "metadata"])
       return
-    }
-
-
-    if(parameter == 'data'){
+    } else if(parameter == 'data'){
       resolve(["surface_pressure", "wind"])
       return
-    }
-
-    if(parameter == 'metadata'){
+    } else if(parameter == 'metadata'){
       tc['tc'].find().distinct('metadata', function (err, vocab) {
         if (err){
           reject({"code": 500, "message": "Server error"});
@@ -165,9 +160,7 @@ exports.tcVocab = function(parameter) {
         }
         resolve(vocab)
       })
-    }
-
-    if(parameter == 'name'){
+    } else if(parameter == 'name'){
       tc['tcMeta'].find().distinct('name', function (err, vocab) {
         if (err){
           reject({"code": 500, "message": "Server error"});

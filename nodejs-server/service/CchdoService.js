@@ -185,34 +185,32 @@ exports.cchdoVocab = function(parameter) {
     if(parameter == 'enum'){
       resolve(["woceline", "cchdo_cruise", "source", "data", "metadata"])
       return
-    }
-
-    if(parameter == 'data'){
+    } else if(parameter == 'data'){
       // data_keys is a summary lookup
       const query = summaries.find({"_id":"cchdo_data_keys"}).lean()
       query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_keys'], resolve, reject))
-    }
-
-    let lookup = {
-        'woceline': 'woce_lines', // <parameter value> : <corresponding key in metadata document>
-        'cchdo_cruise': 'cchdo_cruise_id',
-        'source': 'source.source',
-        'metadata': 'metadata'
-    }
-
-    let model = null
-    if(parameter=='source' || parameter=='metadata'){
-      model = cchdo['cchdo']
     } else {
-      model = cchdo['cchdoMeta']
-    }
-
-    model.find().distinct(lookup[parameter], function (err, vocab) {
-      if (err){
-        reject({"code": 500, "message": "Server error"});
-        return;
+      let lookup = {
+          'woceline': 'woce_lines', // <parameter value> : <corresponding key in metadata document>
+          'cchdo_cruise': 'cchdo_cruise_id',
+          'source': 'source.source',
+          'metadata': 'metadata'
       }
-      resolve(vocab)
-    })
+
+      let model = null
+      if(parameter=='source' || parameter=='metadata'){
+        model = cchdo['cchdo']
+      } else {
+        model = cchdo['cchdoMeta']
+      }
+
+      model.find().distinct(lookup[parameter], function (err, vocab) {
+        if (err){
+          reject({"code": 500, "message": "Server error"});
+          return;
+        }
+        resolve(vocab)
+      })
+    }
   });
 }

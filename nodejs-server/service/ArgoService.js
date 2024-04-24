@@ -53,39 +53,37 @@ exports.argoVocab = function(parameter) {
     if(parameter == 'enum'){
       resolve(["platform", "source", "data", "metadata", "platform_type", "position_qc"])
       return
-    }
-
-    if(parameter == 'source'){
+    } else if(parameter == 'source'){
       resolve(['argo_core', 'argo_bgc', 'argo_deep'])
       return
-    }
-    if(parameter == 'data'){
+    } else if(parameter == 'data'){
       const query = summaries.find({"_id":"argo_data_keys"}).lean()
       query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_keys'], resolve, reject))
-    }
-
-    let lookup = {
-        'platform': 'platform', // <parameter value> : <corresponding key in metadata document>
-        'source': 'source.source',
-        'metadata': 'metadata',
-        'platform_type': 'platform_type',
-        'position_qc': 'geolocation_argoqc'
-    }
-
-    let model = null
-    if(parameter=='position_qc' || parameter == 'metadata'){
-      model = argo['argo']
     } else {
-      model = argo['argoMeta']
-    }
 
-    model.find().distinct(lookup[parameter], function (err, vocab) {
-      if (err){
-        reject({"code": 500, "message": "Server error"});
-        return;
+      let lookup = {
+          'platform': 'platform', // <parameter value> : <corresponding key in metadata document>
+          'source': 'source.source',
+          'metadata': 'metadata',
+          'platform_type': 'platform_type',
+          'position_qc': 'geolocation_argoqc'
       }
-      resolve(vocab)
-    })
+
+      let model = null
+      if(parameter=='position_qc' || parameter == 'metadata'){
+        model = argo['argo']
+      } else {
+        model = argo['argoMeta']
+      }
+
+      model.find().distinct(lookup[parameter], function (err, vocab) {
+        if (err){
+          reject({"code": 500, "message": "Server error"});
+          return;
+        }
+        resolve(vocab)
+      })
+    }
   });
 }
 

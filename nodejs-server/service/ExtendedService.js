@@ -16,11 +16,11 @@ exports.extendedVocab = function(extendedName,parameter) {
     if(parameter == 'enum'){
       resolve(["data"])
       return
-    }
-
-    if(parameter == 'data'){
-      const query = Extended['extendedMeta'].find({"_id":extendedName}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_info'][0], resolve, reject))
+    } else {
+      if(parameter == 'data'){
+        const query = Extended['extendedMeta'].find({"_id":extendedName}).lean()
+        query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_info'][0], resolve, reject))
+      }
     }
   });
 }

@@ -137,20 +137,18 @@ exports.gridVocab = function(gridName,parameter) {
     if(parameter == 'enum'){
       resolve(["data"])
       return
-    }
-
-
-    let lookup = {
-      'data': 'data_info.0'
-    }
-
-    Grid[gridName+'Meta'].find().distinct(lookup[parameter], function (err, vocab) {
-      if (err){
-        reject({"code": 500, "message": "Server error"});
-        return;
+    } else {
+      let lookup = {
+        'data': 'data_info.0'
       }
-      resolve(vocab)
-    })
 
+      Grid[gridName+'Meta'].find().distinct(lookup[parameter], function (err, vocab) {
+        if (err){
+          reject({"code": 500, "message": "Server error"});
+          return;
+        }
+        resolve(vocab)
+      })
+    }
   });
 }
