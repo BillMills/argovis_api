@@ -636,9 +636,16 @@ $RefParser.dereference(rawspec, (err, schema) => {
       });
     });
 
-    describe("GET /cchdo", function () {
+    describe("GET /argo", function () {
       it("check data negation", async function () {
         const response = await request.get("/argo?polygon=[[-26.5,-0.5],[-23,-0.5],[-23,3.5],[-26.5,3.5],[-26.5,-0.5]]&data=temperature,~doxy").set({'x-argokey': 'developer'});
+        expect(response.body.length).to.eql(1);
+      });
+    });
+
+    describe("GET /argo", function () {
+      it("check batch meta", async function () {
+        const response = await request.get("/argo?polygon=[[152,42],[152,43],[153,43],[153,42],[152,42]]&batchmeta=true").set({'x-argokey': 'developer'});
         expect(response.body.length).to.eql(1);
       });
     });
