@@ -460,28 +460,7 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
     aggPipeline.push({$project: project})
   }
 
-  if(params.batchmeta){
-    return model.aggregate(aggPipeline).exec()  
-  } else {
-    return model.aggregate(aggPipeline).cursor()
-  }
-  
-}
-
- module.exports.metatable_stream = function(batchmeta, metamodel, data_docs){
-
-  if(!batchmeta){
-    return Promise.resolve([])
-  }
-
-  let metaids = []
-  for(let i=0; i<data_docs.length; i++){
-    metaids = metaids.concat(data_docs[i].metadata)
-  }
-  metaids = new Set(metaids)
-  return metamodel.aggregate([
-    {$match: {_id: {$in: Array.from(metaids)}}}
-  ]).cursor()
+  return model.aggregate(aggPipeline).cursor()  
 }
 
 module.exports.combineDataInfo = function(dinfos){
@@ -735,23 +714,33 @@ module.exports.post_xform = function(metaModel, pp_params, search_result, res, s
       // wait on a promise to get this chunk's metadata back
       meta = await module.exports.locate_meta(chunk['metadata'], search_result[0], metaModel)
       // keep track of new metadata docs so we don't look them up twice
+      let newmeta = false
       for(let i=0; i<meta.length; i++){
-        if(!search_result[0].find(x => x._id == meta[i]._id)) search_result[0].push(meta[i])
+        if(!search_result[0].find(x => x._id == meta[i]._id)){
+          search_result[0].push(meta[i])
+          newmeta = true
+        } 
       }
-      // munge the chunk and push it downstream if it isn't rejected.
+      // hand back the metadata if it's new and that's what we want, OR munge the chunk and push it downstream if it isn't rejected.
       let doc = null
-      if(!pp_params.mostrecent || nDocs < pp_params.mostrecent){
-          /// ie dont even bother with post if we've exceeded our mostrecent cap
+      if (pp_params.batchmeta && newmeta && (!pp_params.mostrecent || nDocs < pp_params.mostrecent)) {
+        // hand back metadata
+        res.status(200)
+        nDocs++
+        return(meta)        
+      } else if(!pp_params.batchmeta && (!pp_params.mostrecent || nDocs < pp_params.mostrecent)){
+          // munge the chunk and push it downstream if it isn't rejected.
           doc = module.exports.postprocess_stream(chunk, meta, pp_params, stub)
+          if(doc){
+            if(!pp_params.mostrecent || nDocs < pp_params.mostrecent){
+              res.status(200)
+              nDocs++
+              return(doc)
+            }
+          }
+      } else {
+        return null
       }
-      if(doc){
-        if(!pp_params.mostrecent || nDocs < pp_params.mostrecent){
-          res.status(200)
-          nDocs++
-          return(doc)
-        }
-      }
-      return null
     }, 16)
 
   return postprocess

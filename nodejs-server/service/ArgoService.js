@@ -164,7 +164,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
         presRange: presRange,
         mostrecent: mostrecent,
         always_import: true, // add data_keys and everything in data_adjacent to data docs, no matter what
-        suppress_meta: true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post.
+        suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post.
         qcsuffix: '_argoqc',
         batchmeta : batchmeta
     }
@@ -204,9 +204,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argo['argo'], params, local_filter, projection, data_filter))
 
-    let batchmetafilter = datafilter.then(helpers.metatable_stream.bind(null, pp_params.batchmeta, argo['argoMeta']))
-
-    Promise.all([metafilter, datafilter, batchmetafilter])
+    Promise.all([metafilter, datafilter])
         .then(search_result => {
 
           let stub = function(data, metadata){
@@ -228,12 +226,8 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
           let postprocess = helpers.post_xform(argo['argoMeta'], pp_params, search_result, res, stub)
 
           res.status(404) // 404 by default
-          if(pp_params.batchmeta){
-            resolve([search_result[2], postprocess])
-          } else {
-            resolve([search_result[1], postprocess])
-          }
-
+          
+          resolve([search_result[1], postprocess])
         })
   });
 }
