@@ -63,7 +63,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
       winding=true
     }
 
-    let params = helpers.parameter_sanitization(extendedName,id,startDate,endDate,polygon,multipolygon,null,winding,center,radius)
+    let params = helpers.parameter_sanitization(extendedName,id,startDate,endDate,polygon,null,winding,center,radius)
 
     if(params.hasOwnProperty('code')){
       // error, return and bail out
@@ -77,7 +77,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     params.compression = compression
 
     // decide y/n whether to service this request
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.multipolygon) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius) 
     if(bailout){
       reject(bailout)
       return

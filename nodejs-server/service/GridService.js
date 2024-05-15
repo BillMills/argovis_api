@@ -51,7 +51,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,windin
     // generic helper for all grid search and filter routes
     // input sanitization
 
-    let params = helpers.parameter_sanitization(gridName,id,startDate,endDate,polygon,multipolygon,box,winding,center,radius)
+    let params = helpers.parameter_sanitization(gridName,id,startDate,endDate,polygon,box,winding,center,radius)
     if(params.hasOwnProperty('code')){
       // error, return and bail out
       reject(params)
@@ -61,7 +61,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,windin
     params.compression = compression
 
     // decide y/n whether to service this request
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.multipolygon, params.box) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box) 
     if(bailout){
       reject(bailout)
       return

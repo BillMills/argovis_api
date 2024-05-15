@@ -26,7 +26,7 @@ const summaries = require('../models/summary');
 exports.findTC = function(res,id,startDate,endDate,polygon,box,winding,center,radius,name,metadata,mostrecent,compression,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
-    let params = helpers.parameter_sanitization('tc',id,startDate,endDate,polygon,multipolygon,box,winding,center,radius)
+    let params = helpers.parameter_sanitization('tc',id,startDate,endDate,polygon,box,winding,center,radius)
     if(params.hasOwnProperty('code')){
       // error, return and bail out
       reject(params)
@@ -36,7 +36,7 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,winding,center,ra
     params.compression = compression
 
     // decide y/n whether to service this request
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.multipolygon, params.box) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box) 
     if(bailout){
       reject(bailout)
       return

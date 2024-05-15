@@ -160,7 +160,7 @@ module.exports.box_sanitation = function(box,suppressCoordCleaning, suppressDate
   return b.map(x => module.exports.validlonlat(x, suppressCoordCleaning))
 }
 
-module.exports.parameter_sanitization = function(dataset,id,startDate,endDate,polygon,multipolygon,box,winding,center,radius, suppressCoordCleaning){
+module.exports.parameter_sanitization = function(dataset,id,startDate,endDate,polygon,box,winding,center,radius, suppressCoordCleaning){
   // sanity check and transform generic temporospatial query string parameters in preparation for search.
 
   params = {"dataset": dataset}
@@ -190,20 +190,6 @@ module.exports.parameter_sanitization = function(dataset,id,startDate,endDate,po
     params.polygon = polygon
   }
 
-  if(multipolygon){
-    try {
-      multipolygon = JSON.parse(multipolygon);
-    } catch (e) {
-      return {"code": 400, "message": "Multipolygon region wasn't proper JSON; format should be [[first polygon], [second polygon]], where each polygon is [lon,lat],[lon,lat],..."};
-    }
-    multipolygon = multipolygon.map(function(x){return module.exports.polygon_sanitation(JSON.stringify(x),winding, suppressCoordCleaning)})
-    if(multipolygon.some(p => p.hasOwnProperty('code'))){
-      multipolygon = multipolygon.filter(x=>x.hasOwnProperty('code'))
-      return multipolygon[0]
-    } 
-    params.multipolygon = multipolygon
-  }
-
   if(box){
     box = module.exports.box_sanitation(box, suppressCoordCleaning)
     if(box.hasOwnProperty('code')){
@@ -226,16 +212,16 @@ module.exports.parameter_sanitization = function(dataset,id,startDate,endDate,po
   return params
 }
 
-module.exports.request_sanitation = function(polygon, center, radius, multipolygon, box, require_region){
+module.exports.request_sanitation = function(polygon, center, radius, box, require_region){
   // given some parameters from a requst, decide whether or not to reject; return false == don't reject, return with message / code if do reject
 
-  if(require_region && !polygon && !multipolygon && !(center || radius) && !box){
-    return {"code": 400, "message": "This route requires a geographic region, either a polygon, multipolygon, box, or center and radius."} 
+  if(require_region && !polygon && !(center || radius) && !box){
+    return {"code": 400, "message": "This route requires a geographic region, either a polygon, box, or center and radius."} 
   }
 
   // basic sanity checks
-  if( (center && polygon) || (multipolygon && polygon) || (multipolygon && center) || (box && polygon) || (box && multipolygon) || (box && center)){
-    return {"code": 400, "message": "Please request only one of polygon, multipolygon, box, or center."} 
+  if( (center && polygon) || (box && polygon) || (box && center)){
+    return {"code": 400, "message": "Please request only one of polygon, box, or center."} 
   }
   if((center && !radius) || (!center && radius)){
     return {"code": 400, "message": "Please specify both radius and center to filter for data less than <radius> km from <center>."}
@@ -265,7 +251,7 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
     proxMatch.push({ $unset: "distcalculated" })
   }
   /// spacetime match construction
-  if(params.startDate || params.endDate || params.polygon || params.multipolygon || params.box){
+  if(params.startDate || params.endDate || params.polygon || params.box){
     spacetimeMatch[0] = {$match: {}}
     if(!isTimeseries) {
       // time filtering at this stage only appropriate for point data
@@ -280,19 +266,6 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
     if(params.polygon) {
       spacetimeMatch[0]['$match']['geolocation'] = {}
       spacetimeMatch[0]['$match']['geolocation'][geosearch] = {$geometry: params.polygon}
-    }
-    if(params.multipolygon){
-      params.multipolygon.sort((a,b)=>{area.geometry(a, params.winding) - area.geometry(b, params.winding)}) // smallest first to minimize size of unindexed geo search
-      spacetimeMatch[0]['$match']['geolocation'] = {} 
-      spacetimeMatch[0]['$match']['geolocation'][geosearch] = {$geometry: params.multipolygon[0]}
-    }
-    // zoom in on subsequent polygon regions; will be unindexed.
-    if(params.multipolygon && params.multipolygon.length > 1){
-      for(let i=1; i<params.multipolygon.length; i++){
-        let blob = {'$match': {'geolocation':{}}}
-        blob['$match']['geolocation'][geosearch] = {$geometry: params.multipolygon[i]}
-        spacetimeMatch.push( blob )
-      }
     }
     if(params.box) {
       // might have to $or over a list of two boxes to deal with the dateline
@@ -914,13 +887,13 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
       ///// assume a temporospatial query absent the above (and if _nothing_ is provided, assumes and rejects an all-space-and-time request)
       else{
         ///// parameter cleaning and coercing; don't coerce coords to be mongo appropriate here, causes problems with area computation
-        let params = module.exports.parameter_sanitization(path[path.length-1], null,qString.get('startDate'),qString.get('endDate'),qString.get('polygon'),qString.get('multipolygon'),qString.get('box'),qString.get('winding'),qString.get('center'),qString.get('radius'), true)
+        let params = module.exports.parameter_sanitization(path[path.length-1], null,qString.get('startDate'),qString.get('endDate'),qString.get('polygon'),qString.get('box'),qString.get('winding'),qString.get('center'),qString.get('radius'), true)
         if(params.hasOwnProperty('code')){
           return params
         }
 
         ///// cost out request; timeseries limited only by geography since entire time span for each matched lat/long must be pulled off disk in any case.
-        let geospan = module.exports.geoarea(params.polygon,params.multipolygon,params.box,qString.get('winding'),params.radius) / 13000 // 1 sq degree is about 13k sq km at eq
+        let geospan = module.exports.geoarea(params.polygon,params.box,qString.get('winding'),params.radius) / 13000 // 1 sq degree is about 13k sq km at eq
         let dayspan = Math.round(Math.abs((params.endDate - params.startDate) / (24*60*60*1000) )); // n days of request
         if((!url.includes('compression=minimal')) && (path[0]=='timeseries' && path.length==2 && geospan > maxbulk_timeseries) || (path[0]!='timeseries' && geospan*dayspan > maxbulk) ){
           return {"code": 413, "message": "The temporospatial extent of your request is very large and likely to crash our API. Please request a smaller region or shorter timespan, or both."}
@@ -947,7 +920,7 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
   return c
 }
 
-module.exports.geoarea = function(polygon, multipolygon, box, winding, radius){
+module.exports.geoarea = function(polygon, box, winding, radius){
   // return the area in sq km of the defined region
 
   let geospan = 360000000 // 360M sq km, all the oceans
@@ -955,9 +928,6 @@ module.exports.geoarea = function(polygon, multipolygon, box, winding, radius){
       geospan = area.geometry(polygon, winding) / 1000000
   } else if(radius){
       geospan = 3.14159*radius*radius // recall radius is reported in km
-  } else if(multipolygon){
-    let areas = multipolygon.map(x => area.geometry(x, winding) / 1000000)
-    geospan = Math.min(areas)
   } else if(box){
     // treat a box like a rectangular polygon
     geospan = 0
