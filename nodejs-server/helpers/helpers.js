@@ -2,6 +2,7 @@ const area = require('./area')
 const pipe = require('pipeline-pipe');
 const { pipeline } = require('stream');
 const JSONStream = require('JSONStream')
+const { Transform } = require('stream');
 
 module.exports = {}
 
@@ -963,9 +964,22 @@ module.exports.geoarea = function(polygon, multipolygon, box, winding, radius){
   return geospan
 }
 
-module.exports.data_pipeline = function(res, pipefittings){
+module.exports.data_pipeline = function(res, batchmeta, pipefittings){
+  const flatten = new Transform({
+    objectMode: true,
+    transform(chunk, encoding, callback) {
+      if (batchmeta && Array.isArray(chunk)) {
+        chunk.forEach(item => this.push(item));
+      } else {
+        this.push(chunk);
+      }
+      callback();
+    }
+  });
+
   pipeline(
     ...pipefittings,
+    flatten,
     JSONStream.stringify(),
     res.type('json'),
     (err) => {
