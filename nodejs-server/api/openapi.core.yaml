@@ -292,17 +292,6 @@ paths:
         schema:
           type: string
           example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
       - name: box
         in: query
         description: "lon, lat pairs of the lower left and upper right corners of\
@@ -604,17 +593,6 @@ paths:
         schema:
           type: string
           example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
       - name: box
         in: query
         description: "lon, lat pairs of the lower left and upper right corners of\
@@ -925,17 +903,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
       - name: winding
         in: query
         description: Enforce ccw winding for polygon and multipolygon
@@ -1205,17 +1172,6 @@ paths:
         schema:
           type: string
           example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
       - name: box
         in: query
         description: "lon, lat pairs of the lower left and upper right corners of\
@@ -1486,17 +1442,6 @@ paths:
         schema:
           type: string
           example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
       - name: box
         in: query
         description: "lon, lat pairs of the lower left and upper right corners of\
@@ -1840,17 +1785,6 @@ paths:
         schema:
           type: string
           example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
       - name: box
         in: query
         description: "lon, lat pairs of the lower left and upper right corners of\
@@ -2162,17 +2096,6 @@ paths:
         schema:
           type: string
           example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
       - name: box
         in: query
         description: "lon, lat pairs of the lower left and upper right corners of\
@@ -2608,17 +2531,6 @@ paths:
         schema:
           type: string
           example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
       - name: box
         in: query
         description: "lon, lat pairs of the lower left and upper right corners of\
@@ -4512,18 +4424,6 @@ components:
       schema:
         type: string
         example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-    multipolygon:
-      name: multipolygon
-      in: query
-      description: array of polygon regions; region of interest is taken as the intersection
-        of all listed polygons.
-      required: false
-      style: form
-      explode: true
-      allowReserved: true
-      schema:
-        type: string
-        example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
     box:
       name: box
       in: query
