@@ -73,7 +73,7 @@ module.exports.findArgo = function findArgo (req, res, next, id, startDate, endD
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Profiles.findArgo(res, id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, batchmeta)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })
@@ -87,7 +87,7 @@ module.exports.findArgometa = function findArgometa (req, res, next, id, platfor
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
   
   Profiles.findArgometa(res, id, platform)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

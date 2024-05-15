@@ -9,7 +9,7 @@ module.exports.drifterMetaSearch = function drifterMetaSearch (req, res, next, i
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Drifters.drifterMetaSearch(res,id,platform, wmo)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })
@@ -23,7 +23,7 @@ module.exports.drifterSearch = function drifterSearch (req, res, next, id, start
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Drifters.drifterSearch(res,id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, metadata, wmo, platform, compression, mostrecent, data, batchmeta)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

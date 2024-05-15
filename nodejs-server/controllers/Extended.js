@@ -26,7 +26,7 @@ module.exports.findExtended = function findExtended (req, res, next, id, startDa
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: extendedName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
   
   Extended.findExtended(res, id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,compression,mostrecent,extendedName,batchmeta,data)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })
@@ -40,7 +40,7 @@ module.exports.findextendedMeta = function findextendedMeta (req, res, next, id)
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Extended.findextendedMeta(res, id)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

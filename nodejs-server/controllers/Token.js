@@ -9,7 +9,7 @@ module.exports.validateToken = function validateToken (req, res, next, token) {
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
   
   Token.validateToken(res, token)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

@@ -63,7 +63,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
         presRange: null,
         dateRange: [params.startDate, params.endDate],
         //mostrecent: mostrecent, // mostrecent filtering done in mongo during stream for timeseries
-        suppress_meta: batchmeta,
+        suppress_meta: false,
         batchmeta : batchmeta
     }
 
@@ -80,9 +80,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Timeseries[timeseriesName], params, local_filter, projection, null))
 
-    let batchmetafilter = datafilter.then(helpers.metatable_stream.bind(null, pp_params.batchmeta, Timeseries['timeseriesMeta']))
-
-    Promise.all([metafilter, datafilter, batchmetafilter])
+    Promise.all([metafilter, datafilter])
         .then(search_result => {
 
           let stub = function(data, metadata){
@@ -98,11 +96,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
           }
           let postprocess = helpers.post_xform(Timeseries['timeseriesMeta'], pp_params, search_result, res, stub)
           res.status(404) // 404 by default
-          if(pp_params.batchmeta){
-            resolve([search_result[2], postprocess])
-          } else {
-            resolve([search_result[1], postprocess])
-          }
+          resolve([search_result[1], postprocess])
         })
   });
 }

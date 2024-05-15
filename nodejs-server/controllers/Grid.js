@@ -9,7 +9,7 @@ module.exports.findgrid = function findgrid (req, res, next, id, startDate, endD
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: gridName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Grid.findgrid(res,gridName, id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, compression, mostrecent, data, presRange, batchmeta)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })
@@ -23,7 +23,7 @@ module.exports.findgridMeta = function findgridMeta (req, res, next, id) {
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Grid.findgridMeta(res,id)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

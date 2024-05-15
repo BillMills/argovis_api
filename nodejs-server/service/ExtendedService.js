@@ -102,7 +102,7 @@ exports.findExtended = function(res,id,startDate,endDate,polygon,multipolygon,bo
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         dateRange: [params.startDate, params.endDate],
         mostrecent: mostrecent,
-        suppress_meta: compression=='minimal' || batchmeta,
+        suppress_meta: compression=='minimal' && !batchmeta,
         batchmeta : batchmeta
     }
 
@@ -119,9 +119,7 @@ exports.findExtended = function(res,id,startDate,endDate,polygon,multipolygon,bo
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Extended[extendedName], params, local_filter, projection, null))
 
-    let batchmetafilter = datafilter.then(helpers.metatable_stream.bind(null, pp_params.batchmeta, Extended['extendedMeta']))
-
-    Promise.all([metafilter, datafilter, batchmetafilter])
+    Promise.all([metafilter, datafilter])
         .then(search_result => {
 
           let stub = function(data, metadata){
@@ -138,11 +136,7 @@ exports.findExtended = function(res,id,startDate,endDate,polygon,multipolygon,bo
           let postprocess = helpers.post_xform(Extended['extendedMeta'], pp_params, search_result, res, stub)
 
           res.status(404) // 404 by default
-          if(pp_params.batchmeta){
-            resolve([search_result[2], postprocess])
-          } else {
-            resolve([search_result[1], postprocess])
-          }
+          resolve([search_result[1], postprocess])
         })
   });
 }
