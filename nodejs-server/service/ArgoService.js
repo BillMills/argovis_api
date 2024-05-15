@@ -164,7 +164,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,multipolygon,box,wi
         presRange: presRange,
         mostrecent: mostrecent,
         always_import: true, // add data_keys and everything in data_adjacent to data docs, no matter what
-        suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post.
+        suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post unless we're returing batchmeta
         qcsuffix: '_argoqc',
         batchmeta : batchmeta
     }

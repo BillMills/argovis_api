@@ -90,7 +90,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,multipolygon,b
         presRange: null,
         mostrecent: mostrecent,
         batchmeta : batchmeta,
-        suppress_meta: batchmeta
+        suppress_meta: false
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -116,9 +116,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,multipolygon,b
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Drifter['drifter'], params, local_filter, projection, null))
 
-    let batchmetafilter = datafilter.then(helpers.metatable_stream.bind(null, pp_params.batchmeta, Drifter['drifterMeta']))
-
-    Promise.all([metafilter, datafilter, batchmetafilter])
+    Promise.all([metafilter, datafilter])
         .then(search_result => {
 
           let stub = function(data, metadata){
@@ -137,12 +135,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,multipolygon,b
 
           let postprocess = helpers.post_xform(Drifter['drifterMeta'], pp_params, search_result, res, stub)
           res.status(404) // 404 by default
-          if(pp_params.batchmeta){
-            resolve([search_result[2], postprocess])
-          } else {
-            resolve([search_result[1], postprocess])
-          }
-
+          resolve([search_result[1], postprocess])
         })
     
   });

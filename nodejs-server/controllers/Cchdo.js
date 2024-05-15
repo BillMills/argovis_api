@@ -9,7 +9,7 @@ module.exports.findCCHDO = function findCCHDO (req, res, next, id, startDate, en
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Profiles.findCCHDO(res, id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, metadata, woceline, cchdo_cruise, source, compression, mostrecent, data, presRange, batchmeta)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })
@@ -23,7 +23,7 @@ module.exports.findCCHDOmeta = function findCCHDOmeta (req, res, next, id, wocel
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Profiles.findCCHDOmeta(res, id, woceline, cchdo_cruise)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

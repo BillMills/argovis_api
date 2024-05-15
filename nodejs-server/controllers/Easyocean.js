@@ -25,7 +25,7 @@ module.exports.findeasyocean = function findeasyocean (req, res, next, id, start
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Easyocean.findeasyocean(res, id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, metadata, woceline, compression, mostrecent, data, presRange, batchmeta, section_start_date)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })
@@ -39,7 +39,7 @@ module.exports.findeasyoceanmeta = function findeasyoceanmeta (req, res, next, w
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Easyocean.findeasyoceanmeta(res, woceline)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

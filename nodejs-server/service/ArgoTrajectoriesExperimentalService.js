@@ -93,7 +93,7 @@ exports.findArgoTrajectory = function(res, id,startDate,endDate,polygon,multipol
         presRange: null,
         mostrecent: mostrecent,
         batchmeta : batchmeta,
-        suppress_meta: batchmeta
+        suppress_meta: false
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -113,9 +113,7 @@ exports.findArgoTrajectory = function(res, id,startDate,endDate,polygon,multipol
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, trajectories['argotrajectories'], params, local_filter, projection, null))
 
-    let batchmetafilter = datafilter.then(helpers.metatable_stream.bind(null, pp_params.batchmeta, trajectories['argotrajectoriesMeta']))
-    
-    Promise.all([metafilter, datafilter, batchmetafilter])
+    Promise.all([metafilter, datafilter])
         .then(search_result => {
 
           let stub = function(data, metadata){
@@ -134,12 +132,7 @@ exports.findArgoTrajectory = function(res, id,startDate,endDate,polygon,multipol
           let postprocess = helpers.post_xform(trajectories['argotrajectoriesMeta'], pp_params, search_result, res, stub)
 
           res.status(404) // 404 by default
-          if(pp_params.batchmeta){
-            resolve([search_result[2], postprocess])
-          } else {
-            resolve([search_result[1], postprocess])
-          }
-
+          resolve([search_result[1], postprocess])
         })
   });
 }

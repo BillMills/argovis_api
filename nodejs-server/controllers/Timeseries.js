@@ -10,7 +10,7 @@ module.exports.findtimeseries = function findtimeseries (req, res, next, id, sta
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: timeseriesName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
   
   Timeseries.findtimeseries(res, timeseriesName, id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, compression, mostrecent, data, batchmeta)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })
@@ -24,7 +24,7 @@ module.exports.findtimeseriesMeta = function findtimeseriesMeta (req, res, next,
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Timeseries.findtimeseriesMeta(res, id)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

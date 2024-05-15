@@ -63,7 +63,7 @@ exports.findTC = function(res,id,startDate,endDate,polygon,multipolygon,box,wind
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         presRange: null,
         mostrecent: mostrecent,
-        suppress_meta: compression=='minimal' || batchmeta, // don't need to look up tc metadata if making a minimal request
+        suppress_meta: compression=='minimal' && !batchmeta, // don't need to look up tc metadata if making a minimal request
         batchmeta : batchmeta
     }
 

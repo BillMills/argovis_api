@@ -9,7 +9,7 @@ module.exports.findTC = function findTC (req, res, next, id, startDate, endDate,
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Tc.findTC(res, id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, metadata, name, mostrecent, compression, data, batchmeta)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })
@@ -23,7 +23,7 @@ module.exports.findTCmeta = function findTCmeta (req, res, next, id, name) {
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
 
   Tc.findTCmeta(res,id,name)
-   .then(pipefittings => helpers.data_pipeline.bind(null, res)(pipefittings),
+   .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
     })

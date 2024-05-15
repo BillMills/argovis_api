@@ -91,7 +91,7 @@ exports.findeasyocean = function(res, id,startDate,endDate,polygon,multipolygon,
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         presRange: presRange,
         mostrecent: mostrecent,
-        suppress_meta: true,
+        suppress_meta: params.batchmeta ? false : true,
         batchmeta : batchmeta
     }
 
@@ -117,9 +117,7 @@ exports.findeasyocean = function(res, id,startDate,endDate,polygon,multipolygon,
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, easyocean['easyocean'], params, local_filter, projection, data_filter))
 
-    let batchmetafilter = datafilter.then(helpers.metatable_stream.bind(null, pp_params.batchmeta, easyocean['easyoceanMeta']))
-
-    Promise.all([metafilter, datafilter, batchmetafilter])
+    Promise.all([metafilter, datafilter])
         .then(search_result => {
           
           let stub = function(data, metadata){
@@ -140,12 +138,7 @@ exports.findeasyocean = function(res, id,startDate,endDate,polygon,multipolygon,
 
           let postprocess = helpers.post_xform(easyocean['easyoceanMeta'], pp_params, search_result, res, stub)
           res.status(404) // 404 by default
-          if(pp_params.batchmeta){
-            resolve([search_result[2], postprocess])
-          } else {
-            resolve([search_result[1], postprocess])
-          }
-          
+          resolve([search_result[1], postprocess])
         })
   });
 }
