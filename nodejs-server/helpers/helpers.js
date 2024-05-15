@@ -714,14 +714,19 @@ module.exports.post_xform = function(metaModel, pp_params, search_result, res, s
     pipe(async chunk => {
       // wait on a promise to get this chunk's metadata back
       meta = await module.exports.locate_meta(chunk['metadata'], search_result[0], metaModel)
-      // keep track of new metadata docs so we don't look them up twice
+      // keep track of new metadata docs so we don't look them up twice, and decide if we need to push them at the user in a batchmeta request
       let newmeta = []
+      if(!pp_params.initialMetaPushComplete){
+        newmeta = JSON.parse(JSON.stringify(search_result[0])) 
+      }
+      pp_params.initialMetaPushComplete = true
       for(let i=0; i<meta.length; i++){
         if(!search_result[0].find(x => x._id == meta[i]._id)){
           search_result[0].push(meta[i])
           newmeta.push(meta[i])
         } 
       }
+
       // hand back the metadata if it's new and that's what we want, OR munge the chunk and push it downstream if it isn't rejected.
       let doc = null
       if (pp_params.batchmeta && newmeta.length > 0 && (!pp_params.mostrecent || nDocs < pp_params.mostrecent)) {

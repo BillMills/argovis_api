@@ -662,3 +662,9 @@ describe("GET /argo", function () {
   });
 });
 
+describe("GET /argo", function () {
+  it("check batch meta when a metadata filter has been applied", async function () {
+    const response = await request.get("/argo?startDate=2022-01-07T12:02:21Z&endDate=2022-07-06T12:02:21Z&platform=2902857&batchmeta=true").set({'x-argokey': 'developer'});
+    expect(response.body.length).to.eql(1);
+  });
+}); 
