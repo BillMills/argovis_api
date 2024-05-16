@@ -60,7 +60,9 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
 
       polygon = JSON.stringify(helpers.box2polygon(box[0], box[1]).coordinates[0])
 
-      // always enforce winding for boxes on extended object searches
+      // always enforce winding for boxes on extended object searches;
+      // 2d searches are always interior to the box, but 2dsphere searches can depend on winding
+      // box2polygon always ccw winds, so winding=true preserves interiority
       winding=true
     }
 
