@@ -45,6 +45,7 @@ exports.extendedVocab = function(extendedName,parameter) {
  * returns List
  **/
 exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,box,winding,center,radius,compression,mostrecent,data,batchmeta) {
+
   return new Promise(function(resolve, reject) {
     // input sanitization
 
