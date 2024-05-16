@@ -6,7 +6,6 @@ chai.use(require('chai-almost')(0.00000001));
 const rawspec = require('/tests/core-spec.json');
 const $RefParser = require("@apidevtools/json-schema-ref-parser");
 const helpers = require('/tests/tests/helpers')
-const area = require('/tests/tests/area')
 
 const c = 1
 const cellprice = 0.0001
