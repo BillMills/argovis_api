@@ -72,7 +72,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     }
 
     params.mostrecent = mostrecent
-    params.extended = true // extended objects need a geointersects search instead of geowithin for polygons and multipolygons
+    params.extended = true // extended objects need a geointersects search instead of geowithin for polygons
     params.batchmeta = batchmeta
     params.compression = compression
 

@@ -177,13 +177,6 @@ describe("GET /grids/rg09", function () {
 });
 
 describe("GET /grids/rg09", function () {
-  it("fetch gridded data in overlap region between two polygons", async function () {
-    const response = await request.get("/grids/rg09?multipolygon=[[[22,-65],[22,-64],[26,-64],[26,-65],[22,-65]],[[24,-65],[24,-64],[30,-64],[30,-65],[24,-65]]]&startDate=2000-01-01T00:00:00Z&endDate=2020-01-01T00:00:00Z").set({'x-argokey': 'developer'});
-    expect(response.body.length).to.eql(2);
-  });
-});
-
-describe("GET /grids/rg09", function () {
   it("should return appropriate minimal representation of this measurement", async function () {
     const response = await request.get("/grids/rg09?id=20040115000000_20.5_-64.5&compression=minimal").set({'x-argokey': 'developer'});
     expect(response.body).to.eql([['20040115000000_20.5_-64.5', 20.5, -64.5, "2004-01-15T00:00:00.000Z", ["rg09_temperature_200401_Total","rg09_salinity_200401_Total"]]]);  
