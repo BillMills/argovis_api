@@ -51,7 +51,7 @@ exports.drifterMetaSearch = function(res,id,platform,wmo) {
 exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,wmo,platform,compression,mostrecent,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
-    let params = helpers.parameter_sanitization('drifters',id,startDate,endDate,polygon,box,winding,center,radius)
+    let params = helpers.parameter_sanitization('drifters',id,startDate,endDate,polygon,box,false,center,radius)
     if(params.hasOwnProperty('code')){
       // error, return and bail out
       reject(params)

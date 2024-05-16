@@ -5,14 +5,14 @@ var wgs84 = require('wgs84');
 module.exports.geometry = geometry;
 module.exports.ring = ringArea;
 
-function geometry(_, enforceWinding) {
+function geometry(_) {
     var area = 0, i;
     switch (_.type) {
         case 'Polygon':
-            return polygonArea(_.coordinates, enforceWinding);
+            return polygonArea(_.coordinates);
         case 'MultiPolygon':
             for (i = 0; i < _.coordinates.length; i++) {
-                area += polygonArea(_.coordinates[i], enforceWinding);
+                area += polygonArea(_.coordinates[i]);
             }
             return area;
         case 'Point':
@@ -28,24 +28,15 @@ function geometry(_, enforceWinding) {
     }
 }
 
-function polygonArea(coords, enforceWinding) {
+function polygonArea(coords) {
     var area = 0;
     if (coords) {
         for (var i = 0; i < coords.length; i++) {
             area += ringArea(coords[i]);
         }
     }
-    if(enforceWinding){
-        if(area >= 0){
-            // CW winding, mongo will select the complement
-            return 510100000000000 - area
-        } else if (area < 0){
-            // CCW winding, this is what mongo will select
-            return -1*area
-        }
-    } else {
-        return Math.abs(area)
-    }
+
+    return Math.abs(area)
 }
 
 /**

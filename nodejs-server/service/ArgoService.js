@@ -113,7 +113,7 @@ exports.argoVocab = function(parameter) {
 exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
-    let params = helpers.parameter_sanitization('argo',id,startDate,endDate,polygon,box,winding,center,radius)
+    let params = helpers.parameter_sanitization('argo',id,startDate,endDate,polygon,box,false,center,radius)
     if(params.hasOwnProperty('code')){
       // error, return and bail out
       reject(params)

@@ -54,7 +54,7 @@ exports.argotrajectoryVocab = function(parameter) {
 exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,compression,mostrecent,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
-    let params = helpers.parameter_sanitization('trajectories',id,startDate,endDate,polygon,box,winding,center,radius)
+    let params = helpers.parameter_sanitization('trajectories',id,startDate,endDate,polygon,box,false,center,radius)
     if(params.hasOwnProperty('code')){
       // error, return and bail out
       reject(params)

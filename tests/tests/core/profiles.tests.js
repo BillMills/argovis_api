@@ -578,15 +578,6 @@ describe("GET /argo", function () {
 });
 
 describe("GET /argo", function () {
-  it("winding flag should allow selecting complementary geometry with ccw winding.", async function () {
-    const response = await request.get("/argo?polygon=[[155,40],[160,40],[160,45],[155,45],[155,40]]").set({'x-argokey': 'developer'});
-    expect(response.status).to.eql(404);
-    const response2 = await request.get("/argo?polygon=[[155,40],[155,45],[160,45],[160,40],[155,40]]&winding=true").set({'x-argokey': 'developer'});
-    expect(response2.body.length).to.eql(5);
-  });
-});
-
-describe("GET /argo", function () {
   it("explicitly asking for Argo qc information", async function () {
     const response = await request.get("/argo?id=4901283_003&data=temperature,temperature_argoqc").set({'x-argokey': 'developer'});
     expect(response.body[0].data_info[0]).to.have.members(['temperature', 'pressure', 'temperature_argoqc']) 

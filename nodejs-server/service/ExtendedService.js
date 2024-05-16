@@ -49,6 +49,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
 
     // extended objects must be geo-searched by $geoIntersects, which is only supported on 2dsphere indexes; 
     // therefore, requests for box regions must be coerced into approximately corresponding geodesic-edged polygons.
+    let winding=false
     if(box) {
       box = helpers.box_sanitation(box, false, true)[0] // if we're going to search it like a polygon, we dont need to split on the dateline
         if(box.hasOwnProperty('code')){
