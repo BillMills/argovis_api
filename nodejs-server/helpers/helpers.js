@@ -1,8 +1,8 @@
-const area = require('./area')
 const pipe = require('pipeline-pipe');
 const { pipeline } = require('stream');
 const JSONStream = require('JSONStream')
 const { Transform } = require('stream');
+const area = require('@mapbox/geojson-area').geometry;
 
 module.exports = {}
 
@@ -923,14 +923,14 @@ module.exports.geoarea = function(polygon, box, radius){
 
   let geospan = 360000000 // 360M sq km, all the oceans
   if(polygon){
-      geospan = area.geometry(polygon) / 1000000
+      geospan = area(polygon) / 1000000
   } else if(radius){
       geospan = 3.14159*radius*radius // recall radius is reported in km
   } else if(box){
     // treat a box like a rectangular polygon
     geospan = 0
     for (let i=0; i<box.length; i++){
-      geospan += area.geometry({"type":"Polygon", "coordinates":[[[box[i][0][0],box[i][0][1]],[box[i][1][0],box[i][0][1]],[box[i][1][0],box[i][1][1]],[box[i][0][0],box[i][1][1]],[box[i][0][0],box[i][0][1]]]]}) / 1000000
+      geospan += area({"type":"Polygon", "coordinates":[[[box[i][0][0],box[i][0][1]],[box[i][1][0],box[i][0][1]],[box[i][1][0],box[i][1][1]],[box[i][0][0],box[i][1][1]],[box[i][0][0],box[i][0][1]]]]}) / 1000000
     }
   }
 
