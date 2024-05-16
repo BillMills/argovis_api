@@ -112,13 +112,6 @@ describe("GET /drifters", function () {
 }); 
 
 describe("GET /drifters", function () {
-  it("fetch drifter data with a multipolygon filter", async function () {
-    const response = await request.get("/drifters?multipolygon=[[[-18,14],[-17,14],[-17,15],[-18,15],[-18,14]],[[-18,14],[-17,14],[-17,14.8],[-18,14.8],[-18,14]]]").set({'x-argokey': 'developer'});
-    expect(response.body.length).to.eql(6);
-  });
-}); 
-
-describe("GET /drifters", function () {
   it("fetch drifter data via a cross reference with drifter metadata", async function () {
     const response = await request.get("/drifters?wmo=5500930").set({'x-argokey': 'developer'});
     expect(response.body.length).to.eql(10);

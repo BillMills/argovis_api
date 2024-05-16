@@ -102,9 +102,6 @@
                   "$ref": "#/components/parameters/polygon"
                },
                {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
                   "$ref": "#/components/parameters/box"
                },
                {
@@ -611,7 +608,7 @@
          "winding": {
             "in": "query",
             "name": "winding",
-            "description": "Enforce ccw winding for polygon and multipolygon",
+            "description": "Enforce ccw winding for polygon",
             "schema": {
                "type": "string",
                "enum": ["true"]
@@ -643,16 +640,6 @@
             "schema": {
                "type": "string",
                "example": "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-            }
-         },
-         "multipolygon": {
-            "in": "query",
-            "name": "multipolygon",
-            "description": "array of polygon regions; region of interest is taken as the intersection of all listed polygons.",
-            "allowReserved": true,
-            "schema": {
-               "type": "string",
-               "example": "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
             }
          },
          "box": {
