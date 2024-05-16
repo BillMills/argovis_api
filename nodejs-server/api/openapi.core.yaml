@@ -304,16 +304,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -605,16 +595,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -903,16 +883,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -1184,16 +1154,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -1454,16 +1414,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -1797,16 +1747,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -2108,16 +2048,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -2543,16 +2473,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -4358,17 +4278,6 @@ components:
         type: string
         enum:
         - minimal
-    winding:
-      name: winding
-      in: query
-      description: Enforce ccw winding for polygon
-      required: false
-      style: form
-      explode: true
-      schema:
-        type: string
-        enum:
-        - "true"
     genericID:
       name: id
       in: query
