@@ -608,7 +608,7 @@
          "winding": {
             "in": "query",
             "name": "winding",
-            "description": "Enforce ccw winding for polygon and multipolygon",
+            "description": "Enforce ccw winding for polygon",
             "schema": {
                "type": "string",
                "enum": ["true"]

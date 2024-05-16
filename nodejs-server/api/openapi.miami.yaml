@@ -127,7 +127,7 @@ paths:
           example: "[[0,0],[1,1]]"
       - name: winding
         in: query
-        description: Enforce ccw winding for polygon and multipolygon
+        description: Enforce ccw winding for polygon
         required: false
         style: form
         explode: true
@@ -757,7 +757,7 @@ components:
     winding:
       name: winding
       in: query
-      description: Enforce ccw winding for polygon and multipolygon
+      description: Enforce ccw winding for polygon
       required: false
       style: form
       explode: true
