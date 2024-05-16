@@ -41,7 +41,6 @@ exports.argotrajectoryVocab = function(parameter) {
  * endDate Date ISO 8601 UTC date-time formatted string indicating the end of the time period of interest. (optional)
  * polygon String array of [lon, lat] vertices describing a polygon bounding the region of interest; final point must match initial point (optional)
  * box String lon, lat pairs of the lower left and upper right corners of a box on a mercator projection, packed like [[lower left lon, lower left lat],[upper right lon, upper right lat]] (optional)
- * winding String Enforce ccw winding for polygon (optional)
  * center List center to measure max radius from when defining circular region of interest; must be used in conjunction with query string parameter 'radius'. (optional)
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * metadata String metadata pointer (optional)
@@ -52,7 +51,7 @@ exports.argotrajectoryVocab = function(parameter) {
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,winding,center,radius,metadata,platform,compression,mostrecent,data,batchmeta) {
+exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,compression,mostrecent,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
     let params = helpers.parameter_sanitization('trajectories',id,startDate,endDate,polygon,box,winding,center,radius)
