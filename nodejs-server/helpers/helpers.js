@@ -1,8 +1,8 @@
-const area = require('./area')
 const pipe = require('pipeline-pipe');
 const { pipeline } = require('stream');
 const JSONStream = require('JSONStream')
 const { Transform } = require('stream');
+const area = require('@mapbox/geojson-area').geometry;
 
 module.exports = {}
 
@@ -198,8 +198,6 @@ module.exports.parameter_sanitization = function(dataset,id,startDate,endDate,po
     }
     params.box = box
   }
-
-  params.winding = winding
 
   if(center){
     params.center = center
@@ -887,13 +885,13 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
       ///// assume a temporospatial query absent the above (and if _nothing_ is provided, assumes and rejects an all-space-and-time request)
       else{
         ///// parameter cleaning and coercing; don't coerce coords to be mongo appropriate here, causes problems with area computation
-        let params = module.exports.parameter_sanitization(path[path.length-1], null,qString.get('startDate'),qString.get('endDate'),qString.get('polygon'),qString.get('box'),qString.get('winding'),qString.get('center'),qString.get('radius'), true)
+        let params = module.exports.parameter_sanitization(path[path.length-1], null,qString.get('startDate'),qString.get('endDate'),qString.get('polygon'),qString.get('box'),false,qString.get('center'),qString.get('radius'), true)
         if(params.hasOwnProperty('code')){
           return params
         }
 
         ///// cost out request; timeseries limited only by geography since entire time span for each matched lat/long must be pulled off disk in any case.
-        let geospan = module.exports.geoarea(params.polygon,params.box,qString.get('winding'),params.radius) / 13000 // 1 sq degree is about 13k sq km at eq
+        let geospan = module.exports.geoarea(params.polygon,params.box,params.radius) / 13000 // 1 sq degree is about 13k sq km at eq
         let dayspan = Math.round(Math.abs((params.endDate - params.startDate) / (24*60*60*1000) )); // n days of request
         if((!url.includes('compression=minimal')) && (path[0]=='timeseries' && path.length==2 && geospan > maxbulk_timeseries) || (path[0]!='timeseries' && geospan*dayspan > maxbulk) ){
           return {"code": 413, "message": "The temporospatial extent of your request is very large and likely to crash our API. Please request a smaller region or shorter timespan, or both."}
@@ -920,19 +918,19 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
   return c
 }
 
-module.exports.geoarea = function(polygon, box, winding, radius){
+module.exports.geoarea = function(polygon, box, radius){
   // return the area in sq km of the defined region
 
   let geospan = 360000000 // 360M sq km, all the oceans
   if(polygon){
-      geospan = area.geometry(polygon, winding) / 1000000
+      geospan = area(polygon) / 1000000
   } else if(radius){
       geospan = 3.14159*radius*radius // recall radius is reported in km
   } else if(box){
     // treat a box like a rectangular polygon
     geospan = 0
     for (let i=0; i<box.length; i++){
-      geospan += area.geometry({"type":"Polygon", "coordinates":[[[box[i][0][0],box[i][0][1]],[box[i][1][0],box[i][0][1]],[box[i][1][0],box[i][1][1]],[box[i][0][0],box[i][1][1]],[box[i][0][0],box[i][0][1]]]]}) / 1000000
+      geospan += area({"type":"Polygon", "coordinates":[[[box[i][0][0],box[i][0][1]],[box[i][1][0],box[i][0][1]],[box[i][1][0],box[i][1][1]],[box[i][0][0],box[i][1][1]],[box[i][0][0],box[i][0][1]]]]}) / 1000000
     }
   }
 

@@ -35,7 +35,6 @@ exports.extendedVocab = function(extendedName,parameter) {
  * endDate Date ISO 8601 UTC date-time formatted string indicating the end of the time period of interest. (optional)
  * polygon String array of [lon, lat] vertices describing a polygon bounding the region of interest; final point must match initial point (optional)
  * box String lon, lat pairs of the lower left and upper right corners of a box on a mercator projection, packed like [[lower left lon, lower left lat],[upper right lon, upper right lat]] (optional)
- * winding String Enforce ccw winding for polygon (optional)
  * center List center to measure max radius from when defining circular region of interest; must be used in conjunction with query string parameter 'radius'. (optional)
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * compression String Data minification strategy to apply. (optional)
@@ -44,13 +43,13 @@ exports.extendedVocab = function(extendedName,parameter) {
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,box,winding,center,radius,compression,mostrecent,data,batchmeta) {
-
+exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
 
     // extended objects must be geo-searched by $geoIntersects, which is only supported on 2dsphere indexes; 
     // therefore, requests for box regions must be coerced into approximately corresponding geodesic-edged polygons.
+    let winding=false
     if(box) {
       box = helpers.box_sanitation(box, false, true)[0] // if we're going to search it like a polygon, we dont need to split on the dateline
         if(box.hasOwnProperty('code')){
@@ -60,7 +59,9 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
 
       polygon = JSON.stringify(helpers.box2polygon(box[0], box[1]).coordinates[0])
 
-      // always enforce winding for boxes on extended object searches
+      // always enforce winding for boxes on extended object searches;
+      // 2d searches are always interior to the box, but 2dsphere searches can depend on winding
+      // box2polygon always ccw winds, so winding=true preserves interiority
       winding=true
     }
 

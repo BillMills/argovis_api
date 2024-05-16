@@ -6,7 +6,6 @@ chai.use(require('chai-almost')(0.00000001));
 const rawspec = require('/tests/core-spec.json');
 const $RefParser = require("@apidevtools/json-schema-ref-parser");
 const helpers = require('/tests/tests/helpers')
-const area = require('/tests/tests/area')
 
 const c = 1
 const cellprice = 0.0001
@@ -127,24 +126,6 @@ describe("GET /token", function () {
   it("check token fetching - invalid", async function () {
     const response = await request.get("/token?token=xxx").set({'x-argokey': 'developer'});
     expect(response.status).to.eql(404);
-  });
-});
-
-describe("area functions", function () {
-  it("should return a small area for a small CCW region when winding matters", async function () {
-    expect(area.geometry({'type':'Polygon', 'coordinates': [[[0,0],[1,0],[1,1],[0,1],[0,0]]]}, true)).to.be.lessThan(250000000000000);
-  });
-});
-
-describe("area functions", function () {
-  it("should return a large area for a small CW region when winding matters", async function () {
-    expect(area.geometry({'type':'Polygon', 'coordinates': [[[0,0],[0,1],[1,1],[1,0],[0,0]]]}, true)).to.be.greaterThan(250000000000000);
-  });
-});
-
-describe("area functions", function () {
-  it("should return a small area for a small CW region when winding doesnt matter", async function () {
-    expect(area.geometry({'type':'Polygon', 'coordinates': [[[0,0],[0,1],[1,1],[1,0],[0,0]]]}, false)).to.be.lessThan(250000000000000);
   });
 });
 

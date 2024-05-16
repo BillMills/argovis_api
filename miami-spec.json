@@ -105,9 +105,6 @@
                   "$ref": "#/components/parameters/box"
                },
                {
-                  "$ref": "#/components/parameters/winding"
-               },
-               {
                   "$ref": "#/components/parameters/center"
                },
                {
@@ -603,15 +600,6 @@
             "schema": {
                "type": "string",
                "enum": ["minimal"]
-            }
-         },
-         "winding": {
-            "in": "query",
-            "name": "winding",
-            "description": "Enforce ccw winding for polygon",
-            "schema": {
-               "type": "string",
-               "enum": ["true"]
             }
          },
          "genericID": {
