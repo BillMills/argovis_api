@@ -23,6 +23,9 @@ exports.findTC = function(id,startDate,endDate,polygon,box,center,radius,name,me
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
+  "data_warning" : {
+    "duplicate" : [ "duplicate", "duplicate" ]
+  },
   "metadata" : [ "metadata", "metadata" ],
   "data" : [ [ "", "" ], [ "", "" ] ],
   "_id" : "_id",
@@ -35,6 +38,9 @@ exports.findTC = function(id,startDate,endDate,polygon,box,center,radius,name,me
   },
   "timestamp" : "2000-01-23T04:56:07.000+00:00"
 }, {
+  "data_warning" : {
+    "duplicate" : [ "duplicate", "duplicate" ]
+  },
   "metadata" : [ "metadata", "metadata" ],
   "data" : [ [ "", "" ], [ "", "" ] ],
   "_id" : "_id",

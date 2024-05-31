@@ -2021,6 +2021,17 @@
                },
                "class": {
                   "type": "string"
+               },
+               "data_warning": {
+                  "type": "object",
+                  "properties": {
+                     "duplicate": {
+                        "type": "array",
+                        "items": {
+                           "type": "string"
+                        }
+                     }
+                  }
                }
             }
          },
