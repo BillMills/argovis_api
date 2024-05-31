@@ -21,7 +21,7 @@ var geolocation = Schema({
 
 var sourceinfo = Schema({
   source: {type: [String], required: true},
-  url: {type: String, required: false},
+  url: {type: String, required: true},
   doi: {type: String, required: false},
   date_updated: {type: Date, required: false},
 })
@@ -34,7 +34,8 @@ const tcSchema = Schema({
   record_identifier: {type: String, required: true},
   class: {type: String, required: true},
   metadata: {type: [String], required: true},
-  data: [{type: [Number], required: false}]
+  data: [{type: [Number], required: false}],
+  data_warning: {type:[Schema.Types.Mixed], required: false}
 });
 
 const tcMetaSchema = Schema({
