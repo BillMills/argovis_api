@@ -2911,7 +2911,13 @@ components:
           type: string
         class:
           type: string
+        data_warning:
+          $ref: '#/components/schemas/tc_data_warning'
       example:
+        data_warning:
+          duplicate:
+          - duplicate
+          - duplicate
         metadata:
         - metadata
         - metadata
@@ -4030,6 +4036,17 @@ components:
           "n": 0.80082819046101150206595775671303272247314453125
           mostrecent: 2010-01-01T00:00:00Z
         _id: argo_bgc
+    tc_data_warning:
+      type: object
+      properties:
+        duplicate:
+          type: array
+          items:
+            type: string
+      example:
+        duplicate:
+        - duplicate
+        - duplicate
     easyoceanMeta_occupancies:
       type: object
       properties:
