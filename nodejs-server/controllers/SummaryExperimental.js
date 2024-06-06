@@ -4,11 +4,11 @@ var helpers = require('../helpers/helpers')
 var utils = require('../utils/writer.js');
 var SummaryExperimental = require('../service/SummaryExperimentalService');
 
-module.exports.fetchSummary = function fetchSummary (req, res, next, id) {
+module.exports.fetchSummary = function fetchSummary (req, res, next, id, key) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
   
-  SummaryExperimental.fetchSummary(id)
+  SummaryExperimental.fetchSummary(id, key)
     .then(function (response) {
       utils.writeJson(res, response);
     },
