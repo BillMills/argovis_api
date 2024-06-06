@@ -1837,6 +1837,14 @@
             "parameters": [
                {
                   "$ref": "#/components/parameters/genericID"
+               },
+               {
+                  "in": "query",
+                  "name": "key",
+                  "description": "If set, return only the named key from the summary document (intended for getting back just jsonld, for example)",
+                  "schema": {
+                     "type": "string"
+                  }
                }
             ],
             "responses": {
