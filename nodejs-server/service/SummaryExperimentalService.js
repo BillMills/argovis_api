@@ -12,6 +12,20 @@ const helpers = require('../helpers/helpers')
 exports.fetchSummary = function(id,key) {
   return new Promise(function(resolve, reject) {
     const query = summaries.find({"_id":id}).lean()
-    query.exec(helpers.queryCallback.bind(null,null, resolve, reject))
+
+    let f = function(k, d){
+      if(k in d[0]){
+        return d[0][k]
+      } else {
+        return d
+      }
+    }
+
+    if(key){
+      query.exec(helpers.queryCallback.bind(null,f.bind(null, key), resolve, reject))
+    } else {
+      query.exec(helpers.queryCallback.bind(null,null, resolve, reject))
+    }
   });
 }
+
