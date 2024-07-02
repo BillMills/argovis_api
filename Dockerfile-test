@@ -1,4 +1,4 @@
-FROM argovis/api:test-base-231005
+FROM argovis/api:test-base-240702
 COPY tests .
 COPY nodejs-server/helpers/helpers.js tests/helpers.js
 COPY core-spec.json .
