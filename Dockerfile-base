@@ -6,5 +6,9 @@ RUN mkdir /app/npmlogs && chown -R 1000660000 /app/npmlogs
 COPY nodejs-server/package.json .
 RUN npm install
 RUN apk update
+# hack in security patched deep dependency
+RUN sed -i 's|"qs": "6.7.0"|"qs": "6.7.3"|g' /app/node_modules/body-parser/package.json 
+RUN rm package-lock.json && npm install
+
 RUN chown -R 1000660000 /app/npmlogs/.npm
 
