@@ -171,14 +171,10 @@ module.exports.parameter_sanitization = function(dataset,id,startDate,endDate,po
 
   if(startDate){
     params.startDate = new Date(startDate);
-  } else {
-    params.startDate = module.exports.earliest_records(dataset)
   }
 
   if(endDate){
     params.endDate = new Date(endDate);
-  } else {
-    params.endDate = module.exports.final_records(dataset)
   }
 
   if(polygon){
@@ -888,6 +884,13 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
         let params = module.exports.parameter_sanitization(path[path.length-1], null,qString.get('startDate'),qString.get('endDate'),qString.get('polygon'),qString.get('box'),false,qString.get('center'),qString.get('radius'), true)
         if(params.hasOwnProperty('code')){
           return params
+        }
+        // request costs infer a startDate and endDate if not provided
+        if(!(params.hasOwnProperty('startDate'))){
+          params.startDate = module.exports.earliest_records(params['dataset'])
+        }
+        if(!(params.hasOwnProperty('endDate'))){
+          params.endDate = module.exports.final_records(params['dataset'])
         }
 
         ///// cost out request; timeseries limited only by geography since entire time span for each matched lat/long must be pulled off disk in any case.
