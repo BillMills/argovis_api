@@ -6,7 +6,7 @@ var helpers = require('../helpers/helpers')
 
 module.exports.findgrid = function findgrid (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, batchmeta, gridName) {
  
-  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: gridName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
+  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: gridName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Grid.findgrid(res,gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, batchmeta)
     .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
@@ -20,7 +20,7 @@ module.exports.findgrid = function findgrid (req, res, next, id, startDate, endD
 
 module.exports.findgridMeta = function findgridMeta (req, res, next, id) {
 
-  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
+  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Grid.findgridMeta(res,id)
     .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
@@ -34,7 +34,7 @@ module.exports.findgridMeta = function findgridMeta (req, res, next, id) {
 
 module.exports.gridVocab = function gridVocab (req, res, next, parameter, gridName) {
   
-  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: gridName, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
+  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: gridName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
   Grid.gridVocab(gridName, parameter)
     .then(function (response) {
