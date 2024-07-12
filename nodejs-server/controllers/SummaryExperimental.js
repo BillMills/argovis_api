@@ -6,7 +6,7 @@ var SummaryExperimental = require('../service/SummaryExperimentalService');
 
 module.exports.fetchSummary = function fetchSummary (req, res, next, id, key) {
 
-  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu'})
+  apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
   SummaryExperimental.fetchSummary(id, key)
     .then(function (response) {
