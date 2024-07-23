@@ -152,8 +152,25 @@ exports.drifterVocab = function(parameter) {
       resolve(["wmo", "platform", "data", "metadata"])
       return
     } else if(parameter == 'data'){
-      const query = summaries.find({"_id":"drifter_data_keys"}).lean()
-      query.exec(helpers.queryCallback.bind(null,x=>x[0]['data_keys'], resolve, reject))
+      resolve([
+        "ve",
+        "vn",
+        "err_lon",
+        "err_lat",
+        "err_ve",
+        "err_vn",
+        "gap",
+        "sst",
+        "sst1",
+        "sst2",
+        "err_sst",
+        "err_sst1",
+        "err_sst2",
+        "flg_sst",
+        "flg_sst1",
+        "flg_sst2"
+      ])
+      return
     } else if(parameter == 'metadata'){
       Drifter['drifter'].find().distinct('metadata', function (err, vocab) {
         if (err){
