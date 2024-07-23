@@ -20,7 +20,7 @@
    },
    "servers": [
       {
-         "url": "http://100.26.32.238:8080/"
+         "url": "https://argovis-drifters.colorado.edu"
       },
       {
          "url": "/dapi"
