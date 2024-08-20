@@ -824,7 +824,7 @@ module.exports.final_records = function(dataset){
 
   let dates = {
     'argo': new Date(),
-    'cchdo': new Date("2023-03-09T17:48:01Z"),
+    'cchdo': new Date("2024-03-28T05:31:00Z"),
     'drifters': new Date("2020-06-30T23:00:01Z"),
     'kg21': new Date("2020-12-15T00:00:01Z"),
     'rg09': new Date("2022-05-15T00:00:01Z"),
