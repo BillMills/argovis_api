@@ -66,7 +66,7 @@
       },
       {
          "name": "timeseries",
-         "description": "timeseries-formatted grids derived from satellite data."
+         "description": "timeseries-formatted grids."
       },
       {
          "name": "extended",
@@ -591,7 +591,7 @@
                   "required": "true",
                   "schema": {
                      "type": "string",
-                     "enum": ["noaasst", "copernicussla", "ccmpwind"]
+                     "enum": ["noaasst", "copernicussla", "ccmpwind", "bsose"]
                   }
                },
                {
@@ -614,6 +614,9 @@
                },
                {
                   "$ref": "#/components/parameters/radius"
+               },
+               {
+                  "$ref": "#/components/parameters/presRange"
                },
                {
                   "$ref": "#/components/parameters/compression"
@@ -718,7 +721,7 @@
                   "required": "true",
                   "schema": {
                      "type": "string",
-                     "enum": ["noaasst", "copernicussla", "ccmpwind"]
+                     "enum": ["noaasst", "copernicussla", "ccmpwind", "bsose"]
                   }
                },
                {
@@ -2762,6 +2765,9 @@
                },
                "data": {
                   "$ref": "#/components/schemas/data"
+               },
+               "level": {
+                  "type": "number"
                }
             }
          },

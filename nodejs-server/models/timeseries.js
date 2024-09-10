@@ -29,7 +29,8 @@ const tsSchema = Schema({
   metadata: {type: [String], required: true},
   geolocation: {type: geolocation, required: true},
   basin: {type: Number, required: true},
-  data: [{type: [Number], required: false}]
+  data: [{type: [Number], required: false}],
+  level: {type: Number, required: false}
 });
 
 const tsMetaSchema = Schema({
@@ -47,4 +48,4 @@ module.exports['timeseriesMeta'] = mongoose.model('timeseriesMeta', tsMetaSchema
 module.exports['noaasst'] = mongoose.model('noaaOIsst', tsSchema, 'noaaOIsst');
 module.exports['copernicussla'] = mongoose.model('copernicusSLA', tsSchema, 'copernicusSLA');
 module.exports['ccmpwind'] = mongoose.model('ccmpwind', tsSchema, 'ccmpwind');
-
+module.exports['bsose'] = mongoose.model('bsose', tsSchema, 'bsose');

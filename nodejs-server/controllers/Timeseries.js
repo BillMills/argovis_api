@@ -5,11 +5,11 @@ var utils = require('../utils/writer.js');
 var Timeseries = require('../service/TimeseriesService');
 var helpers = require('../helpers/helpers')
 
-module.exports.findtimeseries = function findtimeseries (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, timeseriesName) {
+module.exports.findtimeseries = function findtimeseries (req, res, next, id, startDate, endDate, polygon, box, center, radius, presRange, compression, mostrecent, data, batchmeta, timeseriesName) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: timeseriesName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
-  Timeseries.findtimeseries(res, timeseriesName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta)
+  Timeseries.findtimeseries(res, timeseriesName, id, startDate, endDate, polygon, box, center, radius, presRange, compression, mostrecent, data, batchmeta)
     .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
     function (response) {
       utils.writeJson(res, response, response.code);
