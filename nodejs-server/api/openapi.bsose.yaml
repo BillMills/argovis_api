@@ -137,27 +137,6 @@ paths:
         schema:
           type: string
           example: "[[0,0],[1,1]]"
-      - name: multipolygon
-        in: query
-        description: array of polygon regions; region of interest is taken as the
-          intersection of all listed polygons.
-        required: false
-        style: form
-        explode: true
-        allowReserved: true
-        schema:
-          type: string
-          example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
-      - name: winding
-        in: query
-        description: Enforce ccw winding for polygon and multipolygon
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - "true"
       - name: center
         in: query
         description: center to measure max radius from when defining circular region
@@ -687,17 +666,6 @@ components:
         type: string
         enum:
         - minimal
-    winding:
-      name: winding
-      in: query
-      description: Enforce ccw winding for polygon and multipolygon
-      required: false
-      style: form
-      explode: true
-      schema:
-        type: string
-        enum:
-        - "true"
     genericID:
       name: id
       in: query
@@ -720,18 +688,6 @@ components:
       schema:
         type: string
         example: "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-    multipolygon:
-      name: multipolygon
-      in: query
-      description: array of polygon regions; region of interest is taken as the intersection
-        of all listed polygons.
-      required: false
-      style: form
-      explode: true
-      allowReserved: true
-      schema:
-        type: string
-        example: "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
     box:
       name: box
       in: query
