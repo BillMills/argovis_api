@@ -3,8 +3,8 @@
 var utils = require('../utils/writer.js');
 var Extended = require('../service/ExtendedService');
 
-module.exports.extendedVocab = function extendedVocab (req, res, next, extendedName) {
-  Extended.extendedVocab(extendedName)
+module.exports.extendedVocab = function extendedVocab (req, res, next, extendedName, parameter) {
+  Extended.extendedVocab(extendedName, parameter)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -13,8 +13,8 @@ module.exports.extendedVocab = function extendedVocab (req, res, next, extendedN
     });
 };
 
-module.exports.findExtended = function findExtended (req, res, next, extendedName, id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, compression, mostrecent, batchmeta) {
-  Extended.findExtended(extendedName, id, startDate, endDate, polygon, multipolygon, box, winding, center, radius, compression, mostrecent, batchmeta)
+module.exports.findExtended = function findExtended (req, res, next, extendedName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta) {
+  Extended.findExtended(extendedName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta)
     .then(function (response) {
       utils.writeJson(res, response);
     })

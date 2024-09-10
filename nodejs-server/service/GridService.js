@@ -9,9 +9,7 @@
  * startDate Date ISO 8601 UTC date-time formatted string indicating the beginning of the time period of interest. (optional)
  * endDate Date ISO 8601 UTC date-time formatted string indicating the end of the time period of interest. (optional)
  * polygon String array of [lon, lat] vertices describing a polygon bounding the region of interest; final point must match initial point (optional)
- * multipolygon String array of polygon regions; region of interest is taken as the intersection of all listed polygons. (optional)
  * box String lon, lat pairs of the lower left and upper right corners of a box on a mercator projection, packed like [[lower left lon, lower left lat],[upper right lon, upper right lat]] (optional)
- * winding String Enforce ccw winding for polygon and multipolygon (optional)
  * center List center to measure max radius from when defining circular region of interest; must be used in conjunction with query string parameter 'radius'. (optional)
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * compression String Data minification strategy to apply. (optional)
@@ -21,7 +19,7 @@
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findgrid = function(gridName,id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,compression,mostrecent,data,presRange,batchmeta) {
+exports.findgrid = function(gridName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,presRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
@@ -65,6 +63,14 @@ exports.findgridMeta = function(id) {
     var examples = {};
     examples['application/json'] = [ {
   "data_info" : [ "", "" ],
+  "lattice" : {
+    "minLon" : 5.637376656633329,
+    "spacing" : [ 1.4658129805029452, 1.4658129805029452 ],
+    "maxLat" : 2.3021358869347655,
+    "minLat" : 5.962133916683182,
+    "center" : [ 6.027456183070403, 6.027456183070403 ],
+    "maxLon" : 7.061401241503109
+  },
   "data_type" : "data_type",
   "_id" : "_id",
   "source" : [ {
@@ -82,6 +88,14 @@ exports.findgridMeta = function(id) {
   "levels" : [ 0.8008281904610115, 0.8008281904610115 ]
 }, {
   "data_info" : [ "", "" ],
+  "lattice" : {
+    "minLon" : 5.637376656633329,
+    "spacing" : [ 1.4658129805029452, 1.4658129805029452 ],
+    "maxLat" : 2.3021358869347655,
+    "minLat" : 5.962133916683182,
+    "center" : [ 6.027456183070403, 6.027456183070403 ],
+    "maxLon" : 7.061401241503109
+  },
   "data_type" : "data_type",
   "_id" : "_id",
   "source" : [ {
@@ -111,9 +125,10 @@ exports.findgridMeta = function(id) {
  * List data and lattice for the requested grid.
  *
  * gridName String 
+ * parameter String categorical grid search and filter parameters
  * returns List
  **/
-exports.gridVocab = function(gridName) {
+exports.gridVocab = function(gridName,parameter) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];

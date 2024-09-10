@@ -241,13 +241,7 @@
                   "$ref": "#/components/parameters/polygon"
                },
                {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
                   "$ref": "#/components/parameters/box"
-               },
-               {
-                  "$ref": "#/components/parameters/winding"
                },
                {
                   "$ref": "#/components/parameters/center"
@@ -369,7 +363,7 @@
                   "description": "TC query string parameter to summarize possible values of.",
                   "schema": {
                      "type": "string",
-                     "enum": ["name", "data", "metadata"]
+                     "enum": ["enum", "name", "data", "metadata"]
                   }
                }
             ],
@@ -429,13 +423,7 @@
                   "$ref": "#/components/parameters/polygon"
                },
                {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
                   "$ref": "#/components/parameters/box"
-               },
-               {
-                  "$ref": "#/components/parameters/winding"
                },
                {
                   "$ref": "#/components/parameters/center"
@@ -551,6 +539,16 @@
                      "type": "string",
                      "enum": ["rg09", "kg21", "glodap"]
                   }
+               },
+               {
+                  "in": "query",
+                  "name": "parameter",
+                  "required": true,
+                  "description": "categorical grid search and filter parameters",
+                  "schema": {
+                     "type": "string",
+                     "enum": ["enum", "data"]
+                  }
                }
             ],
             "responses": {
@@ -610,12 +608,6 @@
                },
                {
                   "$ref": "#/components/parameters/box"
-               },
-               {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
-                  "$ref": "#/components/parameters/winding"
                },
                {
                   "$ref": "#/components/parameters/center"
@@ -731,6 +723,16 @@
                      "type": "string",
                      "enum": ["noaasst", "copernicussla", "ccmpwind", "bsose"]
                   }
+               },
+               {
+                  "in": "query",
+                  "name": "parameter",
+                  "required": true,
+                  "description": "categorical timeseries search and filter parameters",
+                  "schema": {
+                     "type": "string",
+                     "enum": ["enum", "data"]
+                  }
                }
             ],
             "responses": {
@@ -789,13 +791,7 @@
                   "$ref": "#/components/parameters/polygon"
                },
                {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
                   "$ref": "#/components/parameters/box"
-               },
-               {
-                  "$ref": "#/components/parameters/winding"
                },
                {
                   "$ref": "#/components/parameters/center"
@@ -808,6 +804,21 @@
                },
                {
                   "$ref": "#/components/parameters/mostrecent"
+               },
+               {
+                  "name": "data",
+                  "in": "query",
+                  "description": "Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses.",
+                  "style": "form",
+                  "explode": false,
+                  "allowReserved": true,
+                  "schema": {
+                     "type": "array",
+                     "items": {
+                        "type": "string"
+                     },
+                     "example": "longitude,latitude,ivt"
+                  }
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
@@ -893,6 +904,16 @@
                      "type": "string",
                      "enum": ["ar"]
                   }
+               },
+               {
+                  "in": "query",
+                  "name": "parameter",
+                  "required": true,
+                  "description": "categorical extended object search and filter parameters",
+                  "schema": {
+                     "type": "string",
+                     "enum": ["enum", "data"]
+                  }
                }
             ],
             "responses": {
@@ -942,13 +963,7 @@
                   "$ref": "#/components/parameters/polygon"
                },
                {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
                   "$ref": "#/components/parameters/box"
-               },
-               {
-                  "$ref": "#/components/parameters/winding"
                },
                {
                   "$ref": "#/components/parameters/center"
@@ -1082,7 +1097,7 @@
                   "description": "GO-SHIP query string parameter to summarize possible values of.",
                   "schema": {
                      "type": "string",
-                     "enum": ["woceline", "cchdo_cruise", "source", "data", "metadata"]
+                     "enum": ["enum", "woceline", "cchdo_cruise", "source", "data", "metadata"]
                   }
                }
             ],
@@ -1133,13 +1148,7 @@
                   "$ref": "#/components/parameters/polygon"
                },
                {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
                   "$ref": "#/components/parameters/box"
-               },
-               {
-                  "$ref": "#/components/parameters/winding"
                },
                {
                   "$ref": "#/components/parameters/center"
@@ -1272,7 +1281,7 @@
                   "description": "Easyocean query string parameter to summarize possible values of.",
                   "schema": {
                      "type": "string",
-                     "enum": ["woceline", "data", "metadata"]
+                     "enum": ["enum", "woceline", "data", "metadata"]
                   }
                }
             ],
@@ -1323,13 +1332,7 @@
                   "$ref": "#/components/parameters/polygon"
                },
                {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
                   "$ref": "#/components/parameters/box"
-               },
-               {
-                  "$ref": "#/components/parameters/winding"
                },
                {
                   "$ref": "#/components/parameters/center"
@@ -1345,6 +1348,9 @@
                },
                {
                   "$ref": "#/components/parameters/platform_type"
+               },
+               {
+                  "$ref": "#/components/parameters/positionqc"
                },
                {
                   "$ref": "#/components/parameters/profileSource"
@@ -1455,7 +1461,7 @@
                   "description": "Argo query string parameter to summarize possible values of.",
                   "schema": {
                      "type": "string",
-                     "enum": ["platform", "source", "data", "metadata", "platform_type"]
+                     "enum": ["enum", "platform", "source", "data", "metadata", "platform_type", "position_qc"]
                   }
                }
             ],
@@ -1677,13 +1683,7 @@
                   "$ref": "#/components/parameters/polygon"
                },
                {
-                  "$ref": "#/components/parameters/multipolygon"
-               },
-               {
                   "$ref": "#/components/parameters/box"
-               },
-               {
-                  "$ref": "#/components/parameters/winding"
                },
                {
                   "$ref": "#/components/parameters/center"
@@ -1800,7 +1800,7 @@
                   "description": "Argo trajectory query string parameter to summarize possible values of.",
                   "schema": {
                      "type": "string",
-                     "enum": ["platform"]
+                     "enum": ["enum", "platform", "data", "metadata"]
                   }
                }
             ],
@@ -1840,6 +1840,14 @@
             "parameters": [
                {
                   "$ref": "#/components/parameters/genericID"
+               },
+               {
+                  "in": "query",
+                  "name": "key",
+                  "description": "If set, return only the named key from the summary document (intended for getting back just jsonld, for example)",
+                  "schema": {
+                     "type": "string"
+                  }
                }
             ],
             "responses": {
@@ -2024,6 +2032,17 @@
                },
                "class": {
                   "type": "string"
+               },
+               "data_warning": {
+                  "type": "object",
+                  "properties": {
+                     "duplicate": {
+                        "type": "array",
+                        "items": {
+                           "type": "string"
+                        }
+                     }
+                  }
                }
             }
          },
@@ -2088,7 +2107,7 @@
          },
          "gridMeta": {
             "type": "object",
-            "required": ["_id", "data_type", "date_updated_argovis", "source", "levels", "data_info"],
+            "required": ["_id", "data_type", "date_updated_argovis", "source", "levels", "data_info", "lattice"],
             "properties": {
                "_id": {
                   "type": "string"
@@ -2114,6 +2133,9 @@
                },
                "data_info": {
                   "$ref": "#/components/schemas/data_info"
+               },
+               "lattice": {
+                  "$ref": "#/components/schemas/generic_lattice"
                }
             }
          },
@@ -2228,6 +2250,17 @@
                "doi": {
                   "type": "string"
                }
+            }
+         },
+         "generic_lattice": {
+            "type": "object",
+            "properties": {
+               "center" : {"type": "array", "items": {"type": "number", "minItems": 2, "maxItems": 2}}, 
+               "spacing": {"type": "array", "items": {"type": "number", "minItems": 2, "maxItems": 2}}, 
+               "minLat" : {"type": "number"}, 
+               "minLon" : {"type": "number"},  
+               "maxLat" : {"type": "number"},  
+               "maxLon" : {"type": "number"}
             }
          },
          "timeseries": {
@@ -2740,7 +2773,7 @@
          },
          "genericTimeseriesMeta": {
             "type": "object",
-            "required": ["_id", "data_type", "data_info", "date_updated_argovis", "timeseries", "source"],
+            "required": ["_id", "data_type", "data_info", "date_updated_argovis", "timeseries", "source", "lattice"],
             "properties":{
                "_id": {
                   "type": "string"
@@ -2763,12 +2796,15 @@
                   "items": {
                      "$ref": "#/components/schemas/generic_source_info"
                   }
+               },
+               "lattice": {
+                  "$ref": "#/components/schemas/generic_lattice"
                }
             }
          },
          "genericExtended": {
             "type": "object",
-            "required": ["_id", "metadata", "geolocation", "timestamp", "raster", "basins"],
+            "required": ["_id", "metadata", "geolocation", "timestamp", "basins"],
             "properties": {
                "_id": {
                   "type": "string"
@@ -2789,25 +2825,6 @@
                   "type": "string",
                   "format": "date-time"
                },
-               "raster": {
-                  "type": "array",
-                  "items": {
-                     "type": "array",
-                     "items":{
-                        "anyOf": [
-                           {
-                              "type": "number"
-                           },
-                           {
-                              "type": "array",
-                              "items": {
-                                 "type": "number"
-                              }
-                           }
-                        ]
-                     }
-                  }
-               },
                "basins": {
                   "type": "array",
                   "items": {
@@ -2819,13 +2836,15 @@
                   "items": {
                      "type": "string"
                   }
+               },
+               "data": {
+                  "$ref": "#/components/schemas/data"
                }
-               
             }
          },
          "genericExtendedMeta": {
             "type": "object",
-            "required": ["_id", "data_type", "data_info", "date_updated_argovis", "source"],
+            "required": ["_id", "data_type", "data_info", "date_updated_argovis", "source", "lattice"],
             "properties":{
                "_id": {
                   "type": "string"
@@ -2845,6 +2864,9 @@
                   "items": {
                      "$ref": "#/components/schemas/generic_source_info"
                   }
+               },
+               "lattice": {
+                  "$ref": "#/components/schemas/generic_lattice"
                }
             }
          },
@@ -3022,15 +3044,6 @@
                "enum": ["minimal"]
             }
          },
-         "winding": {
-            "in": "query",
-            "name": "winding",
-            "description": "Enforce ccw winding for polygon and multipolygon",
-            "schema": {
-               "type": "string",
-               "enum": ["true"]
-            }
-         },
          "genericID": {
             "in": "query",
             "name": "id",
@@ -3058,6 +3071,21 @@
                "example": "PALACE"
             }
          },
+         "positionqc": {
+            "in": "query",
+            "name": "positionqc",
+            "description": "Argo position qc flag.",
+            "style": "form",
+            "explode": false,
+            "allowReserved": true,
+            "schema": {
+               "type": "array",
+               "items": {
+                  "type": "number"
+               },
+               "example": "1,2"
+            }
+         },
          "polygon": {
             "in": "query",
             "name": "polygon",
@@ -3066,16 +3094,6 @@
             "schema": {
                "type": "string",
                "example": "[[-74.1,40.5],[-73.7,40.5],[-74.0,40.8],[-74.1,40.5]]"
-            }
-         },
-         "multipolygon": {
-            "in": "query",
-            "name": "multipolygon",
-            "description": "array of polygon regions; region of interest is taken as the intersection of all listed polygons.",
-            "allowReserved": true,
-            "schema": {
-               "type": "string",
-               "example": "[[[0,0],[0,1],[1,1],[1,0],[0,0]],[[0.5,0],[0.5,1],[1.5,1],[1.5,0],[0.5,0]]]"
             }
          },
          "box": {

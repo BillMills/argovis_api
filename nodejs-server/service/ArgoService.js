@@ -112,14 +112,13 @@ exports.argoVocab = function(parameter) {
  * startDate Date ISO 8601 UTC date-time formatted string indicating the beginning of the time period of interest. (optional)
  * endDate Date ISO 8601 UTC date-time formatted string indicating the end of the time period of interest. (optional)
  * polygon String array of [lon, lat] vertices describing a polygon bounding the region of interest; final point must match initial point (optional)
- * multipolygon String array of polygon regions; region of interest is taken as the intersection of all listed polygons. (optional)
  * box String lon, lat pairs of the lower left and upper right corners of a box on a mercator projection, packed like [[lower left lon, lower left lat],[upper right lon, upper right lat]] (optional)
- * winding String Enforce ccw winding for polygon and multipolygon (optional)
  * center List center to measure max radius from when defining circular region of interest; must be used in conjunction with query string parameter 'radius'. (optional)
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * metadata String metadata pointer (optional)
  * platform String Unique platform ID to search for. (optional)
  * platform_type String Make/model of platform (optional)
+ * positionqc List Argo position qc flag. (optional)
  * source List Experimental program source(s) to search for; document must match all sources to be returned. Accepts ~ negation to filter out documents. See /<data route>/vocabulary?parameter=source for list of options. (optional)
  * compression String Data minification strategy to apply. (optional)
  * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
@@ -128,7 +127,7 @@ exports.argoVocab = function(parameter) {
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findArgo = function(id,startDate,endDate,polygon,multipolygon,box,winding,center,radius,metadata,platform,platform_type,source,compression,mostrecent,data,presRange,batchmeta) {
+exports.findArgo = function(id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
