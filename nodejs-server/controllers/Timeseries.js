@@ -23,8 +23,8 @@ module.exports.findtimeseriesMeta = function findtimeseriesMeta (req, res, next,
     });
 };
 
-module.exports.timeseriesVocab = function timeseriesVocab (req, res, next, timeseriesName) {
-  Timeseries.timeseriesVocab(timeseriesName)
+module.exports.timeseriesVocab = function timeseriesVocab (req, res, next, timeseriesName, parameter) {
+  Timeseries.timeseriesVocab(timeseriesName, parameter)
     .then(function (response) {
       utils.writeJson(res, response);
     })

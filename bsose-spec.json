@@ -227,6 +227,16 @@
                      "type": "string",
                      "enum": ["noaasst", "copernicussla", "ccmpwind", "bsose"]
                   }
+               },
+               {
+                  "in": "query",
+                  "name": "parameter",
+                  "required": true,
+                  "description": "categorical timeseries search and filter parameters",
+                  "schema": {
+                     "type": "string",
+                     "enum": ["enum", "data"]
+                  }
                }
             ],
             "responses": {
@@ -265,6 +275,14 @@
             "parameters": [
                {
                   "$ref": "#/components/parameters/genericID"
+               },
+               {
+                  "in": "query",
+                  "name": "key",
+                  "description": "If set, return only the named key from the summary document (intended for getting back just jsonld, for example)",
+                  "schema": {
+                     "type": "string"
+                  }
                }
             ],
             "responses": {

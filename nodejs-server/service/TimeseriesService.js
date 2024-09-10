@@ -109,9 +109,10 @@ exports.findtimeseriesMeta = function(id) {
  * List data and lattice for the requested timeseries.
  *
  * timeseriesName String 
+ * parameter String categorical timeseries search and filter parameters
  * returns List
  **/
-exports.timeseriesVocab = function(timeseriesName) {
+exports.timeseriesVocab = function(timeseriesName,parameter) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
