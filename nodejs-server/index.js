@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 var debug = require('debug')('app');
 var serverPort = 8080;
 var tokenbucket = require('./middleware/ratelimiter/tokenbucket')
+var promclient = require('./middleware/prometheus/prometheus')
 
 // swaggerRouter configuration
 var options = {
@@ -20,10 +21,12 @@ var app = expressAppConfig.getApp();
 
 // custom middleware injection ///////////
 app.use(tokenbucket.tokenbucket)
+app.use(promclient)
 const stack = app._router.stack;
-const lastEntries = stack.splice(app._router.stack.length - 1);  // since we're adding 1 custom middleware
-const firstEntries = stack.splice(0, 15); // adding our middleware after the first 15, tbd constraints (putting it after the first 5-10 breaks /docs)
+const lastEntries = stack.splice(app._router.stack.length - 2);  // since we're adding 2 custom middleware
+const firstEntries = stack.splice(0, 5); // adding our middleware after the first 5, arbitrary
 app._router.stack = [...firstEntries, ...lastEntries, ...stack];
+
 // end custom middleware injection ///////////////
 
 // Initialize the Swagger middleware

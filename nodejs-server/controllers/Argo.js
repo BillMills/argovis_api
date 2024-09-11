@@ -3,6 +3,13 @@ const apihits = require('../models/apihits');
 var utils = require('../utils/writer.js');
 var Profiles = require('../service/ArgoService');
 var helpers = require('../helpers/helpers')
+const client = require('prom-client');
+
+const httpRequestCounter = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'status_code'],
+});
 
 module.exports.argoBGC = function argoBGC (req, res, next) {
 
@@ -70,6 +77,8 @@ module.exports.argoVocab = function argoVocab (req, res, next, parameter) {
 
 module.exports.findArgo = function findArgo (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, batchmeta) {
 
+  httpRequestCounter.inc({ method: req.method, status_code: res.statusCode });
+  
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Profiles.findArgo(res, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, batchmeta)
