@@ -20,8 +20,8 @@ var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/open
 var app = expressAppConfig.getApp();
 
 // custom middleware injection ///////////
-app.use(tokenbucket.tokenbucket)
 app.use(promclient)
+app.use(tokenbucket.tokenbucket)
 const stack = app._router.stack;
 const lastEntries = stack.splice(app._router.stack.length - 2);  // since we're adding 2 custom middleware
 const firstEntries = stack.splice(0, 5); // adding our middleware after the first 5, arbitrary

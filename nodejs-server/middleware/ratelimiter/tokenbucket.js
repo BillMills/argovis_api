@@ -10,8 +10,15 @@ const hgetAsync = util.promisify(client.hget).bind(client);
 const hgetallAsync = util.promisify(client.hgetall).bind(client);
 const hsetAsync = util.promisify(client.hset).bind(client);
 const userModel = require('../../models/user');
+const promclient = require('prom-client');
 
 module.exports = {}
+
+const httpRequestCounter = new promclient.Counter({
+	name: 'tokenbucket_requests_total',
+	help: 'Total number of HTTP requests',
+	labelNames: ['method', 'status_code'],
+});
 
 module.exports.tokenbucket = function (req, res, next) {
 	let bucketsize = 100
@@ -49,10 +56,10 @@ module.exports.tokenbucket = function (req, res, next) {
 		}
 	})
 	.then(userbucket => {
-		if(userbucket.superuser) {
-			next()
-			return
-		}
+		// if(userbucket.superuser) {
+		// 	next()
+		// 	return
+		// }
 		let d = new Date()
 		let t = d.getTime()
 		let tokensnow = Math.min(userbucket.ntokens + Math.round((t - userbucket.lastUpdate)/tokenrespawntime), bucketsize)
@@ -65,6 +72,7 @@ module.exports.tokenbucket = function (req, res, next) {
 			hsetAsync(userbucket.key, "ntokens", tokensnow-requestCost, "lastUpdate", t).then(next())
 		} else {
 			console.log('request rejected on token bucket:', req['url'], tokensnow)
+			httpRequestCounter.inc({ method: req.method, status_code: 429 });
 			throw({"code": 429, delay: [-1*tokensnow, requestCost], "message": "You have temporarily exceeded your API request limit. You will be able to issue another request in "+String(-1*tokensnow)+" seconds. Long term, requests like the one you just made can be made every "+String(requestCost)+" seconds."})
 		}
 	})
