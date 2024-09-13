@@ -7,7 +7,7 @@ var helpers = require('../helpers/helpers')
 module.exports.argoBGC = function argoBGC (req, res, next) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
-
+  
   Profiles.argoBGC()
     .then(function (response) {
       utils.writeJson(res, response);
@@ -58,12 +58,15 @@ module.exports.argoVocab = function argoVocab (req, res, next, parameter) {
 
   Profiles.argoVocab(parameter)
     .then(function (response) {
+      helpers.successful_requests.inc({ endpoint: req.path, status_code: res.statusCode });
       utils.writeJson(res, response);
     },
     function (response) {
+      helpers.request_error_counter.inc({ endpoint: req.path, note: 'data lookup fail' });
       utils.writeJson(res, response, response.code);
     })
     .catch(function (response) {
+      helpers.request_error_counter.inc({ endpoint: req.path, note: 'pipeline fail' });
       utils.writeJson(res, response);
     });
 };
@@ -73,11 +76,15 @@ module.exports.findArgo = function findArgo (req, res, next, id, startDate, endD
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Profiles.findArgo(res, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, batchmeta)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
+    .then(pipefittings => {
+      helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings)
+    },
     function (response) {
+      helpers.request_error_counter.inc({ endpoint: req.path, note: 'data lookup fail' }); // throw/rejects from findArgo
       utils.writeJson(res, response, response.code);
     })
     .catch(function (response) {
+      helpers.request_error_counter.inc({ endpoint: req.path, note: 'pipeline fail' }); // throw/rejects from the .then functions
       utils.writeJson(res, response);
     });
 };

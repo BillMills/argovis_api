@@ -7,10 +7,16 @@ const promclient = require('prom-client');
 
 module.exports = {}
 
-const httpRequestCounter = new promclient.Counter({
-	name: 'helper_requests_total',
-	help: 'Total number of HTTP requests',
-	labelNames: ['method', 'status_code'],
+module.exports.successful_requests = new promclient.Counter({
+	name: 'successful_requests',
+	help: 'Number of requests that made it to the end of the processing pipeline, to be returned to the user',
+	labelNames: ['endpoint', 'status_code'],
+});
+
+module.exports.request_error_counter = new promclient.Counter({
+  name: 'request_errors',
+  help: 'Number of failed requests',
+  labelNames: ['endpoint', 'note'],
 });
 
 module.exports.queryCallback = function(postprocess, resolve, reject, err, data){
@@ -904,7 +910,6 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
         let geospan = module.exports.geoarea(params.polygon,params.box,params.radius) / 13000 // 1 sq degree is about 13k sq km at eq
         let dayspan = Math.round(Math.abs((params.endDate - params.startDate) / (24*60*60*1000) )); // n days of request
         if((!url.includes('compression=minimal')) && (path[0]=='timeseries' && path.length==2 && geospan > maxbulk_timeseries) || (path[0]!='timeseries' && geospan*dayspan > maxbulk) ){
-          httpRequestCounter.inc({ method: 'dummy', status_code: 413 });
           return {"code": 413, "message": "The temporospatial extent of your request is very large and likely to crash our API. Please request a smaller region or shorter timespan, or both."}
         }
         if(path[0] == 'timeseries'){
@@ -948,7 +953,7 @@ module.exports.geoarea = function(polygon, box, radius){
   return geospan
 }
 
-module.exports.data_pipeline = function(res, batchmeta, pipefittings){
+module.exports.data_pipeline = function(req, res, batchmeta, pipefittings){
   const flatten = new Transform({
     objectMode: true,
     transform(chunk, encoding, callback) {
@@ -970,7 +975,7 @@ module.exports.data_pipeline = function(res, batchmeta, pipefittings){
       if(err){
         console.log(err)
       }
-      httpRequestCounter.inc({ method: 'dummy', status_code: res.statusCode });
+      module.exports.successful_requests.inc({ endpoint: req.path, status_code: res.statusCode });
     }
   )
 }

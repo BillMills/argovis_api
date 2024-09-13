@@ -7,7 +7,17 @@ var mongoose = require('mongoose');
 var debug = require('debug')('app');
 var serverPort = 8080;
 var tokenbucket = require('./middleware/ratelimiter/tokenbucket')
-var promclient = require('./middleware/prometheus/prometheus')
+const express = require('express');
+const router = express.Router();
+const promClient = require('prom-client');
+
+// Create a prometheus histogram for request durations
+const requestDurationHistogram = new promClient.Histogram({
+    name: 'api_request_duration_seconds',
+    help: 'Duration of API requests in seconds',
+    labelNames: ['endpoint'],
+    buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60] // Define bucket sizes for request duration (in seconds)
+  });
 
 // swaggerRouter configuration
 var options = {
@@ -20,10 +30,24 @@ var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/open
 var app = expressAppConfig.getApp();
 
 // custom middleware injection ///////////
-app.use(promclient)
+/// /metrics endpoint for prometheus
+app.use(router.get('/metrics', (req,res) => {
+    res.set('Content-Type', promClient.register.contentType)
+    promClient.register.metrics().then(data => res.send(data));
+}))
+/// prometheus request duration middleware
+app.use((req, res, next) => {
+    const end = requestDurationHistogram.startTimer({ endpoint: req.path });
+    
+    res.on('finish', () => {
+      end({});
+    });
+  
+    next();
+});
 app.use(tokenbucket.tokenbucket)
 const stack = app._router.stack;
-const lastEntries = stack.splice(app._router.stack.length - 2);  // since we're adding 2 custom middleware
+const lastEntries = stack.splice(app._router.stack.length - 3);  // since we're adding 3 custom middleware
 const firstEntries = stack.splice(0, 5); // adding our middleware after the first 5, arbitrary
 app._router.stack = [...firstEntries, ...lastEntries, ...stack];
 
