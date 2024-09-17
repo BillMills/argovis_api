@@ -1,5 +1,6 @@
 FROM argovis/api:test-base-240916
 COPY tests .
 COPY nodejs-server/helpers/helpers.js tests/helpers.js
+COPY nodejs-server/utils/writer.js utils/writer.js
 COPY core-spec.json .
 COPY miami-spec.json .
