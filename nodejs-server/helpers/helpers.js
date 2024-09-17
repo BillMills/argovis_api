@@ -4,6 +4,7 @@ const JSONStream = require('JSONStream')
 const { Transform } = require('stream');
 const area = require('@mapbox/geojson-area').geometry;
 const promclient = require('prom-client');
+var utils = require('../utils/writer.js');
 
 module.exports = {}
 
@@ -1083,3 +1084,20 @@ module.exports.box2polygon = function(lowerLeft, upperRight) {
     return polygon;
 }
 
+module.exports.lookupReject = function (req, res, response) {
+  // generic function to handle when data lookup errors or rejects
+  module.exports.request_error_counter.inc({ endpoint: req.path, note: 'data lookup fail' });
+  utils.writeJson(res, response, response.code);
+}
+
+module.exports.catchPipeline = function (req, res, response) {
+  // generic function to handle when pipeline rejects or errors
+  module.exports.request_error_counter.inc({ endpoint: req.path, note: 'pipeline fail' });
+  utils.writeJson(res, response);
+}
+
+module.exports.simpleWrite = function (req, res, response){
+  // next thing in the promise chain after db lookup if we're skipping the fancy pipeline and just writing directly to the response
+  module.exports.successful_requests.inc({ endpoint: req.path, status_code: res.statusCode });
+  utils.writeJson(res, response);
+}

@@ -9,13 +9,9 @@ module.exports.fetchSummary = function fetchSummary (req, res, next, id, key) {
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
   SummaryExperimental.fetchSummary(id, key)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    },
-    function (response) {
-      utils.writeJson(res, response, response.code);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+    .then(
+      helpers.simpleWrite.bind(null, req, res),
+      helpers.lookupReject.bind(null, req, res)
+    )
+    .catch(helpers.catchPipeline.bind(null, req, res));
 };
