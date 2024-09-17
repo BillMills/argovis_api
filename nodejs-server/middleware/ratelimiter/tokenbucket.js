@@ -65,10 +65,10 @@ module.exports.tokenbucket = function (req, res, next) {
 		}
 	})
 	.then(userbucket => {
-		// if(userbucket.superuser) {
-		// 	next()
-		// 	return
-		// }
+		if(userbucket.superuser) {
+			next()
+			return
+		}
 		let d = new Date()
 		let t = d.getTime()
 		let tokensnow = Math.min(userbucket.ntokens + Math.round((t - userbucket.lastUpdate)/tokenrespawntime), bucketsize)
