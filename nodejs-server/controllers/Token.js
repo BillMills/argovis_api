@@ -1,6 +1,5 @@
 'use strict';
 const apihits = require('../models/apihits');
-var utils = require('../utils/writer.js');
 var Token = require('../service/TokenService');
 var helpers = require('../helpers/helpers')
 

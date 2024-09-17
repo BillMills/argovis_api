@@ -1,7 +1,6 @@
 'use strict';
 const apihits = require('../models/apihits');
 var helpers = require('../helpers/helpers')
-var utils = require('../utils/writer.js');
 var Easyocean = require('../service/EasyoceanService');
 
 module.exports.easyoceanVocab = function easyoceanVocab (req, res, next, parameter) {

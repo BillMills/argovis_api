@@ -1,7 +1,6 @@
 'use strict';
 const apihits = require('../models/apihits');
 var helpers = require('../helpers/helpers')
-var utils = require('../utils/writer.js');
 var SummaryExperimental = require('../service/SummaryExperimentalService');
 
 module.exports.fetchSummary = function fetchSummary (req, res, next, id, key) {

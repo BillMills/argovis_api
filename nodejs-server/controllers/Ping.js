@@ -1,7 +1,7 @@
 'use strict';
 
-var utils = require('../utils/writer.js');
 var Ping = require('../service/PingService');
+var helpers = require('../helpers/helpers')
 
 module.exports.ping = function ping (req, res, next) {
   Ping.ping()
