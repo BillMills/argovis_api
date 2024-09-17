@@ -10,10 +10,26 @@ const hgetAsync = util.promisify(client.hget).bind(client);
 const hgetallAsync = util.promisify(client.hgetall).bind(client);
 const hsetAsync = util.promisify(client.hset).bind(client);
 const userModel = require('../../models/user');
+const promclient = require('prom-client');
 
 module.exports = {}
 
+const incomingRequestCounter = new promclient.Counter({
+	name: 'incoming_requests',
+	help: 'Number of incoming HTTP requests',
+	labelNames: ['endpoint'],
+});
+
+const denyCounter = new promclient.Counter({
+	name: 'requests_denied',
+	help: 'Number of incoming HTTP requests rejected due to malformed input (400), ginormous tempotospatial extent (413), or throttling (429)',
+	labelNames: ['endpoint', 'code'],
+});
+
 module.exports.tokenbucket = function (req, res, next) {
+	// immediately count incoming requests
+	incomingRequestCounter.inc({ endpoint: req.path });
+
 	let bucketsize = 100
 	let tokenrespawntime = 800 // ms to respawn one token
 	let requestCost = 1 //default cost, for except-data-values requests
@@ -59,12 +75,14 @@ module.exports.tokenbucket = function (req, res, next) {
 		requestCost = helpers.cost(req['url'], requestCost, cellprice, metaDiscount, maxbulk, maxbulk_timeseries)
 		if(requestCost.hasOwnProperty('code')){
 			hsetAsync(userbucket.key, "ntokens", tokensnow-1, "lastUpdate", t) // penalize spamming us with bad requests a little
+			denyCounter.inc({ endpoint: req.path, code: requestCost.code });
 			throw(requestCost)
 		}
 		else if(tokensnow >= 0){
 			hsetAsync(userbucket.key, "ntokens", tokensnow-requestCost, "lastUpdate", t).then(next())
 		} else {
 			console.log('request rejected on token bucket:', req['url'], tokensnow)
+			denyCounter.inc({ endpoint: req.path, code: 429 });
 			throw({"code": 429, delay: [-1*tokensnow, requestCost], "message": "You have temporarily exceeded your API request limit. You will be able to issue another request in "+String(-1*tokensnow)+" seconds. Long term, requests like the one you just made can be made every "+String(requestCost)+" seconds."})
 		}
 	})

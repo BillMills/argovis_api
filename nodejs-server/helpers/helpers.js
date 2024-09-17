@@ -3,8 +3,22 @@ const { pipeline } = require('stream');
 const JSONStream = require('JSONStream')
 const { Transform } = require('stream');
 const area = require('@mapbox/geojson-area').geometry;
+const promclient = require('prom-client');
+var utils = require('../utils/writer.js');
 
 module.exports = {}
+
+module.exports.successful_requests = new promclient.Counter({
+	name: 'successful_requests',
+	help: 'Number of requests that made it to the end of the processing pipeline, to be returned to the user',
+	labelNames: ['endpoint', 'status_code'],
+});
+
+module.exports.request_error_counter = new promclient.Counter({
+  name: 'request_errors',
+  help: 'Number of failed requests',
+  labelNames: ['endpoint', 'note'],
+});
 
 module.exports.queryCallback = function(postprocess, resolve, reject, err, data){
 	// standard callback for a database query that should return an array, passed in as <data>.
@@ -940,7 +954,7 @@ module.exports.geoarea = function(polygon, box, radius){
   return geospan
 }
 
-module.exports.data_pipeline = function(res, batchmeta, pipefittings){
+module.exports.data_pipeline = function(req, res, batchmeta, pipefittings){
   const flatten = new Transform({
     objectMode: true,
     transform(chunk, encoding, callback) {
@@ -962,6 +976,7 @@ module.exports.data_pipeline = function(res, batchmeta, pipefittings){
       if(err){
         console.log(err)
       }
+      module.exports.successful_requests.inc({ endpoint: req.path, status_code: res.statusCode });
     }
   )
 }
@@ -1069,3 +1084,20 @@ module.exports.box2polygon = function(lowerLeft, upperRight) {
     return polygon;
 }
 
+module.exports.lookupReject = function (req, res, response) {
+  // generic function to handle when data lookup errors or rejects
+  module.exports.request_error_counter.inc({ endpoint: req.path, note: 'data lookup fail' });
+  utils.writeJson(res, response, response.code);
+}
+
+module.exports.catchPipeline = function (req, res, response) {
+  // generic function to handle when pipeline rejects or errors
+  module.exports.request_error_counter.inc({ endpoint: req.path, note: 'pipeline fail' });
+  utils.writeJson(res, response);
+}
+
+module.exports.simpleWrite = function (req, res, response){
+  // next thing in the promise chain after db lookup if we're skipping the fancy pipeline and just writing directly to the response
+  module.exports.successful_requests.inc({ endpoint: req.path, status_code: res.statusCode });
+  utils.writeJson(res, response);
+}

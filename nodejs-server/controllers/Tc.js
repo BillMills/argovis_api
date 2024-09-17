@@ -9,13 +9,11 @@ module.exports.findTC = function findTC (req, res, next, id, startDate, endDate,
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Tc.findTC(res, id, startDate, endDate, polygon, box, center, radius, metadata, name, mostrecent, compression, data, batchmeta)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
-    function (response) {
-      utils.writeJson(res, response, response.code);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+    .then(
+      pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
+      helpers.lookupReject.bind(null, req, res)
+    )
+    .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
 module.exports.findTCmeta = function findTCmeta (req, res, next, id, name) {
@@ -23,13 +21,11 @@ module.exports.findTCmeta = function findTCmeta (req, res, next, id, name) {
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Tc.findTCmeta(res,id,name)
-   .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
-    function (response) {
-      utils.writeJson(res, response, response.code);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+    .then(
+      pipefittings => helpers.data_pipeline.bind(null, req, res, false)(pipefittings),
+      helpers.lookupReject.bind(null, req, res)
+    )
+    .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
 module.exports.tcVocab = function tcVocab (req, res, next, parameter) {
@@ -37,13 +33,9 @@ module.exports.tcVocab = function tcVocab (req, res, next, parameter) {
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
   Tc.tcVocab(parameter)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    },
-    function (response) {
-      utils.writeJson(res, response, response.code);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+    .then(
+      helpers.simpleWrite.bind(null, req, res),
+      helpers.lookupReject.bind(null, req, res)
+    )
+    .catch(helpers.catchPipeline.bind(null, req, res));
 };

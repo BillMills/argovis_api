@@ -5,13 +5,9 @@ var Ping = require('../service/PingService');
 
 module.exports.ping = function ping (req, res, next) {
   Ping.ping()
-    .then(function (response) {
-      utils.writeJson(res, response, 200);
-    },
-    function (response) {
-      utils.writeJson(res, response, response.code);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+    .then(
+      helpers.simpleWrite.bind(null, req, res),
+      helpers.lookupReject.bind(null, req, res)
+    )
+    .catch(helpers.catchPipeline.bind(null, req, res));
 };

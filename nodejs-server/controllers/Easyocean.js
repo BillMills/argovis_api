@@ -9,15 +9,11 @@ module.exports.easyoceanVocab = function easyoceanVocab (req, res, next, paramet
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Easyocean.easyoceanVocab(parameter)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    },
-    function (response) {
-      utils.writeJson(res, response, response.code);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+    .then(
+      helpers.simpleWrite.bind(null, req, res),
+      helpers.lookupReject.bind(null, req, res)
+    )
+    .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
 module.exports.findeasyocean = function findeasyocean (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, batchmeta, section_start_date) {
@@ -25,13 +21,11 @@ module.exports.findeasyocean = function findeasyocean (req, res, next, id, start
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Easyocean.findeasyocean(res, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, batchmeta, section_start_date)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res, batchmeta)(pipefittings),
-    function (response) {
-      utils.writeJson(res, response, response.code);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+    .then(
+      pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
+      helpers.lookupReject.bind(null, req, res)
+    )
+    .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
 module.exports.findeasyoceanmeta = function findeasyoceanmeta (req, res, next, woceline) {
@@ -39,11 +33,9 @@ module.exports.findeasyoceanmeta = function findeasyoceanmeta (req, res, next, w
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
   Easyocean.findeasyoceanmeta(res, woceline)
-    .then(pipefittings => helpers.data_pipeline.bind(null, res, false)(pipefittings),
-    function (response) {
-      utils.writeJson(res, response, response.code);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
+    .then(
+      pipefittings => helpers.data_pipeline.bind(null, req, res, false)(pipefittings),
+      helpers.lookupReject.bind(null, req, res)
+    )
+    .catch(helpers.catchPipeline.bind(null, req, res));
 };
