@@ -1,7 +1,6 @@
 'use strict';
 
 const apihits = require('../models/apihits');
-var utils = require('../utils/writer.js');
 var Extended = require('../service/ExtendedService');
 var helpers = require('../helpers/helpers')
 
