@@ -35,20 +35,26 @@ app.use(router.get('/metrics', (req,res) => {
     res.set('Content-Type', promClient.register.contentType)
     promClient.register.metrics().then(data => res.send(data));
 }))
-/// prometheus request duration middleware
-app.use((req, res, next) => {
-    const end = requestDurationHistogram.startTimer({ endpoint: req.path });
-    
-    res.on('finish', () => {
-      end({});
-    });
-  
-    next();
-});
 app.use(tokenbucket.tokenbucket)
-const stack = app._router.stack;
-const lastEntries = stack.splice(app._router.stack.length - 3);  // since we're adding 3 custom middleware
-const firstEntries = stack.splice(0, 5); // adding our middleware after the first 5, arbitrary
+let stack = app._router.stack;
+let lastEntries = stack.splice(app._router.stack.length - 2);  // since we're adding 2 custom middleware at this point
+let firstEntries = stack.splice(0, 5); // adding our middleware after the first 5, arbitrary
+app._router.stack = [...firstEntries, ...lastEntries, ...stack];
+
+/// prometheus request duration middleware, needs to go right before the requests middleware
+app.use((req, res, next) => {
+  const end = requestDurationHistogram.startTimer({ endpoint: req.path });
+  
+  res.on('finish', () => {
+    end({});
+  });
+
+  next();
+});
+stack = app._router.stack;
+lastEntries = stack.splice(app._router.stack.length - 1);
+const requestMiddlewareIndex = app._router.stack.findIndex(layer => layer.name === 'requestMiddleware');
+firstEntries = stack.splice(0, requestMiddlewareIndex);
 app._router.stack = [...firstEntries, ...lastEntries, ...stack];
 
 // end custom middleware injection ///////////////
