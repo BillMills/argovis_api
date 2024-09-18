@@ -864,8 +864,8 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
   // maxbulk == maximum allowed size of ndays x area[sq km]/13000sqkm; set to prevent OOM crashes
   // maxbulk_timeseries == maximum allowed size of area[sq km]/13000sqkm; set to prevent OOM crashes
   /// determine path steps
-  
-  let path = url.split('?')[0].split('/').slice(1)
+
+  let path = url.split('?')[0].replace(/\/+$/, "").replace(/\/+$/, "").split('/').slice(1)
 
   /// tokenize query string
   let qString = new URLSearchParams(url.split('?')[1]);
