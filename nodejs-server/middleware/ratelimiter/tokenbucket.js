@@ -29,7 +29,6 @@ const denyCounter = new promclient.Counter({
 module.exports.tokenbucket = function (req, res, next) {
 	// immediately count incoming requests
 	incomingRequestCounter.inc({ endpoint: req.path });
-
 	let bucketsize = 100
 	let tokenrespawntime = 800 // ms to respawn one token
 	let requestCost = 1 //default cost, for except-data-values requests
