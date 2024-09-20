@@ -41,12 +41,13 @@ exports.easyoceanVocab = function(parameter) {
  * compression String Data minification strategy to apply. (optional)
  * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
- * presRange List Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
+ * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
+ * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * section_start_date Date Start date of the section of interest; see metadata corresponding to the WOCE line of interest for valid options. (optional)
  * returns List
  **/
-exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,woceline,compression,mostrecent,data,presRange,batchmeta,section_start_date) {
+exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,woceline,compression,mostrecent,data,presRange,verticalRange,batchmeta,section_start_date) {
   return new Promise(function(resolve, reject) {
 
     // input sanitization

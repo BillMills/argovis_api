@@ -655,8 +655,23 @@ paths:
             type: string
       - name: presRange
         in: query
-        description: Pressure range in dbar to filter for; levels outside this range
-          will not be returned.
+        description: "DEPRICATED, please use verticalRange instead. Pressure range\
+          \ in dbar to filter for; levels outside this range will not be returned."
+        required: false
+        style: form
+        explode: false
+        allowReserved: true
+        schema:
+          type: array
+          example: "10,20.1"
+          items:
+            maxItems: 2
+            minItems: 2
+            type: number
+      - name: verticalRange
+        in: query
+        description: Vertical range to filter for in pressure or depth as appropriate
+          for this dataset; levels outside this range will not be returned.
         required: false
         style: form
         explode: false
@@ -1517,8 +1532,23 @@ paths:
             type: string
       - name: presRange
         in: query
-        description: Pressure range in dbar to filter for; levels outside this range
-          will not be returned.
+        description: "DEPRICATED, please use verticalRange instead. Pressure range\
+          \ in dbar to filter for; levels outside this range will not be returned."
+        required: false
+        style: form
+        explode: false
+        allowReserved: true
+        schema:
+          type: array
+          example: "10,20.1"
+          items:
+            maxItems: 2
+            minItems: 2
+            type: number
+      - name: verticalRange
+        in: query
+        description: Vertical range to filter for in pressure or depth as appropriate
+          for this dataset; levels outside this range will not be returned.
         required: false
         style: form
         explode: false
@@ -1826,8 +1856,23 @@ paths:
             type: string
       - name: presRange
         in: query
-        description: Pressure range in dbar to filter for; levels outside this range
-          will not be returned.
+        description: "DEPRICATED, please use verticalRange instead. Pressure range\
+          \ in dbar to filter for; levels outside this range will not be returned."
+        required: false
+        style: form
+        explode: false
+        allowReserved: true
+        schema:
+          type: array
+          example: "10,20.1"
+          items:
+            maxItems: 2
+            minItems: 2
+            type: number
+      - name: verticalRange
+        in: query
+        description: Vertical range to filter for in pressure or depth as appropriate
+          for this dataset; levels outside this range will not be returned.
         required: false
         style: form
         explode: false
@@ -2157,8 +2202,23 @@ paths:
           $ref: '#/components/schemas/argo_data_keys'
       - name: presRange
         in: query
-        description: Pressure range in dbar to filter for; levels outside this range
-          will not be returned.
+        description: "DEPRICATED, please use verticalRange instead. Pressure range\
+          \ in dbar to filter for; levels outside this range will not be returned."
+        required: false
+        style: form
+        explode: false
+        allowReserved: true
+        schema:
+          type: array
+          example: "10,20.1"
+          items:
+            maxItems: 2
+            minItems: 2
+            type: number
+      - name: verticalRange
+        in: query
+        description: Vertical range to filter for in pressure or depth as appropriate
+          for this dataset; levels outside this range will not be returned.
         required: false
         style: form
         explode: false
@@ -4213,8 +4273,24 @@ components:
     presRange:
       name: presRange
       in: query
-      description: Pressure range in dbar to filter for; levels outside this range
-        will not be returned.
+      description: "DEPRICATED, please use verticalRange instead. Pressure range in\
+        \ dbar to filter for; levels outside this range will not be returned."
+      required: false
+      style: form
+      explode: false
+      allowReserved: true
+      schema:
+        type: array
+        example: "10,20.1"
+        items:
+          maxItems: 2
+          minItems: 2
+          type: number
+    verticalRange:
+      name: verticalRange
+      in: query
+      description: Vertical range to filter for in pressure or depth as appropriate
+        for this dataset; levels outside this range will not be returned.
       required: false
       style: form
       explode: false
