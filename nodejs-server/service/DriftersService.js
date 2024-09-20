@@ -61,7 +61,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
     params.compression = compression
 
     // decide y/n whether to service this request
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
     if(bailout){
       reject(bailout)
       return

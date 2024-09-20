@@ -220,7 +220,7 @@ module.exports.parameter_sanitization = function(dataset,id,startDate,endDate,po
   return params
 }
 
-module.exports.request_sanitation = function(polygon, center, radius, box, require_region){
+module.exports.request_sanitation = function(polygon, center, radius, box, require_region, presRange, verticalRange){
   // given some parameters from a requst, decide whether or not to reject; return false == don't reject, return with message / code if do reject
 
   if(require_region && !polygon && !(center || radius) && !box){
@@ -233,6 +233,9 @@ module.exports.request_sanitation = function(polygon, center, radius, box, requi
   }
   if((center && !radius) || (!center && radius)){
     return {"code": 400, "message": "Please specify both radius and center to filter for data less than <radius> km from <center>."}
+  }
+  if(presRange && verticalRange){
+    return {"code": 400, "message": "Please specify only one of presRange or verticalRange. Note that presRange is depricated; verticalRange will filter on pressure or depth, whichever is appropriate for this dataset."}
   }
 
   return false

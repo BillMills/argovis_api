@@ -128,7 +128,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
       reject({"code": 400, "message": "Please combine source queries with at least one of a time range, spatial extent, id or platform search."})
       return
     }
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
     if(bailout){
       reject(bailout)
       return
