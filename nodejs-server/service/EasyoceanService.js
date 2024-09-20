@@ -88,7 +88,7 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
     let pp_params = {
         compression: compression,
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange,
+        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
         suppress_meta: params.batchmeta ? false : true,
         batchmeta : batchmeta
@@ -96,7 +96,7 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
 
     // can we afford to project data documents down to a subset in aggregation?
     let projection = null
-    if(compression=='minimal' && data==null && presRange==null){
+    if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
       projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
     }
 

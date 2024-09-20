@@ -380,8 +380,15 @@ describe("GET /argo", function () {
 });
 
 describe("GET /argo", function () {
-  it("drop whole profile is no levels with non-null requested data", async function () {
+  it("drop whole profile if no levels with non-null requested data", async function () {
     const response = await request.get("/argo?id=2902857_003&data=bbp700&presRange=1.45,1.55").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(404);
+  });
+});
+
+describe("GET /argo", function () {
+  it("drop whole profile if no levels with non-null requested data; verticalRange alias", async function () {
+    const response = await request.get("/argo?id=2902857_003&data=bbp700&verticalRange=1.45,1.55").set({'x-argokey': 'developer'});
     expect(response.status).to.eql(404);
   });
 });

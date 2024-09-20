@@ -42,7 +42,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
       reject({"code": 400, "message": "Please combine source queries with at least one of a time range, spatial extent, id, CCHDO cruise ID, or WOCE line search."})
       return
     }
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
     if(bailout){
       reject(bailout)
       return
@@ -71,7 +71,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     let pp_params = {
         compression: compression,
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange,
+        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
         qcsuffix: '_woceqc',
         suppress_meta: compression != 'minimal' && !batchmeta, // cchdo used metadata in stubs
@@ -80,7 +80,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
 
     // can we afford to project data documents down to a subset in aggregation?
     let projection = null
-    if(compression=='minimal' && data==null && presRange==null){
+    if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
       projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
     }
 

@@ -109,6 +109,13 @@ describe("GET /grids/rg09", function () {
 });
 
 describe("GET /grids/rg09", function () {
+  it("grids profile should be dropped if grid is present but has no requested levels (verticalRange too high); verticalRange alias", async function () {
+    const response = await request.get("/grids/rg09?id=20040115000000_20.5_-64.5&data=rg09_salinity&verticalRange=2000,3000").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(404);
+  });
+});
+
+describe("GET /grids/rg09", function () {
   it("grids profile should be dropped if grid is present but has no requested levels (presRange too low)", async function () {
     const response = await request.get("/grids/rg09?id=20040115000000_20.5_-64.5&data=rg09_salinity&presRange=0,1").set({'x-argokey': 'developer'});
     expect(response.status).to.eql(404);

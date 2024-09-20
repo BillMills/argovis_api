@@ -160,7 +160,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     let pp_params = {
         compression: compression,
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange,
+        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
         always_import: true, // add data_keys and everything in data_adjacent to data docs, no matter what
         suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post unless we're returing batchmeta
@@ -170,7 +170,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
 
     // can we afford to project data documents down to a subset in aggregation?
     let projection = null
-    if(compression=='minimal' && data==null && presRange==null){
+    if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
       projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
     }
 

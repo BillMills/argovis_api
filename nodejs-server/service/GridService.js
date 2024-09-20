@@ -61,7 +61,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
     params.compression = compression
 
     // decide y/n whether to service this request
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
     if(bailout){
       reject(bailout)
       return
@@ -77,7 +77,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
     let pp_params = {
         compression: compression,
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange,
+        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
         batchmeta : batchmeta,
         suppress_meta: false
@@ -85,7 +85,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
 
     // can we afford to project data documents down to a subset in aggregation?
     let projection = null
-    if(compression=='minimal' && data==null && presRange==null){
+    if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
       projection = ['_id', 'metadata', 'geolocation', 'timestamp']
     }
 
