@@ -67,6 +67,12 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
       return
     }
 
+    // bespoke sanitization for glodap
+    if(gridName === 'glodap' && presRange){
+      reject({"code": 400, "message": "Pressure range filtering is not supported for GLODAP; use verticalRange instead."})
+      return
+    }
+
     // local filter: fields in data collection other than geolocation and timestamp 
     let local_filter = []
     if(id){
