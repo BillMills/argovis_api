@@ -3,8 +3,8 @@
 var utils = require('../utils/writer.js');
 var Grid = require('../service/GridService');
 
-module.exports.findgrid = function findgrid (req, res, next, gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, batchmeta) {
-  Grid.findgrid(gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, batchmeta)
+module.exports.findgrid = function findgrid (req, res, next, gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta) {
+  Grid.findgrid(gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta)
     .then(function (response) {
       utils.writeJson(res, response);
     })

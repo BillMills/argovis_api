@@ -456,6 +456,9 @@
                   "$ref": "#/components/parameters/presRange"
                },
                {
+                  "$ref": "#/components/parameters/verticalRange"
+               },
+               {
                   "$ref": "#/components/parameters/batchMeta" 
                }
             ],
@@ -1006,6 +1009,9 @@
                   "$ref": "#/components/parameters/presRange"
                },
                {
+                  "$ref": "#/components/parameters/verticalRange"
+               },
+               {
                   "$ref": "#/components/parameters/batchMeta" 
                }
             ],
@@ -1183,6 +1189,9 @@
                },
                {
                   "$ref": "#/components/parameters/presRange"
+               },
+               {
+                  "$ref": "#/components/parameters/verticalRange"
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
@@ -1371,6 +1380,9 @@
                },
                {
                   "$ref": "#/components/parameters/presRange"
+               },
+               {
+                  "$ref": "#/components/parameters/verticalRange"
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
@@ -2948,7 +2960,24 @@
          "presRange": {
             "in": "query",
             "name": "presRange",
-            "description": "Pressure range in dbar to filter for; levels outside this range will not be returned.",
+            "description": "DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned.",
+            "style": "form",
+            "explode": false,
+            "allowReserved": true,
+            "schema": {
+               "type": "array",
+               "items": {
+                  "type": "number",
+                  "minItems": 2,
+                  "maxItems": 2
+               },
+               "example": "10,20.1"
+            }
+         },
+         "verticalRange": {
+            "in": "query",
+            "name": "verticalRange",
+            "description": "Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned.",
             "style": "form",
             "explode": false,
             "allowReserved": true,
