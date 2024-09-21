@@ -79,7 +79,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     params.compression = compression
 
     // decide y/n whether to service this request
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, null, false, null, null) 
     if(bailout){
       reject(bailout)
       return

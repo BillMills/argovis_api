@@ -106,11 +106,12 @@ exports.argoVocab = function(parameter) {
  * compression String Data minification strategy to apply. (optional)
  * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data argo_data_keys Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
- * presRange List Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
+ * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
+ * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,batchmeta) {
+exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
     let params = helpers.parameter_sanitization('argo',id,startDate,endDate,polygon,box,false,center,radius)
@@ -127,7 +128,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
       reject({"code": 400, "message": "Please combine source queries with at least one of a time range, spatial extent, id or platform search."})
       return
     }
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
     if(bailout){
       reject(bailout)
       return
@@ -159,7 +160,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     let pp_params = {
         compression: compression,
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange,
+        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
         always_import: true, // add data_keys and everything in data_adjacent to data docs, no matter what
         suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post unless we're returing batchmeta
@@ -169,7 +170,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
 
     // can we afford to project data documents down to a subset in aggregation?
     let projection = null
-    if(compression=='minimal' && data==null && presRange==null){
+    if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
       projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
     }
 

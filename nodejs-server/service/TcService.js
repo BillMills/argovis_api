@@ -35,7 +35,7 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
     params.compression = compression
 
     // decide y/n whether to service this request
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
     if(bailout){
       reject(bailout)
       return

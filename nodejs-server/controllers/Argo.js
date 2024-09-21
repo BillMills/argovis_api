@@ -51,11 +51,11 @@ module.exports.argoVocab = function argoVocab (req, res, next, parameter) {
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findArgo = function findArgo (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, batchmeta) {
+module.exports.findArgo = function findArgo (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, verticalRange, batchmeta) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
-  Profiles.findArgo(res, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, batchmeta)
+  Profiles.findArgo(res, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, verticalRange, batchmeta)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
       helpers.lookupReject.bind(null, req, res)

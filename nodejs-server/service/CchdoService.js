@@ -20,11 +20,12 @@ const helpers = require('../helpers/helpers')
  * compression String Data minification strategy to apply. (optional)
  * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
- * presRange List Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
+ * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
+ * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,woceline,cchdo_cruise,source,compression,mostrecent,data,presRange,batchmeta) {
+exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,woceline,cchdo_cruise,source,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
     let params = helpers.parameter_sanitization('cchdo',id,startDate,endDate,polygon,box,false,center,radius)
@@ -41,7 +42,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
       reject({"code": 400, "message": "Please combine source queries with at least one of a time range, spatial extent, id, CCHDO cruise ID, or WOCE line search."})
       return
     }
-    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box) 
+    let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
     if(bailout){
       reject(bailout)
       return
@@ -70,7 +71,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     let pp_params = {
         compression: compression,
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange,
+        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
         qcsuffix: '_woceqc',
         suppress_meta: compression != 'minimal' && !batchmeta, // cchdo used metadata in stubs
@@ -79,7 +80,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
 
     // can we afford to project data documents down to a subset in aggregation?
     let projection = null
-    if(compression=='minimal' && data==null && presRange==null){
+    if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
       projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
     }
 

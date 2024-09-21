@@ -109,6 +109,13 @@ describe("GET /grids/rg09", function () {
 });
 
 describe("GET /grids/rg09", function () {
+  it("grids profile should be dropped if grid is present but has no requested levels (verticalRange too high); verticalRange alias", async function () {
+    const response = await request.get("/grids/rg09?id=20040115000000_20.5_-64.5&data=rg09_salinity&verticalRange=2000,3000").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(404);
+  });
+});
+
+describe("GET /grids/rg09", function () {
   it("grids profile should be dropped if grid is present but has no requested levels (presRange too low)", async function () {
     const response = await request.get("/grids/rg09?id=20040115000000_20.5_-64.5&data=rg09_salinity&presRange=0,1").set({'x-argokey': 'developer'});
     expect(response.status).to.eql(404);
@@ -197,4 +204,16 @@ describe("GET /grids/rg09", function () {
   });
 }); 
 
+describe("GET /grids/glodap", function () {
+  it("glodap should accept a verticalRange filter", async function () {
+    const response = await request.get("/grids/glodap?id=20.5_-70.5&verticalRange=0,100").set({'x-argokey': 'developer'});
+    expect(response.body.length).to.eql(1); 
+  });
+});
 
+describe("GET /grids/glodap", function () {
+  it("glodap should not accept a presRange filter", async function () {
+    const response = await request.get("/grids/glodap?id=20.5_-70.5&presRange=0,100").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(400);
+  });
+});
