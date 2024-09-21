@@ -394,6 +394,13 @@ describe("GET /argo", function () {
 });
 
 describe("GET /argo", function () {
+  it("reject request with both presRange and verticalRange", async function () {
+    const response = await request.get("/argo?id=2902857_003&presRange=1.45,1.553&verticalRange=1.45,1.55").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(400);
+  });
+});
+
+describe("GET /argo", function () {
   it("argo profile should be dropped if no requested data is available", async function () {
     const response = await request.get("/argo?id=2902857_003&data=doxy").set({'x-argokey': 'developer'});
     expect(response.status).to.eql(404);

@@ -204,4 +204,16 @@ describe("GET /grids/rg09", function () {
   });
 }); 
 
+describe("GET /grids/glodap", function () {
+  it("glodap should accept a verticalRange filter", async function () {
+    const response = await request.get("/grids/glodap?id=20.5_-70.5&verticalRange=0,100").set({'x-argokey': 'developer'});
+    expect(response.body.length).to.eql(1); 
+  });
+});
 
+describe("GET /grids/glodap", function () {
+  it("glodap should not accept a presRange filter", async function () {
+    const response = await request.get("/grids/glodap?id=20.5_-70.5&presRange=0,100").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(400);
+  });
+});
