@@ -219,6 +219,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -282,6 +291,15 @@ paths:
         schema:
           type: number
           example: 1300915
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -742,6 +760,16 @@ components:
         type: string
         format: date-time
         example: 2010-01-01T00:00:00Z
+    page:
+      name: page
+      in: query
+      description: Page number of paginated results to return.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+        example: 0
     compression:
       name: compression
       in: query

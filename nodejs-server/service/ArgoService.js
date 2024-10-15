@@ -126,9 +126,10 @@ exports.argoVocab = function(parameter) {
  * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findArgo = function(id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
+exports.findArgo = function(id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,verticalRange,batchmeta,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
@@ -204,9 +205,10 @@ exports.findArgo = function(id,startDate,endDate,polygon,box,center,radius,metad
  *
  * id String Unique ID to search for. (optional)
  * platform String Unique platform ID to search for. (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findArgometa = function(id,platform) {
+exports.findArgometa = function(id,platform,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {

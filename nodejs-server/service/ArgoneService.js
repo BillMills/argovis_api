@@ -11,9 +11,10 @@
  * compression String Data minification strategy to apply. (optional)
  * data List Forecast durations to include. Return only documents that have all data requested. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findargone = function(id,forecastOrigin,forecastGeolocation,metadata,compression,data,batchmeta) {
+exports.findargone = function(id,forecastOrigin,forecastGeolocation,metadata,compression,data,batchmeta,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
@@ -46,9 +47,10 @@ exports.findargone = function(id,forecastOrigin,forecastGeolocation,metadata,com
  * argone metadata search and filter.
  *
  * id String Unique ID to search for. (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findargoneMeta = function(id) {
+exports.findargoneMeta = function(id,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {

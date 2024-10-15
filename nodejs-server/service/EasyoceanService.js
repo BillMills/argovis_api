@@ -39,9 +39,10 @@ exports.easyoceanVocab = function(parameter) {
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * section_start_date Date Start date of the section of interest; see metadata corresponding to the WOCE line of interest for valid options. (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findeasyocean = function(id,startDate,endDate,polygon,box,center,radius,metadata,woceline,compression,mostrecent,data,presRange,verticalRange,batchmeta,section_start_date) {
+exports.findeasyocean = function(id,startDate,endDate,polygon,box,center,radius,metadata,woceline,compression,mostrecent,data,presRange,verticalRange,batchmeta,section_start_date,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ { }, { } ];
@@ -58,9 +59,10 @@ exports.findeasyocean = function(id,startDate,endDate,polygon,box,center,radius,
  * Easyocean metadata search and filter.
  *
  * woceline String WOCE line to search for. See /cchdo/vocabulary?parameter=woceline for list of options. (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findeasyoceanmeta = function(woceline) {
+exports.findeasyoceanmeta = function(woceline,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {

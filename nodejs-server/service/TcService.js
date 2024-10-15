@@ -17,9 +17,10 @@
  * compression String Data minification strategy to apply. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findTC = function(id,startDate,endDate,polygon,box,center,radius,name,metadata,mostrecent,compression,data,batchmeta) {
+exports.findTC = function(id,startDate,endDate,polygon,box,center,radius,name,metadata,mostrecent,compression,data,batchmeta,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
@@ -67,9 +68,10 @@ exports.findTC = function(id,startDate,endDate,polygon,box,center,radius,name,me
  *
  * id String Unique ID to search for. (optional)
  * name String name of tropical cyclone (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findTCmeta = function(id,name) {
+exports.findTCmeta = function(id,name,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {

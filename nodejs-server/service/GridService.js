@@ -18,9 +18,10 @@
  * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findgrid = function(gridName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
+exports.findgrid = function(gridName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,presRange,verticalRange,batchmeta,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
@@ -57,9 +58,10 @@ exports.findgrid = function(gridName,id,startDate,endDate,polygon,box,center,rad
  * Metadata for grids by ID
  *
  * id String Unique ID to search for. (optional)
+ * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findgridMeta = function(id) {
+exports.findgridMeta = function(id,page) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {

@@ -143,6 +143,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -187,6 +190,9 @@
                },
                {
                   "$ref": "#/components/parameters/wmo"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -600,6 +606,15 @@
                "format": "date-time",
                "example": "2010-01-01T00:00:00Z"
             }
+         },
+         "page": {
+            "in": "query",
+            "name": "page",
+            "description": "Page number of paginated results to return.",
+            "schema": {
+               "type": "integer",
+               "example": 0
+            } 
          },
          "compression": {
             "in": "query",

@@ -167,6 +167,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -212,6 +221,15 @@ paths:
         schema:
           type: string
           example: 4902911_0
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -389,6 +407,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -443,6 +470,15 @@ paths:
         schema:
           type: string
           example: LANE
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -692,6 +728,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -737,6 +782,15 @@ paths:
         schema:
           type: string
           example: 4902911_0
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -965,6 +1019,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -1010,6 +1073,15 @@ paths:
         schema:
           type: string
           example: 4902911_0
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -1236,6 +1308,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -1281,6 +1362,15 @@ paths:
         schema:
           type: string
           example: 4902911_0
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -1569,6 +1659,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -1634,6 +1733,15 @@ paths:
         schema:
           type: number
           example: 518
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -1905,6 +2013,15 @@ paths:
           type: string
           format: date-time
           example: 2010-01-01T00:00:00Z
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -1951,6 +2068,15 @@ paths:
         schema:
           type: string
           example: A10
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -2239,6 +2365,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -2293,6 +2428,15 @@ paths:
         schema:
           type: string
           example: "4902911"
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -2614,6 +2758,15 @@ paths:
         explode: true
         schema:
           type: string
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -2668,6 +2821,15 @@ paths:
         schema:
           type: string
           example: "4902911"
+      - name: page
+        in: query
+        description: Page number of paginated results to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          example: 0
       responses:
         "200":
           description: OK
@@ -4369,6 +4531,16 @@ components:
       schema:
         type: number
         example: 518
+    page:
+      name: page
+      in: query
+      description: Page number of paginated results to return.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+        example: 0
     compression:
       name: compression
       in: query
