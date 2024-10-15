@@ -154,6 +154,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -192,6 +195,9 @@
             "parameters": [
                {
                   "$ref": "#/components/parameters/genericID"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -279,6 +285,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -320,6 +329,9 @@
                },
                {
                   "$ref": "#/components/parameters/tcName"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -460,6 +472,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -498,6 +513,9 @@
             "parameters":[
                {
                   "$ref": "#/components/parameters/genericID"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -641,6 +659,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -679,6 +700,9 @@
             "parameters":[
                {
                   "$ref": "#/components/parameters/genericID"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -822,6 +846,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -860,6 +887,9 @@
             "parameters":[
                {
                   "$ref": "#/components/parameters/genericID"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -1013,6 +1043,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -1057,6 +1090,9 @@
                },
                {
                   "$ref": "#/components/parameters/cchdo_cruise"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -1206,6 +1242,9 @@
                      "format": "date-time",
                      "example": "2010-01-01T00:00:00Z"
                   }
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -1244,6 +1283,9 @@
             "parameters": [
                {
                   "$ref": "#/components/parameters/woceline"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -1386,6 +1428,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -1427,6 +1472,9 @@
                },
                {
                   "$ref": "#/components/parameters/platformID"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -1725,6 +1773,9 @@
                },
                {
                   "$ref": "#/components/parameters/batchMeta" 
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -1766,6 +1817,9 @@
                },
                {
                   "$ref": "#/components/parameters/platformID"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -3056,6 +3110,15 @@
             "schema": {
                "type": "number",
                "example": 518
+            } 
+         },
+         "page": {
+            "in": "query",
+            "name": "page",
+            "description": "Page number of paginated results to return.",
+            "schema": {
+               "type": "integer",
+               "example": 0
             } 
          },
          "compression": {

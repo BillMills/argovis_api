@@ -51,11 +51,11 @@ module.exports.argoVocab = function argoVocab (req, res, next, parameter) {
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findArgo = function findArgo (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, verticalRange, batchmeta) {
+module.exports.findArgo = function findArgo (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, verticalRange, batchmeta, page) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
-  Profiles.findArgo(res, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, verticalRange, batchmeta)
+  Profiles.findArgo(res, id, startDate, endDate, polygon, box, center, radius, metadata, platform, platform_type, positionqc, source, compression, mostrecent, data, presRange, verticalRange, batchmeta, page)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
       helpers.lookupReject.bind(null, req, res)
@@ -63,11 +63,11 @@ module.exports.findArgo = function findArgo (req, res, next, id, startDate, endD
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findArgometa = function findArgometa (req, res, next, id, platform) {
+module.exports.findArgometa = function findArgometa (req, res, next, id, platform, page) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
-  Profiles.findArgometa(res, id, platform)
+  Profiles.findArgometa(res, id, platform, page)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, false)(pipefittings),
       helpers.lookupReject.bind(null, req, res)

@@ -16,11 +16,11 @@ module.exports.extendedVocab = function extendedVocab (req, res, next, parameter
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findExtended = function findExtended (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, extendedName) {
+module.exports.findExtended = function findExtended (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, extendedName, page) {
   
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: extendedName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
-  Extended.findExtended(res,extendedName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,batchmeta)
+  Extended.findExtended(res,extendedName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,batchmeta, page)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
       helpers.lookupReject.bind(null, req, res)
@@ -28,11 +28,11 @@ module.exports.findExtended = function findExtended (req, res, next, id, startDa
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findextendedMeta = function findextendedMeta (req, res, next, id) {
+module.exports.findextendedMeta = function findextendedMeta (req, res, next, id, page) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
-  Extended.findextendedMeta(res, id)
+  Extended.findextendedMeta(res, id, page)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, false)(pipefittings),
       helpers.lookupReject.bind(null, req, res)
