@@ -16,7 +16,7 @@ module.exports.extendedVocab = function extendedVocab (req, res, next, parameter
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findExtended = function findExtended (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, extendedName, page) {
+module.exports.findExtended = function findExtended (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, page, extendedName) {
   
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: extendedName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   

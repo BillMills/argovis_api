@@ -4,7 +4,7 @@ const apihits = require('../models/apihits');
 var Timeseries = require('../service/TimeseriesService');
 var helpers = require('../helpers/helpers')
 
-module.exports.findtimeseries = function findtimeseries (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, timeseriesName, page) {
+module.exports.findtimeseries = function findtimeseries (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, page, timeseriesName) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: timeseriesName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
