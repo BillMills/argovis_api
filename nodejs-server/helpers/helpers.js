@@ -303,12 +303,33 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
   // set up aggregation and return promise to evaluate:
   let aggPipeline = proxMatch.concat(spacetimeMatch).concat(local_filter).concat(foreignMatch)
 
-  if(params.compression !== 'minimal'){
-    // some stub requests are allowed that would swamp mongo's default sorting limits.
-    aggPipeline.push({$sort: {'timestamp':-1}})
+  // construct transform stages as required
+
+  if(params.needs_data_info && params.data){
+    // go find data_info on the metadata document and bring it along
+    aggPipeline.push({
+      $lookup: {
+        from: params.needs_data_info, 
+        localField: 'metadata', 
+        foreignField: '_id', 
+        as: 'metadata_docs'
+      }
+    })
+
+    aggPipeline.push({
+      $addFields: {
+        data_info: { $arrayElemAt: ["$metadata_docs.data_info", 0] }
+      }
+    });
+
+    aggPipeline.push({
+      $project: {
+        metadata_docs: 0
+      }
+    });
   }
 
-  // optionally filter off data before pulling documents out of mongo; currently only supports data documents that include data_info
+  // drop non-requested data keys, or set data = [] if a negated key is present
   if(data_filter){
     aggPipeline.push(
       {
@@ -375,6 +396,26 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
         }
       }
     )
+  }
+
+  // filter levels by QC requests
+  if(params.qc_suffix){
+    aggPipeline.push({
+      $addFields: {
+        data: {
+          $function: {
+            body: module.exports.qc_filter.toString(),
+            args: [params.data_query, "$data", "$data_info", params.qc_suffix],
+            lang: 'js'
+          }
+        }
+      }
+    })
+  }
+
+  if(params.compression !== 'minimal'){
+    // some stub requests are allowed that would swamp mongo's default sorting limits.
+    aggPipeline.push({$sort: {'timestamp':-1}})
   }
 
   // filter down to requested time range in mongo for timeseries data
@@ -447,6 +488,77 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
   return model.aggregate(aggPipeline).cursor()  
 }
 
+module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
+  // data_query: the data QSP
+  // data: the data array
+  // data_info: the data_info array
+  // qc_suffix: the suffix to append to the data key to get the corresponding qc key
+
+  const negated_variables = [];
+  const flags = [];
+  const variables = {};
+
+  // Split the input string by commas and trim whitespace
+  const tokens = data_query.split(',').map(token => token.trim());
+
+  let currentVariable = null;
+
+  tokens.forEach(token => {
+    if (token.startsWith('~')) {
+      // Add negated variable (removing the `~`)
+      negated_variables.push(token.substring(1));
+    } else if (token === 'all' || token === 'except_data_values') {
+      // Add to flags
+      flags.push(token);
+    } else if (isNaN(token)) {
+      // It's a variable name, store it
+      currentVariable = token;
+      variables[currentVariable] = [];
+    } else if (!isNaN(token) && currentVariable) {
+      // If it's a number and we have a current variable, add the number to that variable's array
+      variables[currentVariable].push(Number(token));
+    }
+  });
+
+  // Remove any variable that has an empty array - no qc filtering to do
+  for (const key in variables) {
+    if (variables[key].length === 0) {
+      delete variables[key];
+    }
+  }
+
+  if (flags.includes('all') || Object.keys(variables).length === 0) {
+    // either we want it all, or we don't want any qc filtering
+    return data;
+  }
+
+  // Transpose the data so we can iterate through levels
+  const transposedData = data[0].map((_, colIndex) => data.map(row => row[colIndex]));
+
+  // Iterate over levels
+  const updatedTransposedData = transposedData.map(lvl => {
+    for (const key in variables) {
+      const qcVariableName = key + qc_suffix;
+      const qcIndex = data_info[0].indexOf(qcVariableName);
+      const varIndex = data_info[0].indexOf(key);
+
+      // If the QC variable is found and its value isn't in the allowed list, set the original value to null
+      if (qcIndex !== -1 && !variables[key].includes(lvl[qcIndex])) {
+        lvl[varIndex] = null;  // Set the value of the corresponding variable at this level to null
+      }
+    }
+    return lvl;
+  });
+
+  // Un-transpose the data to return it back to the original row/column format
+  const updatedData = updatedTransposedData[0]
+    ? updatedTransposedData[0].map((_, rowIndex) => updatedTransposedData.map(col => col[rowIndex]))
+    : [];
+
+
+  return updatedData;
+}
+
 module.exports.combineDataInfo = function(dinfos){
   // <dinfos>: array of data_info objects, all with same set of columns
   // returns a single data_info object composed of all elements of input array
@@ -465,7 +577,8 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
   // returns chunk mutated into its final, user-facing form
   // or return false to drop this item from the stream
   // nothing to do if we're just passing meta docs through for a bulk metadata match
-
+  console.log(8888, chunk.data)
+  console.log(8889, chunk.data_info)
   if(pp_params.batchmeta){
     return chunk
   }
@@ -559,26 +672,26 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
       return false
     }
     // first pass: qc filtration
-    for(let i=0; i<keyset.length; i++){
-      let k = keyset[i]
-      let kIndex = chunk.data_info[0].indexOf(k)
-      // suppress levels that don't have a suitable qc flag
-      if( (qclist.hasOwnProperty(k) || qclist.hasOwnProperty('all')) && pp_params.hasOwnProperty('qcsuffix') && keyset.includes(k+pp_params.qcsuffix)){
-        let qcIndex = chunk.data_info[0].indexOf(k+pp_params.qcsuffix)
-        let allowedQC = qclist.hasOwnProperty('all') ? qclist['all'] : qclist[k]
-        chunk.data[kIndex] = chunk.data[kIndex].map((x, ix) => {
-          if(allowedQC.includes(chunk.data[qcIndex][ix])){
-            return x
-          } else {
-            return null
-          }
-        })
-      }
-      // abandon profile if a requested measurement is all null
-      if(!keys.includes('all') && keys.includes(k) && chunk.data[kIndex].every(x => x === null)){
-        return false
-      }
-    }
+    // for(let i=0; i<keyset.length; i++){
+    //   let k = keyset[i]
+    //   let kIndex = chunk.data_info[0].indexOf(k)
+    //   // suppress levels that don't have a suitable qc flag
+    //   if( (qclist.hasOwnProperty(k) || qclist.hasOwnProperty('all')) && pp_params.hasOwnProperty('qcsuffix') && keyset.includes(k+pp_params.qcsuffix)){
+    //     let qcIndex = chunk.data_info[0].indexOf(k+pp_params.qcsuffix)
+    //     let allowedQC = qclist.hasOwnProperty('all') ? qclist['all'] : qclist[k]
+    //     chunk.data[kIndex] = chunk.data[kIndex].map((x, ix) => {
+    //       if(allowedQC.includes(chunk.data[qcIndex][ix])){
+    //         return x
+    //       } else {
+    //         return null
+    //       }
+    //     })
+    //   }
+    //   // abandon profile if a requested measurement is all null
+    //   if(!keys.includes('all') && keys.includes(k) && chunk.data[kIndex].every(x => x === null)){
+    //     return false
+    //   }
+    // }
     // second pass: drop things we didn't ask for
     for(let i=0; i<keyset.length; i++){
       let k = keyset[i]

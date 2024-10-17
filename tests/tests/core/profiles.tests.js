@@ -563,9 +563,11 @@ describe("GET /argo", function () {
 
 describe("GET /argo", function () {
   it("check QC requirements correctly suppress bad values", async function () {
-    const response = await request.get("/argo?id=2902857_001&data=bbp700,pressure").set({'x-argokey': 'developer'});
+    const response = await request.get("/argo?id=2902857_001&data=bbp700,pressure,bbp700_argoqc").set({'x-argokey': 'developer'});
     expect(response.body[0].data[0][6]).to.eql(0.004465);
-    const responseqc = await request.get("/argo?id=2902857_001&data=bbp700,1,pressure").set({'x-argokey': 'developer'});
+    console.log(response.body[0].data)
+    const responseqc = await request.get("/argo?id=2902857_001&data=bbp700,1,pressure,bbp700_argoqc").set({'x-argokey': 'developer'});
+    console.log(responseqc.body[0].data)
     expect(responseqc.body[0].data[0][6]).to.eql(null);
   });
 });

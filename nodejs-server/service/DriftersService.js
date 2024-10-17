@@ -61,6 +61,9 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    // bring this back later
+    //params.data = data
+    //params.needs_data_info = 'drifterMeta' // ie do we need to pull data_info in from the metadata doc? if so provide name of metadata collection
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -98,6 +101,9 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
     if(compression=='minimal' && data==null){
       projection = ['_id', 'metadata', 'geolocation', 'timestamp']
     }
+
+    // filter data in mongo - bring back later
+    // let data_filter = helpers.parse_data(data)
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
     let metafilter = Promise.resolve([])

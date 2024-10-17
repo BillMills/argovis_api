@@ -123,6 +123,10 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    if(data){
+      params.data_query = data.join(',')
+      params.qc_suffix = '_argoqc'
+    }
 
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,(center && radius),platform].some(x=>x)){

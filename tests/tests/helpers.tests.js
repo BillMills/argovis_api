@@ -219,3 +219,22 @@ describe("remove_laps", function () {
   });
 }); 
 
+describe("qc_filter", function () {
+  it("check basic behavior of qc filter", async function () {
+    data_query = 'temp,doxy,1,4'
+    data = [[1,2,3], [10,20,30], [2,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_argoqc', 'doxy_argoqc']]
+    qc_suffix = '_argoqc'
+    expect(helpers.qc_filter(data_query, data, data_info, qc_suffix)).to.deep.equal([[1,2,3], [10,null,30], [2,2,2], [1,3,4]])
+  });
+}); 
+
+describe("qc_filter", function () {
+  it("qc filter - no qc conditions", async function () {
+    data_query = 'temp,doxy'
+    data = [[1,2,3], [10,20,30], [2,2,2], [1,3,4] ]
+    data_info = [['temp', 'doxy', 'temp_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.qc_filter(data_query, data, data_info, qc_suffix)).to.deep.equal([[1,2,3], [10,20,30], [2,2,2], [1,3,4]])
+  });
+}); 
