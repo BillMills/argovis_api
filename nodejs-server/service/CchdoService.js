@@ -37,7 +37,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     }
     params.batchmeta = batchmeta
     params.compression = compression
-    if(data){
+    if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
       params.qc_suffix = '_woceqc'
 

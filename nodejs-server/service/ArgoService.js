@@ -123,7 +123,8 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     }
     params.batchmeta = batchmeta
     params.compression = compression
-    if(data){
+    params.verticalRange = presRange || verticalRange
+    if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
       params.qc_suffix = '_argoqc'
 

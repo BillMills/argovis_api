@@ -306,31 +306,59 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
   // construct transform stages as required
 
   /// data query filtration
+
+  //// go find data_info on the metadata document and bring it along
+  if(params.needs_data_info && (params.data_query || params.verticalRange)){
+    aggPipeline.push({
+      $lookup: {
+        from: params.needs_data_info, 
+        localField: 'metadata', 
+        foreignField: '_id', 
+        as: 'metadata_docs'
+      }
+    })
+
+    aggPipeline.push({
+      $addFields: {
+        data_info: { $arrayElemAt: ["$metadata_docs.data_info", 0] }
+      }
+    });
+
+    aggPipeline.push({
+      $project: {
+        metadata_docs: 0
+      }
+    });
+  }
+
+  //// perform pressure filter
+  if(params.verticalRange){
+    aggPipeline.push({
+      $addFields: {
+        data: {
+          $function: {
+            body: module.exports.vertical_filter.toString(),
+            args: ["$data", "$data_info", params.verticalRange],
+            lang: 'js'
+          }
+        }
+      }
+    })
+  }
+
   if(params.data_query){
-
-    //// go find data_info on the metadata document and bring it along
-    if(params.needs_data_info){
-      aggPipeline.push({
-        $lookup: {
-          from: params.needs_data_info, 
-          localField: 'metadata', 
-          foreignField: '_id', 
-          as: 'metadata_docs'
+    //// if there's a requested measurement not present, or a negated measurement present, immediately null the data attribute for dropping
+    aggPipeline.push({
+      $addFields: {
+        data: {
+          $function: {
+            body: module.exports.correct_data_available.toString(),
+            args: [params.data_query, "$data", "$data_info"],
+            lang: 'js'
+          }
         }
-      })
-
-      aggPipeline.push({
-        $addFields: {
-          data_info: { $arrayElemAt: ["$metadata_docs.data_info", 0] }
-        }
-      });
-
-      aggPipeline.push({
-        $project: {
-          metadata_docs: 0
-        }
-      });
-    }
+      }
+    })
 
     //// filter levels by QC requests
     if(params.qc_suffix){
@@ -366,7 +394,7 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
         data: {
           $function: {
             body: module.exports.data_filter.toString(),
-            args: ["$data_mask", "$data", params.data_query, params.coerced_pressure],
+            args: ["$data_mask", "$data", params.data_query],
             lang: 'js'
           }
         }
@@ -392,7 +420,65 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
         data_mask: 0
       }
     });
+
+    //// dump pressure if coerced and it's the only thing left on the data array after masking
+    if(params.coerced_pressure){
+      aggPipeline.push({
+        $addFields: {
+          data: {
+            $function: {
+              body: `function(data){
+                if(data.length == 1){
+                  return []
+                } else {
+                  return data
+                }
+              }`,
+              args: ["$data"],
+              lang: 'js'
+            }
+          }
+        }
+      })
+    }
   }
+
+  //// filter data for levels that have none of the requested data
+  aggPipeline.push({
+    $addFields: {
+      data: {
+        $function: {
+          body: module.exports.level_filter.toString(),
+          args: ["$data", "$data_info", params.coerced_pressure],
+          lang: 'js'
+        }
+      }
+    }
+  })
+
+  // if there's no data left after all that, drop the document
+  aggPipeline.push({
+    $match: {
+      $expr: {
+        $not: {
+          $function: {
+            body: module.exports.isArrayOfEmptyArrays.toString(),  
+            args: ["$data"], 
+            lang: "js"
+          }
+        }
+      }
+    }
+  })
+
+  if(!params.data_query || params.data_query[1].includes('except-data-values')){
+    aggPipeline.push({
+      $project: {
+        data: 0
+      }
+    });
+  }
+  
 
   // drop non-requested data keys, or set data = [] if a negated key is present
   // if(data_filter){
@@ -528,7 +614,7 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
 
   if(projection){
     // drop documents with no data before they come out of the DB, and project out only the listed data document keys
-    aggPipeline.push({$match: {'data.0':{$exists:true}} })
+    //aggPipeline.push({$match: {'data.0':{$exists:true}} })
     project = {}
     for(let i=0;i<projection.length;i++){
       project[projection[i]] = 1
@@ -553,7 +639,7 @@ module.exports.parse_data_qsp = function(data_query){
     if (token.startsWith('~')) {
       // Add negated variable (removing the `~`)
       negated_variables.push(token.substring(1));
-    } else if (token === 'all' || token === 'except_data_values') {
+    } else if (token === 'all' || token === 'except-data-values') {
       // Handle 'all' flag - check if it has integers following it
       flags.push(token);
       currentVariable = token;  // Set the current variable to 'all'
@@ -657,16 +743,15 @@ module.exports.data_mask = function(data_query, data, data_info, qc_suffix) {
   return Array.from(new Set(indices_to_keep));
 }
 
-module.exports.data_filter = function(indexes, data, data_query, coerced_pressure) {
+module.exports.data_filter = function(indexes, data, data_query) {
+  if(data.length == 0){
+    return data
+  }
+
   let d = indexes.map(index => data[index]);
 
   if (!data_query[1].includes('all') && d.some(innerArray => innerArray.every(item => item === null))) { 
-    // If all values for a variable are null and we didn't specifically ask for it, return an empty array, QC failed
-    return [];
-  }
-
-  if (coerced_pressure && d.length == 1) {
-    // all that's left is the pressure we forced to be there, drop
+    // If all values for a variable are null and we specifically ask for it, return an empty array, QC failed
     return [];
   }
 
@@ -681,6 +766,103 @@ module.exports.data_info_filter = function(indexes, data_info) {
   });
   return d;
 }
+
+module.exports.vertical_filter = function(data, data_info, verticalRange) {
+  let lvlSpectrum = []
+  let pressure_index = data_info[0].findIndex(x => x === 'pressure')
+
+  if(pressure_index !== -1){
+    lvlSpectrum = data[pressure_index]
+  } //else if(metadata[0].levels){ // will need to figure this out for grids
+    //lvlSpectrum = metadata[0].levels // note we take from metadata[0] since we're requiring all grids in the same collection have the same level spectrum
+  //}
+  
+  if(lvlSpectrum){
+    let lowIndex = 0
+    let highIndex = lvlSpectrum.length-1
+
+    if(lvlSpectrum[0] > verticalRange[1]){
+      return Array.from({ length: data.length }, () => []); // requested pressure range that is completely shallower than pressures available
+    }
+    if(lvlSpectrum[highIndex] < verticalRange[0]){
+      return Array.from({ length: data.length }, () => []); // requested pressure range that is completely deeper than pressures available
+    }
+    while(lowIndex < highIndex && lvlSpectrum[lowIndex] < verticalRange[0]){
+      lowIndex++
+    } // lowIndex now points at the first level index to keep
+    while(highIndex > lowIndex && lvlSpectrum[highIndex] > verticalRange[1]){
+      highIndex--
+    } // highIndex now points at the last level index to keep
+
+
+    return data.map(variable => variable.slice(lowIndex, highIndex+1));
+
+    // /// append levels to the data document if it has been filtered on - figure out later for grids
+    // if(metadata[0] && metadata[0].levels) {
+    //   chunk.levels = metadata[0].levels.slice(lowIndex, highIndex+1)
+    // }
+  } else {
+    return data
+  }
+}
+
+module.exports.level_filter = function(data, data_info, coerced_pressure){
+  // drop levels that are all null for all requested variables
+
+  // just pass through if no data
+  if(data.length == 0){
+    return data
+  }
+
+  // only want to consider non-coerced pressures for this filter
+  filter_data = data.slice()
+
+  if(coerced_pressure){
+    let pressure_index = data_info[0].findIndex(x => x === 'pressure')
+    filter_data.splice(pressure_index, 1);
+  }
+
+  const transposed_filter = filter_data[0].map((_, colIndex) => filter_data.map(row => row[colIndex]));
+
+  const nullIndices = [];
+  transposed_filter.forEach((innerArray, colIndex) => {
+    if (innerArray.every(value => value === null)) {
+      nullIndices.push(colIndex);
+    }
+  });
+
+  const transposed_data = data[0].map((_, colIndex) => data.map(row => row[colIndex]));
+  const filtered_transposed_data = transposed_data.filter((_, colIndex) => !nullIndices.includes(colIndex));
+
+  const finalResult = filtered_transposed_data[0]
+    ? filtered_transposed_data[0].map((_, rowIndex) => filtered_transposed_data.map(col => col[rowIndex]))
+    : [];
+
+  return finalResult;
+}
+
+module.exports.isArrayOfEmptyArrays = function(data) {
+  // Return true if the data is an array of empty arrays, false otherwise
+  if (data.length === 0) return true;  // Empty array is considered an array of empty arrays
+
+  // Check if all elements are empty arrays
+  return data.every(item => Array.isArray(item) && item.length === 0);
+}
+
+module.exports.correct_data_available = function(data_query, data, data_info) {
+  // make sure that all requested data is present, and no negated data is present
+
+  if (data_query[0].some(item => data_info[0].includes(item))){
+    return []
+  }
+
+  if (!Object.keys(data_query[2]).every(item => data_info[0].includes(item))){
+    return []
+  }
+
+  return data
+}
+
 
 module.exports.combineDataInfo = function(dinfos){
   // <dinfos>: array of data_info objects, all with same set of columns
@@ -700,7 +882,9 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
   // returns chunk mutated into its final, user-facing form
   // or return false to drop this item from the stream
   // nothing to do if we're just passing meta docs through for a bulk metadata match
-  console.log(chunk)
+
+  //console.log(chunk)
+
   if(pp_params.batchmeta){
     return chunk
   }
@@ -724,10 +908,10 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
     }
   }
 
-  // if chunk has no data recoreded, abandon
-  if(chunk.data.length == 0){
-    return false
-  }
+  // // if chunk has no data recoreded, abandon
+  // if(chunk.data.length == 0){
+  //   return false
+  // }
 
   // make sure metadata is sorted the same as chunk.metadata
   let m = []
@@ -783,119 +967,119 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
     coerced_pressure = true
   }
 
-  // filter down to requested data
-  if(pp_params.data){
-    if(!chunk.hasOwnProperty('data_info')){
-      chunk.data_info = dinfo
-    }
-    let keyset = JSON.parse(JSON.stringify(chunk.data_info[0]))
-    // abandon profile if a requested data key is missing
-    if(!keys.includes('all') && !keys.every(val => keyset.includes(val))){
-      return false
-    }
-    // first pass: qc filtration
-    // for(let i=0; i<keyset.length; i++){
-    //   let k = keyset[i]
-    //   let kIndex = chunk.data_info[0].indexOf(k)
-    //   // suppress levels that don't have a suitable qc flag
-    //   if( (qclist.hasOwnProperty(k) || qclist.hasOwnProperty('all')) && pp_params.hasOwnProperty('qcsuffix') && keyset.includes(k+pp_params.qcsuffix)){
-    //     let qcIndex = chunk.data_info[0].indexOf(k+pp_params.qcsuffix)
-    //     let allowedQC = qclist.hasOwnProperty('all') ? qclist['all'] : qclist[k]
-    //     chunk.data[kIndex] = chunk.data[kIndex].map((x, ix) => {
-    //       if(allowedQC.includes(chunk.data[qcIndex][ix])){
-    //         return x
-    //       } else {
-    //         return null
-    //       }
-    //     })
-    //   }
-    //   // abandon profile if a requested measurement is all null
-    //   if(!keys.includes('all') && keys.includes(k) && chunk.data[kIndex].every(x => x === null)){
-    //     return false
-    //   }
-    // }
-    // second pass: drop things we didn't ask for
-    for(let i=0; i<keyset.length; i++){
-      let k = keyset[i]
-      let kIndex = chunk.data_info[0].indexOf(k)
-      if(!keys.includes('all') && !keys.includes(k)){
-        // drop it if we didn't ask for it
-        chunk.data.splice(kIndex,1)
-        chunk.data_info[0].splice(kIndex,1)
-        chunk.data_info[2].splice(kIndex,1)
-      } 
-    }
-    if(Object.keys(chunk.data).length === (coerced_pressure ? 1 : 0)){
-      return false // deleted all our data, bail out
-    }
-  }
+  // // filter down to requested data
+  // if(pp_params.data){
+  //   if(!chunk.hasOwnProperty('data_info')){
+  //     chunk.data_info = dinfo
+  //   }
+  //   let keyset = JSON.parse(JSON.stringify(chunk.data_info[0]))
+  //   // abandon profile if a requested data key is missing
+  //   if(!keys.includes('all') && !keys.every(val => keyset.includes(val))){
+  //     return false
+  //   }
+  //   // first pass: qc filtration
+  //   // for(let i=0; i<keyset.length; i++){
+  //   //   let k = keyset[i]
+  //   //   let kIndex = chunk.data_info[0].indexOf(k)
+  //   //   // suppress levels that don't have a suitable qc flag
+  //   //   if( (qclist.hasOwnProperty(k) || qclist.hasOwnProperty('all')) && pp_params.hasOwnProperty('qcsuffix') && keyset.includes(k+pp_params.qcsuffix)){
+  //   //     let qcIndex = chunk.data_info[0].indexOf(k+pp_params.qcsuffix)
+  //   //     let allowedQC = qclist.hasOwnProperty('all') ? qclist['all'] : qclist[k]
+  //   //     chunk.data[kIndex] = chunk.data[kIndex].map((x, ix) => {
+  //   //       if(allowedQC.includes(chunk.data[qcIndex][ix])){
+  //   //         return x
+  //   //       } else {
+  //   //         return null
+  //   //       }
+  //   //     })
+  //   //   }
+  //   //   // abandon profile if a requested measurement is all null
+  //   //   if(!keys.includes('all') && keys.includes(k) && chunk.data[kIndex].every(x => x === null)){
+  //   //     return false
+  //   //   }
+  //   // }
+  //   // second pass: drop things we didn't ask for
+  //   // for(let i=0; i<keyset.length; i++){
+  //   //   let k = keyset[i]
+  //   //   let kIndex = chunk.data_info[0].indexOf(k)
+  //   //   if(!keys.includes('all') && !keys.includes(k)){
+  //   //     // drop it if we didn't ask for it
+  //   //     chunk.data.splice(kIndex,1)
+  //   //     chunk.data_info[0].splice(kIndex,1)
+  //   //     chunk.data_info[2].splice(kIndex,1)
+  //   //   } 
+  //   // }
+  //   // if(Object.keys(chunk.data).length === (coerced_pressure ? 1 : 0)){
+  //   //   return false // deleted all our data, bail out
+  //   // }
+  // }
 
   // filter by presRange, drop profile if reqested and available pressures are disjoint
   /// identify level spectrum, could be <data doc>.data.pressure (for point data) or <metadata doc>.levels (for grids)
-  let lvlSpectrum = []
-  let pressure_index = dinfo[0].findIndex(x => x === 'pressure')
-  if(pressure_index !== -1){
-    lvlSpectrum = chunk.data[pressure_index]
-  } else if(metadata[0].levels){
-    lvlSpectrum = metadata[0].levels // note we take from metadata[0] since we're requiring all grids in the same collection have the same level spectrum
-  }
-  if(pp_params.presRange && lvlSpectrum.length > 0){
-    let lowIndex = 0
-    let highIndex = lvlSpectrum.length-1
-    if(lvlSpectrum[0] > pp_params.presRange[1]){
-      return false // requested pressure range that is completely shallower than pressures available
-    }
-    if(lvlSpectrum[highIndex] < pp_params.presRange[0]){
-      return false // requested pressure range that is completely deeper than pressures available
-    }
-    while(lowIndex < highIndex && lvlSpectrum[lowIndex] < pp_params.presRange[0]){
-      lowIndex++
-    } // lowIndex now points at the first level index to keep
-    while(highIndex > lowIndex && lvlSpectrum[highIndex] > pp_params.presRange[1]){
-      highIndex--
-    } // highIndex now points at the last level index to keep
-    for(let i=0; i<Object.keys(chunk.data).length; i++){
-      let k = Object.keys(chunk.data)[i]
-      chunk.data[k] = chunk.data[k].slice(lowIndex, highIndex+1)
-    }
-    /// append levels to the data document if it has been filtered on 
-    if(metadata[0] && metadata[0].levels) {
-      chunk.levels = metadata[0].levels.slice(lowIndex, highIndex+1)
-    }
-  }
+  // let lvlSpectrum = []
+  // let pressure_index = dinfo[0].findIndex(x => x === 'pressure')
+  // if(pressure_index !== -1){
+  //   lvlSpectrum = chunk.data[pressure_index]
+  // } else if(metadata[0].levels){
+  //   lvlSpectrum = metadata[0].levels // note we take from metadata[0] since we're requiring all grids in the same collection have the same level spectrum
+  // }
+  // if(pp_params.presRange && lvlSpectrum.length > 0){
+  //   let lowIndex = 0
+  //   let highIndex = lvlSpectrum.length-1
+  //   if(lvlSpectrum[0] > pp_params.presRange[1]){
+  //     return false // requested pressure range that is completely shallower than pressures available
+  //   }
+  //   if(lvlSpectrum[highIndex] < pp_params.presRange[0]){
+  //     return false // requested pressure range that is completely deeper than pressures available
+  //   }
+  //   while(lowIndex < highIndex && lvlSpectrum[lowIndex] < pp_params.presRange[0]){
+  //     lowIndex++
+  //   } // lowIndex now points at the first level index to keep
+  //   while(highIndex > lowIndex && lvlSpectrum[highIndex] > pp_params.presRange[1]){
+  //     highIndex--
+  //   } // highIndex now points at the last level index to keep
+  //   for(let i=0; i<Object.keys(chunk.data).length; i++){
+  //     let k = Object.keys(chunk.data)[i]
+  //     chunk.data[k] = chunk.data[k].slice(lowIndex, highIndex+1)
+  //   }
+  //   /// append levels to the data document if it has been filtered on 
+  //   if(metadata[0] && metadata[0].levels) {
+  //     chunk.levels = metadata[0].levels.slice(lowIndex, highIndex+1)
+  //   }
+  // }
 
-  // drop any level for which all requested measurements are null if specific data has been requested
-  if(pp_params.data && pp_params.data != 'all'){
-    let dcopy = JSON.parse(JSON.stringify(chunk.data))
-    if(coerced_pressure){
-      dcopy.splice(chunk.data_info[0].indexOf('pressure'),1)
-    }
+  // // drop any level for which all requested measurements are null if specific data has been requested
+  // if(pp_params.data && pp_params.data != 'all'){
+  //   let dcopy = JSON.parse(JSON.stringify(chunk.data))
+  //   if(coerced_pressure){
+  //     dcopy.splice(chunk.data_info[0].indexOf('pressure'),1)
+  //   }
 
-    dcopy = module.exports.zip(dcopy)
+  //   dcopy = module.exports.zip(dcopy)
 
-    dcopy = dcopy.map( (level,index) => {
-      if(level.every(x => x === null)){
-        return index
-      } else{
-        return -1
-      }
-    }).filter(x => x!==-1)
+  //   dcopy = dcopy.map( (level,index) => {
+  //     if(level.every(x => x === null)){
+  //       return index
+  //     } else{
+  //       return -1
+  //     }
+  //   }).filter(x => x!==-1)
 
-    /// bail out if every level is marked for deletion
-    if(dcopy.length==chunk.data[0].length){
-      return false
-    }
+  //   /// bail out if every level is marked for deletion
+  //   if(dcopy.length==chunk.data[0].length){
+  //     return false
+  //   }
 
-    for(let i=0; i<chunk.data.length; i++){
-      chunk.data[i] = chunk.data[i].filter((level, index) => {
-        if(dcopy.includes(index)){
-          return false
-        } else {
-          return true
-        } 
-      })
-    }
-  }
+  //   for(let i=0; i<chunk.data.length; i++){
+  //     chunk.data[i] = chunk.data[i].filter((level, index) => {
+  //       if(dcopy.includes(index)){
+  //         return false
+  //       } else {
+  //         return true
+  //       } 
+  //     })
+  //   }
+  // }
 
   // // drop data on metadata only requests
   // if(!pp_params.data || metadata_only){

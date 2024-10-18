@@ -278,3 +278,21 @@ describe("data_mask", function () {
     expect(helpers.data_mask(data_query, data, data_info, qc_suffix)).to.deep.equal([0])
   });
 }); 
+
+describe("vertical_filter", function () {
+  it("vertical filter - nomianl", async function () {
+    data = [[0,0,0,0,0,0], [1,2,3,4,5,6]]
+    data_info = [['temp', 'pressure']]
+    verticalRange = [2.3,4.5]
+    expect(helpers.vertical_filter(data, data_info, verticalRange)).to.deep.equal([[0,0],[3,4]])
+  });
+}); 
+
+describe("level_filter", function () {
+  it("level filter - nomianl", async function () {
+    data = [[0,null,0,0,0,0], [1,2,3,4,5,6]]
+    data_info = [['temp', 'pressure']]
+    coerced_pressure = true
+    expect(helpers.level_filter(data, data_info, coerced_pressure)).to.deep.equal([[0,0,0,0,0], [1,3,4,5,6]])
+  });
+});
