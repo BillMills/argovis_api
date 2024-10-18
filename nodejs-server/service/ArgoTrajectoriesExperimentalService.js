@@ -63,6 +63,10 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.needs_data_info = 'trajectoriesMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -88,7 +92,7 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
+        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         presRange: null,
         mostrecent: mostrecent,
         batchmeta : batchmeta,
