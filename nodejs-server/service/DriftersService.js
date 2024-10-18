@@ -61,9 +61,10 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
     }
     params.batchmeta = batchmeta
     params.compression = compression
-    // bring this back later
-    //params.data = data
-    //params.needs_data_info = 'drifterMeta' // ie do we need to pull data_info in from the metadata doc? if so provide name of metadata collection
+    params.needs_data_info = 'drifterMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -89,7 +90,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
+        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         presRange: null,
         mostrecent: mostrecent,
         batchmeta : batchmeta,
