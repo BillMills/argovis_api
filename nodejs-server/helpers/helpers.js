@@ -883,7 +883,7 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
   // or return false to drop this item from the stream
   // nothing to do if we're just passing meta docs through for a bulk metadata match
 
-  //console.log(chunk)
+  console.log(chunk)
 
   if(pp_params.batchmeta){
     return chunk

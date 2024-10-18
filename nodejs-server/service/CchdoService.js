@@ -37,17 +37,16 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.verticalRange = presRange || verticalRange
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
       params.qc_suffix = '_woceqc'
-
       if(!('pressure' in params.data_query[0]) && !('pressure' in params.data_query[2])){
         // pull pressure out of mongo by default
-        params.data_query[2].push('pressure')
+        params.data_query[2]['pressure'] = []
         params.coerced_pressure = true
       }
     }
-
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,(center && radius),cchdo_cruise,woceline].some(x=>x)){
       reject({"code": 400, "message": "Please combine source queries with at least one of a time range, spatial extent, id, CCHDO cruise ID, or WOCE line search."})
@@ -81,10 +80,10 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
+        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         presRange: presRange || verticalRange,
         mostrecent: mostrecent,
-        qcsuffix: '_woceqc',
+        //qcsuffix: '_woceqc',
         suppress_meta: compression != 'minimal' && !batchmeta, // cchdo used metadata in stubs
         batchmeta : batchmeta
     }
