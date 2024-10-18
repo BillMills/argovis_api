@@ -124,8 +124,14 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     params.batchmeta = batchmeta
     params.compression = compression
     if(data){
-      params.data_query = data.join(',')
+      params.data_query = helpers.parse_data_qsp(data.join(','))
       params.qc_suffix = '_argoqc'
+
+      if(!('pressure' in params.data_query[0]) && !('pressure' in params.data_query[2])){
+        // pull pressure out of mongo by default
+        params.data_query[2]['pressure'] = []
+        params.coerced_pressure = true
+      }
     }
 
     // decide y/n whether to service this request
@@ -164,12 +170,12 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
+        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         presRange: presRange || verticalRange,
         mostrecent: mostrecent,
         always_import: true, // add data_keys and everything in data_adjacent to data docs, no matter what
         suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post unless we're returing batchmeta
-        qcsuffix: '_argoqc',
+        //qcsuffix: '_argoqc',
         batchmeta : batchmeta
     }
 

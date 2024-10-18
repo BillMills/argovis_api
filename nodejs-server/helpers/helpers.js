@@ -300,118 +300,168 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
     foreignMatch.push({$match:{'metadata':{$in:Array.from(metaIDs)}}})
   }
 
-  // set up aggregation and return promise to evaluate:
+  // set up first part of pipeline aggregation:
   let aggPipeline = proxMatch.concat(spacetimeMatch).concat(local_filter).concat(foreignMatch)
 
   // construct transform stages as required
 
-  if(params.needs_data_info && params.data){
-    // go find data_info on the metadata document and bring it along
-    aggPipeline.push({
-      $lookup: {
-        from: params.needs_data_info, 
-        localField: 'metadata', 
-        foreignField: '_id', 
-        as: 'metadata_docs'
-      }
-    })
+  /// data query filtration
+  if(params.data_query){
 
-    aggPipeline.push({
-      $addFields: {
-        data_info: { $arrayElemAt: ["$metadata_docs.data_info", 0] }
-      }
-    });
+    //// go find data_info on the metadata document and bring it along
+    if(params.needs_data_info){
+      aggPipeline.push({
+        $lookup: {
+          from: params.needs_data_info, 
+          localField: 'metadata', 
+          foreignField: '_id', 
+          as: 'metadata_docs'
+        }
+      })
 
-    aggPipeline.push({
-      $project: {
-        metadata_docs: 0
-      }
-    });
-  }
+      aggPipeline.push({
+        $addFields: {
+          data_info: { $arrayElemAt: ["$metadata_docs.data_info", 0] }
+        }
+      });
 
-  // drop non-requested data keys, or set data = [] if a negated key is present
-  if(data_filter){
-    aggPipeline.push(
-      {
+      aggPipeline.push({
+        $project: {
+          metadata_docs: 0
+        }
+      });
+    }
+
+    //// filter levels by QC requests
+    if(params.qc_suffix){
+      aggPipeline.push({
         $addFields: {
           data: {
             $function: {
-                body: `function(data_info, data, selections){
-                  data_filtered = []
-                  for(i=0; i<selections[1].length; i++){
-                    sel_index = data_info[0].indexOf(selections[1][i])
-                    if(sel_index !== -1){
-                      // data negation, return empty data array to be dropped downstream
-                      return []
-                    }
-                  }
-                  for(i=0; i<selections[0].length; i++){
-                    sel_index = data_info[0].indexOf(selections[0][i])
-                    if(sel_index == -1 || sel_index >= data.length){
-                      // didnt find required data, bail
-                      return []
-                    }
-                    data_filtered.push(data[sel_index])
-
-                    // bring qc data along for the ride, if available, even if not explicitly requested
-                    qc_name = selections[0][i] + '_' + selections[2]
-                    if(!selections[0].includes(qc_name)){
-                      qc_index = data_info[0].indexOf(qc_name)
-                      if(qc_index > -1 && qc_index < data.length){
-                        data_filtered.push(data[qc_index])
-                      }
-                    }
-                  }
-                  return data_filtered
-                }`,
-                args: ["$data_info", "$data", data_filter ],
-                lang: 'js'
-            }
-          },
-          data_info: {
-            $function: {
-              body: `function(data_info, selections){
-                data_info_filtered = [[],data_info[1], []]
-                  for(i=0; i<selections[0].length; i++){
-                    sel_index = data_info[0].indexOf(selections[0][i])
-                    if(sel_index == -1){
-                      continue
-                    }
-                    data_info_filtered[0].push(data_info[0][sel_index])
-                    data_info_filtered[2].push(data_info[2][sel_index])
-
-                    qc_name = selections[0][i] + '_' + selections[2]
-                    qc_index = data_info[0].indexOf(qc_name)
-                    if(!selections[0].includes(qc_name) && qc_index > -1 && qc_index < data_info[0].length){
-                      data_info_filtered[0].push(data_info[0][qc_index])
-                      data_info_filtered[2].push(data_info[2][qc_index])
-                    }
-                }
-                return data_info_filtered
-              }`,
-              args: ["$data_info", data_filter ],
-              lang: "js"
+              body: module.exports.qc_filter.toString(),
+              args: [params.data_query, "$data", "$data_info", params.qc_suffix],
+              lang: 'js'
             }
           }
         }
-      }
-    )
-  }
+      })
+    }
 
-  // filter levels by QC requests
-  if(params.qc_suffix){
+    //// find mask for .data, data_info[0], data_info[2]
     aggPipeline.push({
       $addFields: {
-        data: {
+        data_mask: {
           $function: {
-            body: module.exports.qc_filter.toString(),
+            body: module.exports.data_mask.toString(),
             args: [params.data_query, "$data", "$data_info", params.qc_suffix],
             lang: 'js'
           }
         }
       }
     })
+
+    //// keep the data in the mask
+    aggPipeline.push({
+      $addFields: {
+        data: {
+          $function: {
+            body: module.exports.data_filter.toString(),
+            args: ["$data_mask", "$data", params.data_query, params.coerced_pressure],
+            lang: 'js'
+          }
+        }
+      }
+    })
+
+    //// keep the data_info in the mask
+    aggPipeline.push({
+      $addFields: {
+        data_info: {
+          $function: {
+            body: module.exports.data_info_filter.toString(),
+            args: ["$data_mask", "$data_info"],
+            lang: 'js'
+          }
+        }
+      }
+    })
+
+    //// dump the mask
+    aggPipeline.push({
+      $project: {
+        data_mask: 0
+      }
+    });
   }
+
+  // drop non-requested data keys, or set data = [] if a negated key is present
+  // if(data_filter){
+  //   aggPipeline.push(
+  //     {
+  //       $addFields: {
+  //         data: {
+  //           $function: {
+  //               body: `function(data_info, data, selections){
+  //                 data_filtered = []
+  //                 for(i=0; i<selections[1].length; i++){
+  //                   sel_index = data_info[0].indexOf(selections[1][i])
+  //                   if(sel_index !== -1){
+  //                     // data negation, return empty data array to be dropped downstream
+  //                     return []
+  //                   }
+  //                 }
+  //                 for(i=0; i<selections[0].length; i++){
+  //                   sel_index = data_info[0].indexOf(selections[0][i])
+  //                   if(sel_index == -1 || sel_index >= data.length){
+  //                     // didnt find required data, bail
+  //                     return []
+  //                   }
+  //                   data_filtered.push(data[sel_index])
+
+  //                   // bring qc data along for the ride, if available, even if not explicitly requested
+  //                   qc_name = selections[0][i] + '_' + selections[2]
+  //                   if(!selections[0].includes(qc_name)){
+  //                     qc_index = data_info[0].indexOf(qc_name)
+  //                     if(qc_index > -1 && qc_index < data.length){
+  //                       data_filtered.push(data[qc_index])
+  //                     }
+  //                   }
+  //                 }
+  //                 return data_filtered
+  //               }`,
+  //               args: ["$data_info", "$data", data_filter ],
+  //               lang: 'js'
+  //           }
+  //         },
+  //         data_info: {
+  //           $function: {
+  //             body: `function(data_info, selections){
+  //               data_info_filtered = [[],data_info[1], []]
+  //                 for(i=0; i<selections[0].length; i++){
+  //                   sel_index = data_info[0].indexOf(selections[0][i])
+  //                   if(sel_index == -1){
+  //                     continue
+  //                   }
+  //                   data_info_filtered[0].push(data_info[0][sel_index])
+  //                   data_info_filtered[2].push(data_info[2][sel_index])
+
+  //                   qc_name = selections[0][i] + '_' + selections[2]
+  //                   qc_index = data_info[0].indexOf(qc_name)
+  //                   if(!selections[0].includes(qc_name) && qc_index > -1 && qc_index < data_info[0].length){
+  //                     data_info_filtered[0].push(data_info[0][qc_index])
+  //                     data_info_filtered[2].push(data_info[2][qc_index])
+  //                   }
+  //               }
+  //               return data_info_filtered
+  //             }`,
+  //             args: ["$data_info", data_filter ],
+  //             lang: "js"
+  //           }
+  //         }
+  //       }
+  //     }
+  //   )
+  // }
 
   if(params.compression !== 'minimal'){
     // some stub requests are allowed that would swamp mongo's default sorting limits.
@@ -488,15 +538,11 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
   return model.aggregate(aggPipeline).cursor()  
 }
 
-module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
-  // data_query: the data QSP
-  // data: the data array
-  // data_info: the data_info array
-  // qc_suffix: the suffix to append to the data key to get the corresponding qc key
-
-  const negated_variables = [];
-  const flags = [];
-  const variables = {};
+module.exports.parse_data_qsp = function(data_query){
+  let negated_variables = [];
+  let flags = [];
+  let variables = {};
+  let allQcFlags = [];
 
   // Split the input string by commas and trim whitespace
   const tokens = data_query.split(',').map(token => token.trim());
@@ -508,8 +554,12 @@ module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
       // Add negated variable (removing the `~`)
       negated_variables.push(token.substring(1));
     } else if (token === 'all' || token === 'except_data_values') {
-      // Add to flags
+      // Handle 'all' flag - check if it has integers following it
       flags.push(token);
+      currentVariable = token;  // Set the current variable to 'all'
+    } else if (!isNaN(token) && currentVariable === 'all') {
+      // If 'all' is followed by numbers, store these QC flags
+      allQcFlags.push(Number(token));
     } else if (isNaN(token)) {
       // It's a variable name, store it
       currentVariable = token;
@@ -520,15 +570,34 @@ module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
     }
   });
 
-  // Remove any variable that has an empty array - no qc filtering to do
+  return [negated_variables, flags, variables, allQcFlags];
+}
+
+module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
+  const variables = data_query[2];
+  let allQcFlags = data_query[3];
+
+  // Remove any variable that has an empty array - no QC filtering to do
   for (const key in variables) {
     if (variables[key].length === 0) {
       delete variables[key];
     }
   }
 
-  if (flags.includes('all') || Object.keys(variables).length === 0) {
-    // either we want it all, or we don't want any qc filtering
+  // Apply 'all' QC flags to every variable that doesn't have specific QC values
+  if (allQcFlags.length > 0) {
+    data_info[0].forEach(field => {
+      if (!field.endsWith(qc_suffix)) {  // Only apply to non-QC fields
+        const varName = field;
+        if (!(varName in variables)) {
+          variables[varName] = allQcFlags.slice();  // Apply 'all' QC flags to this variable
+        }
+      }
+    });
+  }
+
+  if (Object.keys(variables).length === 0) {
+    // No variables to filter, return the data as is
     return data;
   }
 
@@ -555,8 +624,62 @@ module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
     ? updatedTransposedData[0].map((_, rowIndex) => updatedTransposedData.map(col => col[rowIndex]))
     : [];
 
-
   return updatedData;
+}
+
+module.exports.data_mask = function(data_query, data, data_info, qc_suffix) {
+  // returns the indexes of the variables to keep in data, data_info[0] and data_info[2]
+
+  // Step 1: Return an empty array if any negated variable is found in labels
+  for (const excludeVar of data_query[0]) {
+    if (data_info[0].includes(excludeVar)) {
+      return [];  // Return [] if a label is in the exclude list
+    }
+  }
+
+  // Step 2: Return full data array if 'all' is in the list of variables to keep
+  if (data_query[1].includes('all')) {
+    return Array.from({ length: data.length}, (_, i) => i);
+  }
+
+  // Step 3: Initialize an array to store the indices of variables to keep
+  const indices_to_keep = [];
+
+  // Step 4: Find the indices of the variables to keep
+  Object.keys(data_query[2]).forEach(varName => {
+    const varIndex = data_info[0].indexOf(varName);
+    if (varIndex !== -1) {
+      indices_to_keep.push(varIndex);
+    }
+  });
+
+  // make sure no indexes are duplicated
+  return Array.from(new Set(indices_to_keep));
+}
+
+module.exports.data_filter = function(indexes, data, data_query, coerced_pressure) {
+  let d = indexes.map(index => data[index]);
+
+  if (!data_query[1].includes('all') && d.some(innerArray => innerArray.every(item => item === null))) { 
+    // If all values for a variable are null and we didn't specifically ask for it, return an empty array, QC failed
+    return [];
+  }
+
+  if (coerced_pressure && d.length == 1) {
+    // all that's left is the pressure we forced to be there, drop
+    return [];
+  }
+
+  return d;
+}
+
+module.exports.data_info_filter = function(indexes, data_info) {
+  let d = [[], data_info[1], []];
+  indexes.forEach(index => {
+    d[0].push(data_info[0][index]);
+    d[2].push(data_info[2][index]);
+  });
+  return d;
 }
 
 module.exports.combineDataInfo = function(dinfos){
@@ -577,8 +700,7 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
   // returns chunk mutated into its final, user-facing form
   // or return false to drop this item from the stream
   // nothing to do if we're just passing meta docs through for a bulk metadata match
-  console.log(8888, chunk.data)
-  console.log(8889, chunk.data_info)
+  console.log(chunk)
   if(pp_params.batchmeta){
     return chunk
   }
@@ -622,14 +744,14 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
       if(pp_params.data[i].charAt(0)!='~'){
         /// keys and qc allowed list
         if((!parseInt(pp_params.data[i]) && parseInt(pp_params.data[i])!==0) || (parseInt(pp_params.data[i])>=90)) { // numbers in the data string are lists of allowed qc flags - excpet for argone, which uses forecast days as data keys starting at 90
-          current_key = pp_params.data[i]
+          //current_key = pp_params.data[i]
           keys.push(pp_params.data[i])
         } else {
-          if(qclist.hasOwnProperty(current_key)){
-            qclist[current_key].push(parseInt(pp_params.data[i]))
-          } else {
-            qclist[current_key] = [parseInt(pp_params.data[i])]
-          }
+          // if(qclist.hasOwnProperty(current_key)){
+          //   qclist[current_key].push(parseInt(pp_params.data[i]))
+          // } else {
+          //   qclist[current_key] = [parseInt(pp_params.data[i])]
+          // }
         }
       } else{
         notkeys.push(pp_params.data[i].substring(1))
@@ -775,10 +897,10 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
     }
   }
 
-  // drop data on metadata only requests
-  if(!pp_params.data || metadata_only){
-    delete chunk.data
-  }
+  // // drop data on metadata only requests
+  // if(!pp_params.data || metadata_only){
+  //   delete chunk.data
+  // }
 
   // return a minimal stub if requested
   if(pp_params.compression == 'minimal'){

@@ -221,7 +221,7 @@ describe("remove_laps", function () {
 
 describe("qc_filter", function () {
   it("check basic behavior of qc filter", async function () {
-    data_query = 'temp,doxy,1,4'
+    data_query = helpers.parse_data_qsp('temp,doxy,1,4')
     data = [[1,2,3], [10,20,30], [2,2,2], [1,3,4]]
     data_info = [['temp', 'doxy', 'temp_argoqc', 'doxy_argoqc']]
     qc_suffix = '_argoqc'
@@ -231,10 +231,50 @@ describe("qc_filter", function () {
 
 describe("qc_filter", function () {
   it("qc filter - no qc conditions", async function () {
-    data_query = 'temp,doxy'
+    data_query = helpers.parse_data_qsp('temp,doxy')
     data = [[1,2,3], [10,20,30], [2,2,2], [1,3,4] ]
-    data_info = [['temp', 'doxy', 'temp_qc']]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
     qc_suffix = '_qc'
     expect(helpers.qc_filter(data_query, data, data_info, qc_suffix)).to.deep.equal([[1,2,3], [10,20,30], [2,2,2], [1,3,4]])
+  });
+}); 
+
+describe("qc_filter", function () {
+  it("qc filter - all", async function () {
+    data_query = helpers.parse_data_qsp('all,1')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4] ]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.qc_filter(data_query, data, data_info, qc_suffix)).to.deep.equal([[1,null,null], [10,null,null], [1,2,2], [1,3,4]])
+  });
+}); 
+
+describe("data_mask", function () {
+  it("data mask - negations", async function () {
+    data_query = helpers.parse_data_qsp('temp,~doxy')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4] ]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.data_mask(data_query, data, data_info, qc_suffix)).to.deep.equal([])
+  });
+}); 
+
+describe("data_mask", function () {
+  it("data mask - all", async function () {
+    data_query = helpers.parse_data_qsp('temp,all')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.data_mask(data_query, data, data_info, qc_suffix)).to.deep.equal([0,1,2,3])
+  });
+}); 
+
+describe("data_mask", function () {
+  it("data mask - nomianl", async function () {
+    data_query = helpers.parse_data_qsp('temp')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.data_mask(data_query, data, data_info, qc_suffix)).to.deep.equal([0])
   });
 }); 

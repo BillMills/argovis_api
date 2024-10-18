@@ -38,8 +38,14 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     params.batchmeta = batchmeta
     params.compression = compression
     if(data){
-      params.data_query = data.join(',')
+      params.data_query = helpers.parse_data_qsp(data.join(','))
       params.qc_suffix = '_woceqc'
+
+      if(!('pressure' in params.data_query[0]) && !('pressure' in params.data_query[2])){
+        // pull pressure out of mongo by default
+        params.data_query[2].push('pressure')
+        params.coerced_pressure = true
+      }
     }
 
     // decide y/n whether to service this request
