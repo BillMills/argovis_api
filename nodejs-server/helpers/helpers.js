@@ -646,7 +646,7 @@ module.exports.parse_data_qsp = function(data_query){
     } else if (!isNaN(token) && currentVariable === 'all') {
       // If 'all' is followed by numbers, store these QC flags
       allQcFlags.push(Number(token));
-    } else if (isNaN(token)) {
+    } else if (isNaN(token) || parseInt(token)>=90) { // argone forecasts use number of days as variable names...
       // It's a variable name, store it
       currentVariable = token;
       variables[currentVariable] = [];

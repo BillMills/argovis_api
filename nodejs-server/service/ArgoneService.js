@@ -70,7 +70,11 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     let metafilter = Promise.resolve([])
     let params = {
       'metafilter': false,
-      'batchmeta': batchmeta
+      'batchmeta': batchmeta,
+      'needs_data_info': 'argoneMeta'
+    }
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
     }
   
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
