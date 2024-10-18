@@ -78,6 +78,10 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     params.extended = true // extended objects need a geointersects search instead of geowithin for polygons
     params.batchmeta = batchmeta
     params.compression = compression
+    params.needs_data_info = 'extendedMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, null, false, null, null) 
@@ -100,7 +104,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
+        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         dateRange: [params.startDate, params.endDate],
         mostrecent: mostrecent,
         suppress_meta: compression=='minimal' && !batchmeta,
