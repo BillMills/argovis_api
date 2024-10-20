@@ -318,7 +318,7 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
       }
     })
 
-    // $lookup does not guarantee sort order, fix it
+    // $lookup does not guarantee sort order, fix it - matters for merged grids for example
     aggPipeline.push({
       $addFields: {
         metadata_docs: {
@@ -357,6 +357,29 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
         metadata_docs: 0
       }
     });
+  }
+
+  //// some metadata documents pre-pulled have globally useful data
+  if(params.archtypical_meta){
+
+    if(params.is_timeseries){
+      if(params.data_query){
+        aggPipeline.push({
+          $addFields: {
+            data_info: foreign_docs[0].data_info
+          }
+        })
+      }
+
+      if(params.startDate || params.endDate){
+        aggPipeline.push({
+          $addFields: {
+            timeseries: foreign_docs[0].timeseries
+          }
+        })
+      }
+    }
+
   }
 
   //// perform pressure filter

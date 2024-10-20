@@ -36,6 +36,11 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     params.mostrecent = mostrecent
     params.batchmeta = batchmeta
     params.compression = compression
+    params.is_timeseries = true
+    params.archtypical_meta = true // any metadata document passed in to the datafilter from the metafilter has a globally applicable data_info, and possibly other fields.
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -58,7 +63,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
+        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         presRange: null,
         dateRange: [params.startDate, params.endDate],
         //mostrecent: mostrecent, // mostrecent filtering done in mongo during stream for timeseries
