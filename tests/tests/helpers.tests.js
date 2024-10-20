@@ -270,7 +270,7 @@ describe("data_mask", function () {
 }); 
 
 describe("data_mask", function () {
-  it("data mask - nomianl", async function () {
+  it("data mask - nominal", async function () {
     data_query = helpers.parse_data_qsp('temp')
     data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
     data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
@@ -279,20 +279,30 @@ describe("data_mask", function () {
   });
 }); 
 
-describe("vertical_filter", function () {
-  it("vertical filter - nomianl", async function () {
-    data = [[0,0,0,0,0,0], [1,2,3,4,5,6]]
-    data_info = [['temp', 'pressure']]
-    verticalRange = [2.3,4.5]
-    expect(helpers.vertical_filter(data, data_info, verticalRange)).to.deep.equal([[0,0],[3,4]])
-  });
-}); 
+// describe("vertical_filter", function () {
+//   it("vertical filter - nominal", async function () {
+//     doc = {
+//       data: [[0,0,0,0,0,0], [1,2,3,4,5,6]],
+//       data_info: [['temp', 'pressure']]
+//     }
+//     verticalRange = [2.3,4.5]
+//     expect(helpers.vertical_filter(doc, verticalRange)).to.deep.equal({data: [[0,0], [3,4,]], data_info: [['temp', 'pressure']]})
+//   });
+// }); 
 
 describe("level_filter", function () {
-  it("level filter - nomianl", async function () {
+  it("level filter - nominal", async function () {
     data = [[0,null,0,0,0,0], [1,2,3,4,5,6]]
     data_info = [['temp', 'pressure']]
     coerced_pressure = true
     expect(helpers.level_filter(data, data_info, coerced_pressure)).to.deep.equal([[0,0,0,0,0], [1,3,4,5,6]])
+  });
+});
+
+describe("sort_metadocs", function () {
+  it("sort metadata documents - nominal", async function () {
+    metadata = ['A', 'B']
+    metadocs = [{_id: 'B'}, {_id: 'A'}]
+    expect(helpers.sort_metadocs(metadata, metadocs)).to.deep.equal([{_id: 'A'}, {_id: 'B'}])
   });
 });

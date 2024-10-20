@@ -318,11 +318,39 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
       }
     })
 
+    // $lookup does not guarantee sort order, fix it
     aggPipeline.push({
       $addFields: {
-        data_info: { $arrayElemAt: ["$metadata_docs.data_info", 0] }
+        metadata_docs: {
+          $function: {
+            body: module.exports.sort_metadocs.toString(),
+            args: ["$metadata", "$metadata_docs"],
+            lang: 'js'
+          }
+        }
       }
-    });
+    }) 
+
+    aggPipeline.push({
+      $addFields: {
+        data_info: {
+          $function: {
+            body: module.exports.merge_data_info.toString(),
+            args: ["$metadata_docs.data_info"],
+            lang: 'js'
+          }
+        }
+      }
+    })    
+
+    ///// if this is a grid, get the level data, too.
+    if(params.is_grid){
+      aggPipeline.push({
+        $addFields: {
+          levels: { $arrayElemAt: ["$metadata_docs.levels", 0] }
+        }
+      });
+    }
 
     aggPipeline.push({
       $project: {
@@ -333,17 +361,53 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
 
   //// perform pressure filter
   if(params.verticalRange){
+    // find the slice bounds
     aggPipeline.push({
       $addFields: {
-        data: {
+        verticalRange: {
           $function: {
-            body: module.exports.vertical_filter.toString(),
-            args: ["$data", "$data_info", params.verticalRange],
+            body: module.exports.vertical_bounds.toString(),
+            args: params.is_grid ? ["$data", "$data_info", params.verticalRange, "$levels"] : ["$data", "$data_info", params.verticalRange, null],
             lang: 'js'
           }
         }
       }
     })
+
+    // do the slicing
+    aggPipeline.push({
+      $addFields: {
+        data: {
+          $function: {
+            body: module.exports.vertical_data_slice.toString(),
+            args: ["$data", "$verticalRange"],
+            lang: 'js'
+          }
+        }
+      }
+    })
+
+    if(params.is_grid){
+      aggPipeline.push({
+        $addFields: {
+          levels: {
+            $function: {
+              body: module.exports.vertical_level_slice.toString(),
+              args: ["$levels", "$verticalRange"],
+              lang: 'js'
+            }
+          }
+        }
+      })
+    }
+
+    // drop the slice bounds
+    aggPipeline.push({
+      $project: {
+        verticalRange: 0
+      }
+    });
+
   }
 
   if(params.data_query){
@@ -743,6 +807,22 @@ module.exports.data_mask = function(data_query, data, data_info, qc_suffix) {
   return Array.from(new Set(indices_to_keep));
 }
 
+module.exports.sort_metadocs = function(metadata, metadata_docs){
+  return metadata.map(id => metadata_docs.find(obj => obj._id === id))
+}
+
+module.exports.merge_data_info = function(di){
+
+  let data_info = [[],[],[]]
+  di.forEach(d => {
+    data_info[0] = data_info[0].concat(d[0])
+    data_info[1] = d[1]
+    data_info[2] = data_info[2].concat(d[2])
+  })
+
+  return data_info
+}
+
 module.exports.data_filter = function(indexes, data, data_query) {
   if(data.length == 0){
     return data
@@ -767,15 +847,15 @@ module.exports.data_info_filter = function(indexes, data_info) {
   return d;
 }
 
-module.exports.vertical_filter = function(data, data_info, verticalRange) {
-  let lvlSpectrum = []
+module.exports.vertical_bounds = function(data, data_info, verticalRange, levels) {
+  let lvlSpectrum = null
   let pressure_index = data_info[0].findIndex(x => x === 'pressure')
 
   if(pressure_index !== -1){
-    lvlSpectrum = data[pressure_index]
-  } //else if(metadata[0].levels){ // will need to figure this out for grids
-    //lvlSpectrum = metadata[0].levels // note we take from metadata[0] since we're requiring all grids in the same collection have the same level spectrum
-  //}
+    lvlSpectrum = data[pressure_index] // for profiles
+  } else if(levels){
+    lvlSpectrum = levels // for grids
+  }
   
   if(lvlSpectrum){
     let lowIndex = 0
@@ -794,16 +874,19 @@ module.exports.vertical_filter = function(data, data_info, verticalRange) {
       highIndex--
     } // highIndex now points at the last level index to keep
 
+    return [lowIndex, highIndex+1]
 
-    return data.map(variable => variable.slice(lowIndex, highIndex+1));
-
-    // /// append levels to the data document if it has been filtered on - figure out later for grids
-    // if(metadata[0] && metadata[0].levels) {
-    //   chunk.levels = metadata[0].levels.slice(lowIndex, highIndex+1)
-    // }
   } else {
-    return data
+    return [0, 0]
   }
+}
+
+module.exports.vertical_data_slice = function(data, verticalRange){
+  return data.map(lvl => lvl.slice(verticalRange[0], verticalRange[1]))
+}
+
+module.exports.vertical_level_slice = function(levels, verticalRange){
+  return levels.slice(verticalRange[0], verticalRange[1])
 }
 
 module.exports.level_filter = function(data, data_info, coerced_pressure){
