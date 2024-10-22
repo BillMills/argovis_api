@@ -171,12 +171,8 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
-        always_import: true, // add data_keys and everything in data_adjacent to data docs, no matter what
         suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post unless we're returing batchmeta
-        //qcsuffix: '_argoqc',
         batchmeta : batchmeta
     }
 

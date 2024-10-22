@@ -80,10 +80,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
-        //qcsuffix: '_woceqc',
         suppress_meta: compression != 'minimal' && !batchmeta, // cchdo used metadata in stubs
         batchmeta : batchmeta
     }

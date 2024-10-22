@@ -63,10 +63,6 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: null,
-        dateRange: [params.startDate, params.endDate],
-        //mostrecent: mostrecent, // mostrecent filtering done in mongo during stream for timeseries
         suppress_meta: false,
         batchmeta : batchmeta
     }

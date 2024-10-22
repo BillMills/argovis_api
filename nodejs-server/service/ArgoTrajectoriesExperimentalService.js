@@ -92,8 +92,6 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        //data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: null,
         mostrecent: mostrecent,
         batchmeta : batchmeta,
         suppress_meta: false

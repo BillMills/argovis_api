@@ -54,7 +54,6 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
         suppress_meta: compression=='minimal' && !batchmeta,
         batchmeta : batchmeta
     }

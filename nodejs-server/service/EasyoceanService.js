@@ -88,8 +88,6 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange || verticalRange,
         mostrecent: mostrecent,
         suppress_meta: params.batchmeta ? false : true,
         batchmeta : batchmeta
