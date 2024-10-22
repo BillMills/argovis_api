@@ -41,6 +41,8 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
+    params.metacollection = 'timeseriesMeta'
+    params.lookup_meta = batchmeta || params.data_query
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 

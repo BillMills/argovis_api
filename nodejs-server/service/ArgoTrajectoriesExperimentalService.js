@@ -63,10 +63,11 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     }
     params.batchmeta = batchmeta
     params.compression = compression
-    params.needs_data_info = 'trajectoriesMeta'
+    params.metacollection = 'trajectoriesMeta'
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
+    params.lookup_meta = batchmeta || params.data_query
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 

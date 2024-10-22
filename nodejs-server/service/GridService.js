@@ -60,12 +60,13 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
     }
     params.batchmeta = batchmeta
     params.compression = compression
-    params.needs_data_info = gridName+'Meta'
+    params.metacollection = gridName+'Meta'
     params.is_grid = true
     params.verticalRange = presRange || verticalRange
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
+    params.lookup_meta = batchmeta || params.data_query || params.verticalRange
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 

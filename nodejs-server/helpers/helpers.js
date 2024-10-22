@@ -280,10 +280,10 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
   /// data query filtration
 
   //// go find data_info on the metadata document and bring it along
-  if(params.needs_data_info && (params.data_query || params.verticalRange)){
+  if(params.lookup_meta){
     aggPipeline.push({
       $lookup: {
-        from: params.needs_data_info, 
+        from: params.metacollection, 
         localField: 'metadata', 
         foreignField: '_id', 
         as: 'metadata_docs'
@@ -324,11 +324,11 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
       });
     }
 
-    aggPipeline.push({
-      $project: {
-        metadata_docs: 0
-      }
-    });
+    // aggPipeline.push({
+    //   $project: {
+    //     metadata_docs: 0
+    //   }
+    // });
   }
 
   //// some metadata documents pre-pulled have globally useful data

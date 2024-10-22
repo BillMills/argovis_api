@@ -124,6 +124,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     params.batchmeta = batchmeta
     params.compression = compression
     params.verticalRange = presRange || verticalRange
+    params.metacollection = 'argoMeta'
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
       params.qc_suffix = '_argoqc'
@@ -134,6 +135,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
         params.coerced_pressure = true
       }
     }
+    params.lookup_meta = batchmeta
 
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,(center && radius),platform].some(x=>x)){

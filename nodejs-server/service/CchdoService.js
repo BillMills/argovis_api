@@ -38,6 +38,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     params.batchmeta = batchmeta
     params.compression = compression
     params.verticalRange = presRange || verticalRange
+    params.metacollection = 'cchdoMeta'
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
       params.qc_suffix = '_woceqc'
@@ -47,6 +48,8 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
         params.coerced_pressure = true
       }
     }
+    params.lookup_meta = batchmeta || (compression === 'minimal')
+
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,(center && radius),cchdo_cruise,woceline].some(x=>x)){
       reject({"code": 400, "message": "Please combine source queries with at least one of a time range, spatial extent, id, CCHDO cruise ID, or WOCE line search."})

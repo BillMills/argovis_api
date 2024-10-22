@@ -64,12 +64,14 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     let params = {
       'metafilter': false,
       'batchmeta': batchmeta,
-      'needs_data_info': 'argoneMeta',
+      'metacollection': 'argoneMeta',
       'junk': ['dist']
     }
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
+    params.lookup_meta = batchmeta || params.data_query
+
     // can we afford to project data documents down to a subset in aggregation?
     if(compression=='minimal' && data==null){
       params.projection = ['_id', 'metadata', 'geolocation', 'geolocation_forecast']

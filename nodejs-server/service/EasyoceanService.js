@@ -60,6 +60,11 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.metacollection = 'easyoceanMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
+    params.lookup_meta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
