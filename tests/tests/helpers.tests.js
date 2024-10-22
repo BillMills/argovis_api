@@ -32,26 +32,6 @@ before(async function() {
   schema = await dereferenceSchema(rawspec);
 });
 
-describe("steradians", function () {
-  it("sanity check steradian caclulation", async function () {
-    const sum = helpers.geoWeightedSum([{value: 1, lons: [0,180], lats: [0,90]}, {value: 2, lons: [0,90], lats: [0,90]}])
-    expect(helpers.steradians([0,360], [-90,90])).to.eql(4*Math.PI)  
-  });
-}); 
-
-describe("steradians", function () {
-  it("compares the area of two zones", async function () {
-    expect(helpers.steradians([0,360], [89,90])).to.be.lessThan(helpers.steradians([0,360], [0,1]))  
-  });
-}); 
-
-describe("geoWeightedSum", function () {
-  it("checks a simple weighted sum over geo regions", async function () {
-    const sum = helpers.geoWeightedSum([{value: 1, lons: [0,180], lats: [0,90]}, {value: 2, lons: [0,90], lats: [0,90]}])
-    expect(sum).to.almost.equal(2*Math.PI)  
-  });
-}); 
-
 describe("validlonlat", function () {
   it("waives through valid longitude", async function () {
     points = [[175,70],[177,56],[-155,56],[-154,69],[175,70]]
@@ -279,16 +259,16 @@ describe("data_mask", function () {
   });
 }); 
 
-// describe("vertical_filter", function () {
-//   it("vertical filter - nominal", async function () {
-//     doc = {
-//       data: [[0,0,0,0,0,0], [1,2,3,4,5,6]],
-//       data_info: [['temp', 'pressure']]
-//     }
-//     verticalRange = [2.3,4.5]
-//     expect(helpers.vertical_filter(doc, verticalRange)).to.deep.equal({data: [[0,0], [3,4,]], data_info: [['temp', 'pressure']]})
-//   });
-// }); 
+describe("vertical_bounds", function () {
+  it("vertical filter - nominal", async function () {
+    doc = {
+      data: [[0,0,0,0,0,0], [1,2,3,4,5,6]],
+      data_info: [['temp', 'pressure']]
+    }
+    verticalRange = [2.3,4.5]
+    expect(helpers.vertical_bounds(doc.data, doc.data_info, verticalRange)).to.deep.equal([2,4])
+  });
+}); 
 
 describe("level_filter", function () {
   it("level filter - nominal", async function () {

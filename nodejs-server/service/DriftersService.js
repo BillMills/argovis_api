@@ -103,9 +103,6 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
       projection = ['_id', 'metadata', 'geolocation', 'timestamp']
     }
 
-    // filter data in mongo - bring back later
-    // let data_filter = helpers.parse_data(data)
-
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
     let metafilter = Promise.resolve([])
     params.metafilter = false

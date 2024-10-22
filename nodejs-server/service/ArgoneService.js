@@ -55,7 +55,6 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     let pp_params = {
         compression: compression,
         data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        junk: ['dist'],
         suppress_meta: compression=='minimal' && !batchmeta,
         batchmeta : batchmeta
     }
@@ -71,7 +70,8 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     let params = {
       'metafilter': false,
       'batchmeta': batchmeta,
-      'needs_data_info': 'argoneMeta'
+      'needs_data_info': 'argoneMeta',
+      'junk': ['dist']
     }
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
