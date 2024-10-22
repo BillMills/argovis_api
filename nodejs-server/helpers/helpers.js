@@ -214,7 +214,7 @@ module.exports.request_sanitation = function(polygon, center, radius, box, requi
   return false
 }
 
-module.exports.datatable_stream = function(model, params, local_filter, projection, data_filter, foreign_docs){
+module.exports.datatable_stream = function(model, params, local_filter, projection, foreign_docs){
   // given <model>, a mongoose model pointing to a data collection,
   // <params> parameter kv with info for performing the selection and filtration
   // <local_filter> a custom set of aggregation pipeline steps to be applied to the data collection reffed by <model>,

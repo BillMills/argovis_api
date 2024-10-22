@@ -186,18 +186,6 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
       projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
     }
 
-    // push data selection into mongo?
-    let data_filter = helpers.parse_data(data)
-    if(data_filter){
-      if(!data_filter[0].includes('pressure')){
-        // always pull pressure out of mongo
-        data_filter[0].push('pressure')
-      }
-
-      // qc suffix so we can bring the qc flags along if available
-      data_filter.push('argoqc')
-    }
-
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
     let metafilter = Promise.resolve([])
     params.metafilter = false
@@ -213,7 +201,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argo['argo'], params, local_filter, projection, data_filter))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argo['argo'], params, local_filter, projection))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {

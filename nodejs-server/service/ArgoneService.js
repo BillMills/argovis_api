@@ -78,7 +78,7 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     }
   
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argone['argone'], params, local_filter, projection, null))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argone['argone'], params, local_filter, projection))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {

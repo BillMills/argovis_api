@@ -82,7 +82,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Timeseries[timeseriesName], params, local_filter, projection, null))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Timeseries[timeseriesName], params, local_filter, projection))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
