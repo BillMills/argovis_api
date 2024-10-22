@@ -72,9 +72,8 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     }
 
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null){
-      projection = ['_id', 'metadata', 'geolocation']
+      params.projection = ['_id', 'metadata', 'geolocation']
     }
 
     // always fetch the metadata doc so we can pull the full list of timesteps off of it
@@ -82,7 +81,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Timeseries[timeseriesName], params, local_filter, projection))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Timeseries[timeseriesName], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {

@@ -214,11 +214,10 @@ module.exports.request_sanitation = function(polygon, center, radius, box, requi
   return false
 }
 
-module.exports.datatable_stream = function(model, params, local_filter, projection, foreign_docs){
+module.exports.datatable_stream = function(model, params, local_filter, foreign_docs){
   // given <model>, a mongoose model pointing to a data collection,
   // <params> parameter kv with info for performing the selection and filtration
   // <local_filter> a custom set of aggregation pipeline steps to be applied to the data collection reffed by <model>,
-  // <projection> a list of data document keys to project down to at the end of the search
   // and <foreign_docs>, an array of documents matching a query on the metadata collection which should constrain which data collection docs we return,
   // return a cursor over that which matches the above
 
@@ -594,11 +593,11 @@ module.exports.datatable_stream = function(model, params, local_filter, projecti
     aggPipeline.push({$sort: {'timestamp':-1}})
   }
 
-  if(projection){
+  if(params.projection){
     // project out only the listed data document keys
     let project = {}
-    for(let i=0;i<projection.length;i++){
-      project[projection[i]] = 1
+    for(let i=0;i<params.projection.length;i++){
+      project[params.projection[i]] = 1
     }
     aggPipeline.push({$project: project})
   }

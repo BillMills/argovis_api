@@ -100,9 +100,8 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     }
 
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null){
-      projection = ['_id', 'metadata', 'geolocation', 'timestamp']
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp']
     }
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
@@ -114,7 +113,7 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, trajectories['argotrajectories'], params, local_filter, projection))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, trajectories['argotrajectories'], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {

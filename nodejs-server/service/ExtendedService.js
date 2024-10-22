@@ -112,9 +112,8 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     }
 
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal'){
-      projection = ['_id', 'metadata', 'timestamp', 'geolocation']
+      params.projection = ['_id', 'metadata', 'timestamp', 'geolocation']
     }
 
     // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
@@ -122,7 +121,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Extended[extendedName], params, local_filter, projection))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Extended[extendedName], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
