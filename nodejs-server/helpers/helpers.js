@@ -1258,32 +1258,6 @@ module.exports.find_grid_collection = function(token){
   }
 }
 
-module.exports.parse_data = function(d){
-  // given the data string from a query, 
-  // split it up into data and data negations
-
-  if(d == null || d.filter(x => (!['all', 'except-data-values'].includes(x) && isNaN(x)) ).length == 0 ){
-    // no data filtering to do if there's no data query to begin with, or its all flags
-    return null
-  }
-
-  all_flags = ['all', 'except-data-values']
-  data_keys = []
-  negation_keys = []
-  flags = []
-
-  for(i=0; i<d.length; i++){
-    if(all_flags.includes(d[i])){
-      flags.push(d[i])
-    } else if(d[i][0] === '~'){
-      negation_keys.push(d[i].slice(1))
-    } else if(isNaN(d[i])) {
-      data_keys.push(d[i])
-    }
-  }
-  return [data_keys, negation_keys]
-}
-
 module.exports.box2polygon = function(lowerLeft, upperRight) {
     let minLon = lowerLeft[0]
     let minLat = lowerLeft[1]
