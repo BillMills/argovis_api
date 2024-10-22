@@ -913,10 +913,41 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
     return stub(chunk, metadata)
   }
 
+  // return metadata documents in batchmeta mode
+  // use pp_params to journal which we've already sent back
+  if(pp_params.batchmeta){
+    let newmeta = []
+    if(!pp_params.metacomplete){
+      pp_params.metacomplete = []
+    }
+    for(let i=0; i<metadata.length; i++){
+      if(!pp_params.metacomplete.includes(metadata[i]._id)){
+        pp_params.metacomplete.push(metadata[i]._id)
+        newmeta.push(metadata[i])
+      }
+    }
+    if(chunk.metadata_docs){
+      for(let i=0; i<chunk.metadata_docs.length; i++){
+        if(!pp_params.metacomplete.includes(chunk.metadata_docs[i]._id)){
+          pp_params.metacomplete.push(chunks.metadata_docs[i]._id)
+          newmeta.push(chunks.metadata_docs[i])
+        }
+      }
+    }
+    if(newmeta.length > 0){
+      return newmeta
+    }
+  }
+
   return chunk
 }
 
 module.exports.post_xform = function(metaModel, pp_params, search_result, res, stub){
+
+  return pipe(async chunk => {
+    return module.exports.postprocess_stream(chunk, search_result[0], pp_params, stub)
+  }, 16)
+
 
   let nDocs = 0
   let postprocess = pp_params.suppress_meta ? 
