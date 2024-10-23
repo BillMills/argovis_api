@@ -289,7 +289,7 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
         as: 'metadata_docs'
       }
     })
-        
+
     // $lookup does not guarantee sort order, fix it - matters for merged grids for example
     aggPipeline.push({
       $addFields: {
@@ -942,6 +942,9 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub, r
       return newmeta
     }
   } else {
+    if(chunk.metadata_docs){
+      delete chunk.metadata_docs // don't keep the full metadata doc if we dont need it
+    }
     return chunk
   }
 }
