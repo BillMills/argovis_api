@@ -114,7 +114,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
         .then(search_result => {
           
           let stub = function(data){
-              // given a data document,,
+              // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
 

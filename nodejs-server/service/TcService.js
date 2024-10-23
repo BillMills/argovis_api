@@ -88,7 +88,7 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
     Promise.all([metafilter, datafilter])
         .then(search_result => {
 
-          let stub = function(data, metadata){
+          let stub = function(data){
               // given a data and corresponding metadata document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
