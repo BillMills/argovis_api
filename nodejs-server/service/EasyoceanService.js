@@ -93,8 +93,6 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        mostrecent: mostrecent,
-        suppress_meta: params.batchmeta ? false : true,
         batchmeta : batchmeta
     }
 

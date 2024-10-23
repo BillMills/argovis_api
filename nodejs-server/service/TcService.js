@@ -64,8 +64,6 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        mostrecent: mostrecent,
-        suppress_meta: compression=='minimal' && !batchmeta, // don't need to look up tc metadata if making a minimal request
         batchmeta : batchmeta
     }
 

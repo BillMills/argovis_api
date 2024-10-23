@@ -39,7 +39,7 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
         }
     }
 
-    // local filter: fields in data collection other than geolocation and timestamp 
+    // local filter: fields in data collection other than geolocation and timestamp
     let local_filter = []
     if(forecastOrigin){
         local_filter.push({'$geoNear': {'near': forecastOrigin, 'maxDistance': 1, 'distanceField': 'dist',  'key': 'geolocation'}})
@@ -54,7 +54,6 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        suppress_meta: compression=='minimal' && !batchmeta,
         batchmeta : batchmeta
     }
 
@@ -76,7 +75,7 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     if(compression=='minimal' && data==null){
       params.projection = ['_id', 'metadata', 'geolocation', 'geolocation_forecast']
     }
-  
+
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argone['argone'], params, local_filter))
 
@@ -88,9 +87,9 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
               return [
                 data['_id'],
-                data.geolocation.coordinates[0], 
-                data.geolocation.coordinates[1], 
-                data.geolocation_forecast.coordinates[0], 
+                data.geolocation.coordinates[0],
+                data.geolocation.coordinates[1],
+                data.geolocation_forecast.coordinates[0],
                 data.geolocation_forecast.coordinates[1],
                 data['metadata']
               ]

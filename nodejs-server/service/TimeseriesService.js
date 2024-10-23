@@ -65,7 +65,6 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        suppress_meta: false,
         batchmeta : batchmeta
     }
 

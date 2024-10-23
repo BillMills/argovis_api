@@ -105,8 +105,6 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        mostrecent: mostrecent,
-        suppress_meta: compression=='minimal' && !batchmeta,
         batchmeta : batchmeta
     }
 

@@ -90,9 +90,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        mostrecent: mostrecent,
         batchmeta : batchmeta,
-        suppress_meta: false
     }
 
     // can we afford to project data documents down to a subset in aggregation?

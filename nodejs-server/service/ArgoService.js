@@ -173,8 +173,6 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        mostrecent: mostrecent,
-        suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post unless we're returing batchmeta
         batchmeta : batchmeta
     }
 

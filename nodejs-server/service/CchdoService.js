@@ -83,8 +83,6 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        mostrecent: mostrecent,
-        suppress_meta: compression != 'minimal' && !batchmeta, // cchdo used metadata in stubs
         batchmeta : batchmeta
     }
 

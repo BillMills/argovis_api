@@ -93,9 +93,7 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     // postprocessing parameters
     let pp_params = {
         compression: compression,
-        mostrecent: mostrecent,
         batchmeta : batchmeta,
-        suppress_meta: false
     }
 
     // can we afford to project data documents down to a subset in aggregation?
