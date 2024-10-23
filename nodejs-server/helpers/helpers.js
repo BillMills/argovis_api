@@ -323,12 +323,6 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
         }
       });
     }
-
-    // aggPipeline.push({
-    //   $project: {
-    //     metadata_docs: 0
-    //   }
-    // });
   }
 
   //// some metadata documents pre-pulled have globally useful data
