@@ -90,7 +90,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
 
     // can we afford to project data documents down to a subset in aggregation?
     if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
-      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source', 'metadata_docs']
     }
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
@@ -113,11 +113,11 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     Promise.all([metafilter, datafilter])
         .then(search_result => {
           
-          let stub = function(data, metadata){
-              // given a data and corresponding metadata document,
+          let stub = function(data){
+              // given a data document,,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
-              
+
               let sourceset = new Set(data.source.map(x => x.source).flat())
 
               return [
@@ -126,8 +126,8 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
                 data.geolocation.coordinates[1], 
                 data.timestamp,
                 Array.from(sourceset),
-                metadata[0].woce_lines,
-                metadata[0].cchdo_cruise_id,
+                data.metadata_docs[0].woce_lines,
+                data.metadata_docs[0].cchdo_cruise_id,
                 data['metadata']
               ]
           }

@@ -289,7 +289,7 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
         as: 'metadata_docs'
       }
     })
-
+        
     // $lookup does not guarantee sort order, fix it - matters for merged grids for example
     aggPipeline.push({
       $addFields: {
@@ -900,7 +900,7 @@ module.exports.correct_data_available = function(data_query, data, data_info) {
   return data
 }
 
-module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
+module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub, res){
   // <chunk>: raw data table document
   // <metadata>: metadata doc corresponding to this chunk
   // <pp_params>: kv with helpful information about what to do here
@@ -908,14 +908,18 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
   // returns chunk mutated into its final, user-facing form
   // or return false to drop this item from the stream (dont - drops should be in the agg pipeline)
 
+  if(chunk){
+    res.status(200)
+  }
+
   // return a minimal stub if requested
   if(pp_params.compression == 'minimal'){
-    return stub(chunk, metadata)
+    return stub(chunk)
   }
 
   // return metadata documents in batchmeta mode
   // use pp_params to journal which we've already sent back
-  if(pp_params.batchmeta){
+  else if(pp_params.batchmeta){
     let newmeta = []
     if(!pp_params.metacomplete){
       pp_params.metacomplete = []
@@ -929,83 +933,25 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub){
     if(chunk.metadata_docs){
       for(let i=0; i<chunk.metadata_docs.length; i++){
         if(!pp_params.metacomplete.includes(chunk.metadata_docs[i]._id)){
-          pp_params.metacomplete.push(chunks.metadata_docs[i]._id)
-          newmeta.push(chunks.metadata_docs[i])
+          pp_params.metacomplete.push(chunk.metadata_docs[i]._id)
+          newmeta.push(chunk.metadata_docs[i])
         }
       }
     }
     if(newmeta.length > 0){
       return newmeta
     }
+  } else {
+    return chunk
   }
-
-  return chunk
 }
 
 module.exports.post_xform = function(metaModel, pp_params, search_result, res, stub){
 
   return pipe(async chunk => {
-    return module.exports.postprocess_stream(chunk, search_result[0], pp_params, stub)
+    return module.exports.postprocess_stream(chunk, search_result[0], pp_params, stub, res)
   }, 16)
 
-
-  let nDocs = 0
-  let postprocess = pp_params.suppress_meta ? 
-    pipe(async chunk => {
-      // munge the chunk from the mongodb cursor and push it downstream if it isn't rejected.
-      let doc = null
-      if(!pp_params.mostrecent || nDocs < pp_params.mostrecent){
-          /// ie dont even bother with post if we've exceeded our mostrecent cap
-          doc = module.exports.postprocess_stream(chunk, [], pp_params, stub)
-      }
-      if(doc){
-        if(!pp_params.mostrecent || nDocs < pp_params.mostrecent){
-          res.status(200)
-          nDocs++
-          return(doc)
-        }
-      }
-      return null
-    }, 16) :
-    pipe(async chunk => {
-      // wait on a promise to get this chunk's metadata back
-      meta = await module.exports.locate_meta(chunk['metadata'], search_result[0], metaModel)
-      // keep track of new metadata docs so we don't look them up twice, and decide if we need to push them at the user in a batchmeta request
-      let newmeta = []
-      if(!pp_params.initialMetaPushComplete){
-        newmeta = JSON.parse(JSON.stringify(search_result[0])) 
-      }
-      pp_params.initialMetaPushComplete = true
-      for(let i=0; i<meta.length; i++){
-        if(!search_result[0].find(x => x._id == meta[i]._id)){
-          search_result[0].push(meta[i])
-          newmeta.push(meta[i])
-        } 
-      }
-
-      // hand back the metadata if it's new and that's what we want, OR munge the chunk and push it downstream if it isn't rejected.
-      let doc = null
-      if (pp_params.batchmeta && newmeta.length > 0 && (!pp_params.mostrecent || nDocs < pp_params.mostrecent)) {
-        // hand back metadata
-        res.status(200)
-        nDocs += newmeta.length
-        return(newmeta)        
-      } else if(!pp_params.batchmeta && (!pp_params.mostrecent || nDocs < pp_params.mostrecent)){
-          // munge the chunk and push it downstream if it isn't rejected.
-          doc = module.exports.postprocess_stream(chunk, meta, pp_params, stub)
-          if(doc){
-            if(!pp_params.mostrecent || nDocs < pp_params.mostrecent){
-              res.status(200)
-              nDocs++
-              return(doc)
-            }
-          }
-      } else {
-        return null
-      }
-    }, 16)
-
-  return postprocess
 }
 
 module.exports.meta_xform = function(res){
