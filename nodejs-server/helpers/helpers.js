@@ -796,7 +796,7 @@ module.exports.vertical_bounds = function(data, data_info, verticalRange, levels
     while(lowIndex < highIndex && lvlSpectrum[lowIndex] < verticalRange[0]){
       lowIndex++
     } // lowIndex now points at the first level index to keep
-    while(highIndex > lowIndex && lvlSpectrum[highIndex] > verticalRange[1]){
+    while(highIndex > lowIndex && lvlSpectrum[highIndex] >= verticalRange[1]){
       highIndex--
     } // highIndex now points at the last level index to keep
 
