@@ -519,6 +519,21 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
       }
     });
 
+    //// filter data for levels that have none of the requested data
+    if(!params.data_query[1].includes('all')){
+      aggPipeline.push({
+        $addFields: {
+          data: {
+            $function: {
+              body: module.exports.level_filter.toString(), // <-- slow?
+              args: ["$data", "$data_info", params.coerced_pressure],
+              lang: 'js'
+            }
+          }
+        }
+      })
+    }
+
     //// dump pressure if coerced and it's the only thing left on the data array after masking
     if(params.coerced_pressure){
       aggPipeline.push({
@@ -540,19 +555,6 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
       })
     }
   }
-
-  //// filter data for levels that have none of the requested data
-  aggPipeline.push({
-    $addFields: {
-      data: {
-        $function: {
-          body: module.exports.level_filter.toString(),
-          args: ["$data", "$data_info", params.coerced_pressure],
-          lang: 'js'
-        }
-      }
-    }
-  })
 
   // if there's no data left after all that, drop the document
   aggPipeline.push({
@@ -840,31 +842,40 @@ module.exports.level_filter = function(data, data_info, coerced_pressure){
     return data
   }
 
-  // only want to consider non-coerced pressures for this filter
-  filter_data = data.slice()
-
+  let dcopy = JSON.parse(JSON.stringify(data))
   if(coerced_pressure){
-    let pressure_index = data_info[0].findIndex(x => x === 'pressure')
-    filter_data.splice(pressure_index, 1);
+    dcopy.splice(data_info[0].indexOf('pressure'),1)
   }
 
-  const transposed_filter = filter_data[0].map((_, colIndex) => filter_data.map(row => row[colIndex]));
-
-  const nullIndices = [];
-  transposed_filter.forEach((innerArray, colIndex) => {
-    if (innerArray.every(value => value === null)) {
-      nullIndices.push(colIndex);
-    }
+  // zip
+  dcopy = dcopy[0].map(function(_,i){
+    return dcopy.map(function(dcopy){return dcopy[i]})
   });
 
-  const transposed_data = data[0].map((_, colIndex) => data.map(row => row[colIndex]));
-  const filtered_transposed_data = transposed_data.filter((_, colIndex) => !nullIndices.includes(colIndex));
+  dcopy = dcopy.map( (level,index) => {
+    if(level.every(x => x === null)){
+      return index
+    } else{
+      return -1
+    }
+  }).filter(x => x!==-1)
 
-  const finalResult = filtered_transposed_data[0]
-    ? filtered_transposed_data[0].map((_, rowIndex) => filtered_transposed_data.map(col => col[rowIndex]))
-    : [];
+  /// bail out if every level is marked for deletion
+  if(dcopy.length==data[0].length){
+    return []
+  }
 
-  return finalResult;
+  for(let i=0; i<data.length; i++){
+    data[i] = data[i].filter((level, index) => {
+      if(dcopy.includes(index)){
+        return false
+      } else {
+        return true
+      } 
+    })
+  }
+
+  return data
 }
 
 module.exports.isArrayOfEmptyArrays = function(data) {
