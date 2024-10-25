@@ -82,7 +82,8 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
-    params.lookup_meta = batchmeta || params.data_query
+    params.lookup_meta = false // there's only one AR meta document, just look it up once
+    params.archtypical_meta = params.data_query
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, null, false, null, null) 
@@ -113,8 +114,8 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
       params.projection = ['_id', 'metadata', 'timestamp', 'geolocation']
     }
 
-    // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
-    let metafilter = Promise.resolve([])
+    // metadata table filter: just get a single metadoc, there's only one for ar objects
+    let metafilter = Extended['extendedMeta'].find({_id:'ar'}).exec()
     params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection

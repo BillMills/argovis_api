@@ -42,7 +42,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
     params.metacollection = 'timeseriesMeta'
-    params.lookup_meta = batchmeta || params.data_query
+    params.lookup_meta = false // there's just one per satellite, so we don't need to look up metadata for each data document
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 

@@ -59,7 +59,7 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
 
 
     // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
-    let metafilter = Promise.resolve([])
+    let metafilter = argone['argoneMeta'].find({_id:'argone'}).exec()
     let params = {
       'metafilter': false,
       'batchmeta': batchmeta,
@@ -69,7 +69,8 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
-    params.lookup_meta = batchmeta || params.data_query
+    params.lookup_meta = false
+    params.archtypical_meta = true // there's just the one.
 
     // can we afford to project data documents down to a subset in aggregation?
     if(compression=='minimal' && data==null){

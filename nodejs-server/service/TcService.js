@@ -38,7 +38,8 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
-    params.lookup_meta = batchmeta || params.data_query
+    params.lookup_meta = batchmeta 
+    params.archtypical_meta = params.data_query
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -71,13 +72,14 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
     if(compression=='minimal' && data==null){
       params.projection = ['_id', 'metadata', 'geolocation', 'timestamp']
     }
-
-    // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
-    let metafilter = Promise.resolve([])
-    params.metafilter = false
+    // metadata table filter: single arbitrary doc for data_info if nothing to filter metadata for, custom search otherwise
+    let metafilter = Promise.resolve([]) 
     if(name){
-        metafilter = tc['tcMeta'].aggregate([{$match: {'name': name}}]).exec()
-        params.metafilter = true
+      metafilter = tc['tcMeta'].aggregate([{$match: {'name': name}}]).exec()
+      params.metafilter = true
+    } else {
+      metafilter = tc['tcMeta'].find({}).limit(1).exec()
+      params.metafilter = false
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
