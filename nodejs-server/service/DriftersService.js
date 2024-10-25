@@ -62,10 +62,11 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
     params.batchmeta = batchmeta
     params.compression = compression
     params.metacollection = 'drifterMeta'
+    params.archtypical_meta = true // any metadata document passed in to the datafilter from the metafilter has a globally applicable data_info, and possibly other fields.
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
-    params.lookup_meta = batchmeta || params.data_query || (compression === 'minimal')
+    params.lookup_meta = compression === 'minimal' // use the single-lookup metafilter for this collection since data_info is all the same, unless we're doing stubs in which case we need the wmo number from the metadata document
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -96,12 +97,11 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
 
     // can we afford to project data documents down to a subset in aggregation?
     if(compression=='minimal' && data==null){
-      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp']
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'metadata_docs']
     }
 
-    // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
-    let metafilter = Promise.resolve([])
-    params.metafilter = false
+    // metadata table filter: arbitrary document if nothing to filter metadata for, custom search otherwise
+    let metafilter = Promise.resolve([]) 
     if(wmo||platform){
         let match = {
             'wmo': wmo,
@@ -111,6 +111,9 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
 
         metafilter = Drifter['drifterMeta'].aggregate([{$match: match}]).exec()
         params.metafilter = true
+    } else {
+      metafilter = Drifter['drifterMeta'].find({}).limit(1).exec()
+      params.metafilter = false
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
@@ -123,6 +126,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
               // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
+
               return [
                 data['_id'], 
                 data.geolocation.coordinates[0], 

@@ -220,11 +220,9 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
   // <local_filter> a custom set of aggregation pipeline steps to be applied to the data collection reffed by <model>,
   // and <foreign_docs>, an array of documents matching a query on the metadata collection which should constrain which data collection docs we return,
   // return a cursor over that which matches the above
-
   let spacetimeMatch = []
   let proxMatch = []
   let foreignMatch = []
-  let isTimeseries = ['noaasst', 'copernicussla', 'ccmpwind'].includes(params.dataset)
   let geosearch = params.extended ? '$geoIntersects' : '$geoWithin' 
 
   // construct match stages as required
@@ -236,7 +234,7 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
   /// spacetime match construction
   if(params.startDate || params.endDate || params.polygon || params.box){
     spacetimeMatch[0] = {$match: {}}
-    if(!isTimeseries) {
+    if(!params.is_timeseries) {
       // time filtering at this stage only appropriate for point data
       if (params.startDate && params.endDate){
         spacetimeMatch[0]['$match']['timestamp'] = {$gte: params.startDate, $lt: params.endDate}
@@ -267,7 +265,7 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
   }
 
   /// construct filter for matching metadata docs if required; timeseries never filter on metadata docs
-  if(!isTimeseries && params.metafilter){
+  if(params.metafilter){
     let metaIDs = new Set(foreign_docs.map(x => x['_id']))
     foreignMatch.push({$match:{'metadata':{$in:Array.from(metaIDs)}}})
   }
@@ -327,16 +325,15 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
 
   //// some metadata documents pre-pulled have globally useful data
   if(params.archtypical_meta){
+    if(params.data_query || params.compression){
+      aggPipeline.push({
+        $addFields: {
+          data_info: foreign_docs[0].data_info
+        }
+      })
+    }
 
     if(params.is_timeseries){
-      if(params.data_query){
-        aggPipeline.push({
-          $addFields: {
-            data_info: foreign_docs[0].data_info
-          }
-        })
-      }
-
       if(params.startDate || params.endDate){
         aggPipeline.push({
           $addFields: {
@@ -345,7 +342,6 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
         })
       }
     }
-
   }
 
   //// perform pressure filter
@@ -399,7 +395,7 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
   }
 
   // filter down to requested time range in mongo for timeseries data
-  if(isTimeseries && (params.startDate || params.endDate)){
+  if(params.is_timeseries && (params.startDate || params.endDate)){
 
     // find the slice bounds
     let ts = JSON.parse(JSON.stringify(foreign_docs[0]['timeseries']))
