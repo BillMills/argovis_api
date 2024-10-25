@@ -218,7 +218,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
               ]
           }
 
-          let postprocess = helpers.post_xform(argo['argoMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
 
           res.status(404) // 404 by default
 

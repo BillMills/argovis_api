@@ -938,7 +938,7 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub, r
   }
 }
 
-module.exports.post_xform = function(metaModel, pp_params, search_result, res, stub){
+module.exports.post_xform = function(pp_params, search_result, res, stub){
 
   return pipe(async chunk => {
     return module.exports.postprocess_stream(chunk, search_result[0], pp_params, stub, res)

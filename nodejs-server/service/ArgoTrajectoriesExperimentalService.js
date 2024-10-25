@@ -128,7 +128,7 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
               ]
           }
 
-          let postprocess = helpers.post_xform(trajectories['argotrajectoriesMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
 
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])

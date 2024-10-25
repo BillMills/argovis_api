@@ -130,7 +130,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
               ]
           }
 
-          let postprocess = helpers.post_xform(cchdo['cchdoMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
           

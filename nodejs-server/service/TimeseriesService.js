@@ -94,7 +94,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
                 data['metadata']
               ]
           }
-          let postprocess = helpers.post_xform(Timeseries['timeseriesMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
         })

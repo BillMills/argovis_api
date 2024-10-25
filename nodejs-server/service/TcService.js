@@ -101,7 +101,7 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
               ]
           }
 
-          let postprocess = helpers.post_xform(tc['tcMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
 

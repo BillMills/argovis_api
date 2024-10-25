@@ -120,7 +120,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
                 data['metadata']
               ]
           }
-          let postprocess = helpers.post_xform(Grid[gridName+'Meta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
         })
