@@ -459,7 +459,9 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
     })
 
     //// filter levels by QC requests
-    if(params.qc_suffix){
+    if(params.qc_suffix && 
+        (Object.values(params.data_query[2]).some(arr => Array.isArray(arr) && arr.length > 0) 
+        || params.data_query[3].length > 0)){
       aggPipeline.push({
         $addFields: {
           data: {
@@ -688,30 +690,20 @@ module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
     return data;
   }
 
-  // Transpose the data so we can iterate through levels
-  const transposedData = data[0].map((_, colIndex) => data.map(row => row[colIndex]));
-
-  // Iterate over levels
-  const updatedTransposedData = transposedData.map(lvl => {
+  for(i=0; i<data[0].length; i++){ // i indexes levels
     for (const key in variables) {
       const qcVariableName = key + qc_suffix;
       const qcIndex = data_info[0].indexOf(qcVariableName);
       const varIndex = data_info[0].indexOf(key);
 
       // If the QC variable is found and its value isn't in the allowed list, set the original value to null
-      if (qcIndex !== -1 && !variables[key].includes(lvl[qcIndex])) {
-        lvl[varIndex] = null;  // Set the value of the corresponding variable at this level to null
+      if (qcIndex !== -1 && !variables[key].includes(data[qcIndex][i])) {
+        data[varIndex][i] = null;  // Set the value of the corresponding variable at this level to null
       }
     }
-    return lvl;
-  });
+  }
 
-  // Un-transpose the data to return it back to the original row/column format
-  const updatedData = updatedTransposedData[0]
-    ? updatedTransposedData[0].map((_, rowIndex) => updatedTransposedData.map(col => col[rowIndex]))
-    : [];
-
-  return updatedData;
+  return data
 }
 
 module.exports.data_mask = function(data_query, data, data_info, qc_suffix) {
