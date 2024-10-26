@@ -561,15 +561,30 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
     $match: {
       $expr: {
         $not: {
-          $function: {
-            body: module.exports.isArrayOfEmptyArrays.toString(),  
-            args: ["$data"], 
-            lang: "js"
-          }
+          $or: [
+            // Case 1: 'data' is an empty array
+            { $eq: [{ $size: "$data" }, 0] },
+  
+            // Case 2: 'data' is an array where all elements are empty arrays
+            {
+              $eq: [
+                {
+                  $size: {
+                    $filter: {
+                      input: "$data",
+                      as: "item",
+                      cond: { $ne: [{ $size: "$$item" }, 0] }  // Keep only non-empty arrays
+                    }
+                  }
+                },
+                0
+              ]
+            }
+          ]
         }
       }
     }
-  })
+  });
 
   if(!params.data_query || params.data_query[1].includes('except-data-values')){
     aggPipeline.push({
@@ -881,14 +896,6 @@ module.exports.level_filter = function(data, data_info, coerced_pressure){
   }
 
   return data
-}
-
-module.exports.isArrayOfEmptyArrays = function(data) {
-  // Return true if the data is an array of empty arrays, false otherwise
-  if (data.length === 0) return true;  // Empty array is considered an array of empty arrays
-
-  // Check if all elements are empty arrays
-  return data.every(item => Array.isArray(item) && item.length === 0);
 }
 
 module.exports.correct_data_available = function(data_query, data, data_info) {

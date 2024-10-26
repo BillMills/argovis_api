@@ -320,14 +320,6 @@ describe("data_info_filter", function () {
   });
 });
 
-describe("isArrayOfEmptyArrays", function () {
-  it("isArrayOfEmptyArrays - nominal", async function () {
-    x = [[],[],[]]
-    expect(helpers.isArrayOfEmptyArrays(x)).to.be.true
-    expect(helpers.isArrayOfEmptyArrays([])).to.be.true
-  });
-});
-
 describe("correct_data_available", function () {
   it("correct_data_available - nominal", async function () {
     data_query = helpers.parse_data_qsp('temp')
