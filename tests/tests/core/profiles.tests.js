@@ -645,3 +645,17 @@ describe("GET /argo", function () {
     expect(response.body.length).to.eql(1);
   });
 }); 
+
+describe("GET /argo", function () {
+  it("qc filtering doesnt break if data array is empty", async function () {
+    const response = await request.get("/argo?id=1900959_198&data=temperature,1").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(404);
+  });
+}); 
+
+describe("GET /argo", function () {
+  it("depth filtering doesnt break if data array is empty", async function () {
+    const response = await request.get("/argo?id=1900959_198&data=temperature&verticalRange=0,100").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(404);
+  });
+}); 

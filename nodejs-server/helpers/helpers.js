@@ -644,6 +644,11 @@ module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
   const variables = data_query[2];
   let allQcFlags = data_query[3];
 
+  // no data, nothing to do here, just pass it along
+  if (data.length === 0) {
+    return data;
+  }
+
   // Remove any variable that has an empty array - no QC filtering to do
   for (const key in variables) {
     if (variables[key].length === 0) {
