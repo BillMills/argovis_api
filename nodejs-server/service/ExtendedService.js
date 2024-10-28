@@ -84,6 +84,8 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     }
     params.lookup_meta = false // there's only one AR meta document, just look it up once
     params.archtypical_meta = params.data_query
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, null, false, null, null) 
@@ -101,12 +103,6 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
       local_filter = [local_filter]
     } else {
       local_filter = []
-    }
-
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -135,7 +131,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
                 data['metadata']
               ]
           }
-          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
 
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])

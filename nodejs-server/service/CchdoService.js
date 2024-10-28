@@ -49,6 +49,8 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
       }
     }
     params.lookup_meta = batchmeta || (compression === 'minimal')
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,(center && radius),cchdo_cruise,woceline].some(x=>x)){
@@ -78,12 +80,6 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     // optional source filtering
     if(source){
       local_filter.push(helpers.source_filter(source))
-    }
-
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -130,7 +126,7 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
               ]
           }
 
-          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
           

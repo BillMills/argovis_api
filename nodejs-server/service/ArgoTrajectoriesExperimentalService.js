@@ -68,6 +68,8 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
     params.lookup_meta = batchmeta || params.data_query
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -88,12 +90,6 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
       local_filter = [local_filter]
     } else {
       local_filter = []
-    }
-
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta,
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -128,7 +124,7 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
               ]
           }
 
-          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
 
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])

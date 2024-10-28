@@ -40,6 +40,8 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
     }
     params.lookup_meta = batchmeta 
     params.archtypical_meta = params.data_query
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -60,12 +62,6 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
       local_filter = [local_filter]
     } else {
       local_filter = []
-    }
-
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -101,7 +97,7 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
               ]
           }
 
-          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
 

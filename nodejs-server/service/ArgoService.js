@@ -136,6 +136,8 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
       }
     }
     params.lookup_meta = batchmeta
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,(center && radius),platform].some(x=>x)){
@@ -168,12 +170,6 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     // optional source filtering
     if(source){
       local_filter.push(helpers.source_filter(source))
-    }
-
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -218,7 +214,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
               ]
           }
 
-          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
 
           res.status(404) // 404 by default
 

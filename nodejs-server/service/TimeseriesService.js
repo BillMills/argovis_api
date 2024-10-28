@@ -43,6 +43,8 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     }
     params.metacollection = 'timeseriesMeta'
     params.lookup_meta = false // there's just one per satellite, so we don't need to look up metadata for each data document
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -60,12 +62,6 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
       local_filter = [local_filter]
     } else {
       local_filter = []
-    }
-
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -94,7 +90,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
                 data['metadata']
               ]
           }
-          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
         })

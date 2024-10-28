@@ -273,9 +273,12 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
   // set up first part of pipeline aggregation:
   let aggPipeline = proxMatch.concat(spacetimeMatch).concat(local_filter).concat(foreignMatch)
 
-  // construct transform stages as required
+  if(params.compression !== 'minimal'){
+    // some stub requests are allowed that would swamp mongo's default sorting limits.
+    aggPipeline.push({$sort: {'timestamp':-1}})
+  }
 
-  /// data query filtration
+  // fetch some useful cross-references, and don't deserialize the data field if we don't need it
 
   //// go find data_info on the metadata document and bring it along
   if(params.lookup_meta){
@@ -342,267 +345,10 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
       }
     }
   }
-
-  //// perform pressure filter
-  if(params.verticalRange){
-    // find the slice bounds
-    aggPipeline.push({
-      $addFields: {
-        verticalRange: {
-          $function: {
-            body: module.exports.vertical_bounds.toString(),
-            args: params.is_grid ? ["$data", "$data_info", params.verticalRange, "$levels"] : ["$data", "$data_info", params.verticalRange, null],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    // do the slicing
-    aggPipeline.push({
-      $addFields: {
-        data: {
-          $function: {
-            body: module.exports.vertical_data_slice.toString(),
-            args: ["$data", "$verticalRange"],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    if(params.is_grid){
-      aggPipeline.push({
-        $addFields: {
-          levels: {
-            $function: {
-              body: module.exports.vertical_level_slice.toString(),
-              args: ["$levels", "$verticalRange"],
-              lang: 'js'
-            }
-          }
-        }
-      })
-    }
-
-    // drop the slice bounds
-    aggPipeline.push({
-      $project: {
-        verticalRange: 0
-      }
-    });
-  }
-
-  // filter down to requested time range in mongo for timeseries data
-  if(params.is_timeseries && (params.startDate || params.endDate)){
-
-    // find the slice bounds
-    let ts = JSON.parse(JSON.stringify(foreign_docs[0]['timeseries']))
-    ts = ts.map(x => new Date(x))
-    aggPipeline.push({
-      $addFields: {
-        timeRange: {
-          $function: {
-            body: module.exports.timerange_bounds.toString(),
-            args: [ts, params.startDate, params.endDate],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    // do the slicing
-    aggPipeline.push({
-      $addFields: {
-        data: {
-          $function: {
-            body: module.exports.timeseries_data_slice.toString(),
-            args: ["$data", "$timeRange"],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    aggPipeline.push({
-      $addFields: {
-        timeseries: {
-          $function: {
-            body: module.exports.timeseries_slice.toString(),
-            args: ["$timeseries", "$timeRange"],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    // drop the slice bounds
-    aggPipeline.push({
-      $project: {
-        timeRange: 0
-      }
-    });
-  }
-
-  if(params.data_query){
-    //// if there's a requested measurement not present, or a negated measurement present, immediately null the data attribute for dropping
-    aggPipeline.push({
-      $addFields: {
-        data: {
-          $function: {
-            body: module.exports.correct_data_available.toString(),
-            args: [params.data_query, "$data", "$data_info"],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    //// filter levels by QC requests
-    if(params.qc_suffix && 
-        (Object.values(params.data_query[2]).some(arr => Array.isArray(arr) && arr.length > 0) 
-        || params.data_query[3].length > 0)){
-      aggPipeline.push({
-        $addFields: {
-          data: {
-            $function: {
-              body: module.exports.qc_filter.toString(),
-              args: [params.data_query, "$data", "$data_info", params.qc_suffix],
-              lang: 'js'
-            }
-          }
-        }
-      })
-    }
-
-    //// find mask for .data, data_info[0], data_info[2]
-    aggPipeline.push({
-      $addFields: {
-        data_mask: {
-          $function: {
-            body: module.exports.data_mask.toString(),
-            args: [params.data_query, "$data", "$data_info", params.qc_suffix],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    //// keep the data in the mask
-    aggPipeline.push({
-      $addFields: {
-        data: {
-          $function: {
-            body: module.exports.data_filter.toString(),
-            args: ["$data_mask", "$data", params.data_query],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    //// keep the data_info in the mask
-    aggPipeline.push({
-      $addFields: {
-        data_info: {
-          $function: {
-            body: module.exports.data_info_filter.toString(),
-            args: ["$data_mask", "$data_info"],
-            lang: 'js'
-          }
-        }
-      }
-    })
-
-    //// dump the mask
-    aggPipeline.push({
-      $project: {
-        data_mask: 0
-      }
-    });
-
-    //// filter data for levels that have none of the requested data
-    if(!params.data_query[1].includes('all')){
-      aggPipeline.push({
-        $addFields: {
-          data: {
-            $function: {
-              body: module.exports.level_filter.toString(), // <-- slow?
-              args: ["$data", "$data_info", params.coerced_pressure],
-              lang: 'js'
-            }
-          }
-        }
-      })
-    }
-
-    //// dump pressure if coerced and it's the only thing left on the data array after masking
-    if(params.coerced_pressure){
-      aggPipeline.push({
-        $addFields: {
-          data: {
-            $function: {
-              body: `function(data){
-                if(data.length == 1){
-                  return []
-                } else {
-                  return data
-                }
-              }`,
-              args: ["$data"],
-              lang: 'js'
-            }
-          }
-        }
-      })
-    }
-  }
-
-  // if there's no data left after all that, drop the document
-  aggPipeline.push({
-    $match: {
-      $expr: {
-        $not: {
-          $or: [
-            // Case 1: 'data' is an empty array
-            { $eq: [{ $size: "$data" }, 0] },
-  
-            // Case 2: 'data' is an array where all elements are empty arrays
-            {
-              $eq: [
-                {
-                  $size: {
-                    $filter: {
-                      input: "$data",
-                      as: "item",
-                      cond: { $ne: [{ $size: "$$item" }, 0] }  // Keep only non-empty arrays
-                    }
-                  }
-                },
-                0
-              ]
-            }
-          ]
-        }
-      }
-    }
-  });
-
-  if(!params.data_query || params.data_query[1].includes('except-data-values')){
-    aggPipeline.push({
-      $project: {
-        data: 0
-      }
-    });
-  }
-  
-  if(params.compression !== 'minimal'){
-    // some stub requests are allowed that would swamp mongo's default sorting limits.
-    aggPipeline.push({$sort: {'timestamp':-1}})
-  }
-
+ 
   if(params.projection){
     // project out only the listed data document keys
+    aggPipeline.push({$match: {'data.0':{$exists:true}} })
     let project = {}
     for(let i=0;i<params.projection.length;i++){
       project[params.projection[i]] = 1
@@ -658,8 +404,8 @@ module.exports.parse_data_qsp = function(data_query){
 }
 
 module.exports.qc_filter = function (data_query, data, data_info, qc_suffix) {
-  const variables = data_query[2];
-  let allQcFlags = data_query[3];
+  const variables = JSON.parse(JSON.stringify(data_query[2])) 
+  let allQcFlags = JSON.parse(JSON.stringify(data_query[3])) 
 
   // no data, nothing to do here, just pass it along
   if (data.length === 0) {
@@ -904,40 +650,103 @@ module.exports.correct_data_available = function(data_query, data, data_info) {
   return data
 }
 
-module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub, res){
+module.exports.postprocess_stream = function(chunk, metadata, params, stub, res){
   // <chunk>: raw data table document
   // <metadata>: metadata doc corresponding to this chunk
-  // <pp_params>: kv with helpful information about what to do here
+  // <params>: kv with helpful information about what to do here
   // <stub>: function accepting one data document and its corresponding metadata document, returns appropriate representation for the compression=minimal flag.
   // returns chunk mutated into its final, user-facing form
   // or return false to drop this item from the stream (dont - drops should be in the agg pipeline)
 
-  if(chunk){
+  // immediately return a minimal stub if requested and data has been projected off
+  if(params.compression == 'minimal' && !chunk.hasOwnProperty('data')){
     res.status(200)
+    return stub(chunk)
+  }
+
+  // filtration
+  /// pressure
+  if(params.verticalRange){
+    let verticalRange = module.exports.vertical_bounds(chunk.data, chunk.data_info, params.verticalRange, chunk.levels)
+    chunk.data = module.exports.vertical_data_slice(chunk.data, verticalRange)
+    if(params.is_grid){
+      chunk.levels = module.exports.vertical_level_slice(chunk.levels, verticalRange)
+    }
+  }
+
+  /// timeseries timeranges
+  if(params.is_timeseries && (params.startDate || params.endDate)){
+    // find the slice bounds
+    let ts = JSON.parse(JSON.stringify(chunk.timeseries))
+    ts = ts.map(x => new Date(x))
+    let timeRange = module.exports.timerange_bounds(ts, params.startDate, params.endDate)
+
+    // do the slicing
+    chunk.data = module.exports.timeseries_data_slice(chunk.data, timeRange)
+    chunk.timeseries = module.exports.timeseries_slice(chunk.timeseries, timeRange)
+  }
+
+  /// data
+  if(params.data_query){
+    //// if there's a requested measurement not present, or a negated measurement present, immediately null the data attribute for dropping
+    chunk.data = module.exports.correct_data_available(params.data_query, chunk.data, chunk.data_info)
+    //// filter levels by QC requests
+    if(params.qc_suffix && 
+        (Object.values(params.data_query[2]).some(arr => Array.isArray(arr) && arr.length > 0) 
+        || params.data_query[3].length > 0)){
+          chunk.data = module.exports.qc_filter(params.data_query, chunk.data, chunk.data_info, params.qc_suffix)
+    }
+    //// filter data and data info for requested variables
+    let data_mask = module.exports.data_mask(params.data_query, chunk.data, chunk.data_info, params.qc_suffix)
+    chunk.data = module.exports.data_filter(data_mask, chunk.data, params.data_query)
+    chunk.data_info = module.exports.data_info_filter(data_mask, chunk.data_info)
+    //// filter off levels that have all null values for all requested variables
+    if(!params.data_query[1].includes('all')){
+      chunk.data = module.exports.level_filter(chunk.data, chunk.data_info, params.coerced_pressure)
+    }
+    //// dump pressure if coerced and it's the only thing left on the data array after masking
+    if(params.coerced_pressure){
+      if(chunk.data.length == 1){
+        chunk.data = []
+      }
+    }
+  }
+
+  // if there's no data left after all that and we didn't suppress it from the get-go, drop the document
+  if(!chunk.data || chunk.data.length === 0 || chunk.data.every(x => x.length === 0)){
+    return null
+  }
+
+  // if we've made it this far, we're keeping the document
+  res.status(200)
+
+  // drop the data key if we're not returning it
+  if(!params.data_query || params.data_query[1].includes('except-data-values')){
+    delete chunk.data
   }
 
   // return a minimal stub if requested
-  if(pp_params.compression == 'minimal'){
+  if(params.compression == 'minimal'){
     return stub(chunk)
   }
 
   // return metadata documents in batchmeta mode
-  // use pp_params to journal which we've already sent back
-  else if(pp_params.batchmeta){
+  // use params to journal which we've already sent back
+  else if(params.batchmeta){
     let newmeta = []
-    if(!pp_params.metacomplete){
-      pp_params.metacomplete = []
+    if(!params.metacomplete){
+      params.metacomplete = []
     }
     for(let i=0; i<metadata.length; i++){
-      if(!pp_params.metacomplete.includes(metadata[i]._id)){
-        pp_params.metacomplete.push(metadata[i]._id)
+      if(!params.metacomplete.includes(metadata[i]._id)){
+        params.metacomplete.push(metadata[i]._id)
         newmeta.push(metadata[i])
       }
     }
     if(chunk.metadata_docs){
       for(let i=0; i<chunk.metadata_docs.length; i++){
-        if(!pp_params.metacomplete.includes(chunk.metadata_docs[i]._id)){
-          pp_params.metacomplete.push(chunk.metadata_docs[i]._id)
+        if(!params.metacomplete.includes(chunk.metadata_docs[i]._id)){
+          params.metacomplete.push(chunk.metadata_docs[i]._id)
           newmeta.push(chunk.metadata_docs[i])
         }
       }
@@ -953,10 +762,10 @@ module.exports.postprocess_stream = function(chunk, metadata, pp_params, stub, r
   }
 }
 
-module.exports.post_xform = function(pp_params, search_result, res, stub){
+module.exports.post_xform = function(params, search_result, res, stub){
 
   return pipe(async chunk => {
-    return module.exports.postprocess_stream(chunk, search_result[0], pp_params, stub, res)
+    return module.exports.postprocess_stream(chunk, search_result[0], params, stub, res)
   }, 16)
 
 }

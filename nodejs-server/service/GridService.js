@@ -67,6 +67,8 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
     params.lookup_meta = batchmeta || params.data_query || params.verticalRange
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
@@ -85,12 +87,6 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
     let local_filter = []
     if(id){
         local_filter = [{$match:{'_id':id}}]
-    }
-
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta,
     }
 
     // can we afford to project data documents down to a subset in aggregation?
@@ -120,7 +116,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
                 data['metadata']
               ]
           }
-          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
         })

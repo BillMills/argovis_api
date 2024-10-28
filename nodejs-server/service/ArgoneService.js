@@ -51,20 +51,15 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
         local_filter.push({'$match':{'_id': id}})
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta
-    }
-
-
     // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
     let metafilter = argone['argoneMeta'].find({_id:'argone'}).exec()
     let params = {
       'metafilter': false,
       'batchmeta': batchmeta,
       'metacollection': 'argoneMeta',
-      'junk': ['dist']
+      'junk': ['dist'],
+      'compression': compression,
+      'batchmeta': batchmeta,
     }
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
@@ -96,7 +91,7 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
               ]
           }
 
-          let postprocess = helpers.post_xform(pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
 
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])

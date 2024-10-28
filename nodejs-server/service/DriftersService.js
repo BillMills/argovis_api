@@ -67,6 +67,8 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
       params.data_query = helpers.parse_data_qsp(data.join(','))
     }
     params.lookup_meta = (compression === 'minimal') || batchmeta // use the single-lookup metafilter for this collection since data_info is all the same, unless we're doing stubs in which case we need the wmo number from the metadata document
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -87,12 +89,6 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
       local_filter = [local_filter]
     } else {
       local_filter = []
-    }
-
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        batchmeta : batchmeta,
     }
 
     // can we afford to project data documents down to a subset in aggregation?
