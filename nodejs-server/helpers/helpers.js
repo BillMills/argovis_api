@@ -317,7 +317,7 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
     })    
 
     ///// if this is a grid, get the level data, too.
-    if(params.is_grid){
+    if(params.is_grid && params.verticalRange){
       aggPipeline.push({
         $addFields: {
           levels: { $arrayElemAt: ["$metadata_docs.levels", 0] }
