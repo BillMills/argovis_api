@@ -51,7 +51,7 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
         local_filter.push({'$match':{'_id': id}})
     }
 
-    // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
+    // metadata table filter: just get the sole solitary argon metadata doc
     let metafilter = argone['argoneMeta'].find({_id:'argone'}).exec()
     let params = {
       'metafilter': false,
