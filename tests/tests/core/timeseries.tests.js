@@ -97,6 +97,12 @@ describe("GET /timeseries/noaasst", function () {
   });
 });
 
+describe("GET /timeseries/noaasst", function () {
+  it("should not have data_info in this case", async function () {
+    const response = await request.get("/timeseries/noaasst?center=-46.5,35.5&radius=1&startDate=1989-12-31T00:00:00Z&endDate=1990-01-28T00:00:00Z").set({'x-argokey': 'developer'});
+    expect(response.body[0]).to.not.have.property('data_info')        
+  });
+});
 
 
 

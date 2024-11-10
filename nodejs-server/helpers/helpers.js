@@ -328,12 +328,13 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
 
   //// some metadata documents pre-pulled have globally useful data
   if(params.archtypical_meta && foreign_docs.length > 0){
-    // always bring in data_info to the data document
-    aggPipeline.push({
-      $addFields: {
-        data_info: foreign_docs[0].data_info
-      }
-    })
+    if(params.data_query){
+      aggPipeline.push({
+        $addFields: {
+          data_info: foreign_docs[0].data_info
+        }
+      })
+    }
 
     if(params.is_timeseries){
       if(params.startDate || params.endDate){
