@@ -73,7 +73,8 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
     if(name){
       metafilter = tc['tcMeta'].aggregate([{$match: {'name': name}}]).exec()
       params.metafilter = true
-    } else {
+    } else if(!batchmeta) {
+      // get an arbitrary metadata doc, unless we're getting specific ones from batchmeta
       metafilter = tc['tcMeta'].find({}).limit(1).exec()
       params.metafilter = false
     }
