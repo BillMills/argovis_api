@@ -84,8 +84,6 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
     }
     params.lookup_meta = false // there's only one AR meta document, just look it up once
     params.archtypical_meta = params.data_query
-    params.compression = compression
-    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, null, false, null, null) 
@@ -119,7 +117,6 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
-
           let stub = function(data){
               // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set

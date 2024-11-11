@@ -677,14 +677,15 @@ module.exports.postprocess_stream = function(chunk, metadata, params, stub, res)
 
   /// timeseries timeranges
   if(params.is_timeseries && (params.startDate || params.endDate)){
-    // find the slice bounds
-    let ts = JSON.parse(JSON.stringify(chunk.timeseries))
-    ts = ts.map(x => new Date(x))
-    let timeRange = module.exports.timerange_bounds(ts, params.startDate, params.endDate)
-
+    // find the slice bounds, record for posterity
+    let ts = chunk.timeseries.map(x => new Date(x))
+    if(!params.timeRange){
+      params.timeRange = module.exports.timerange_bounds(ts, params.startDate, params.endDate)
+    }
+    
     // do the slicing
-    chunk.data = module.exports.timeseries_data_slice(chunk.data, timeRange)
-    chunk.timeseries = module.exports.timeseries_slice(chunk.timeseries, timeRange)
+    chunk.data = module.exports.timeseries_data_slice(chunk.data, params.timeRange)
+    chunk.timeseries = module.exports.timeseries_slice(chunk.timeseries, params.timeRange)
   }
 
   /// data
