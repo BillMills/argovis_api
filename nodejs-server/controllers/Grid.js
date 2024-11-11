@@ -3,8 +3,8 @@
 var utils = require('../utils/writer.js');
 var Grid = require('../service/GridService');
 
-module.exports.findgrid = function findgrid (req, res, next, gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta, page) {
-  Grid.findgrid(gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta, page)
+module.exports.findgrid = function findgrid (req, res, next, gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta) {
+  Grid.findgrid(gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -13,8 +13,8 @@ module.exports.findgrid = function findgrid (req, res, next, gridName, id, start
     });
 };
 
-module.exports.findgridMeta = function findgridMeta (req, res, next, id, page) {
-  Grid.findgridMeta(id, page)
+module.exports.findgridMeta = function findgridMeta (req, res, next, id) {
+  Grid.findgridMeta(id)
     .then(function (response) {
       utils.writeJson(res, response);
     })

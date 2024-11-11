@@ -40,10 +40,9 @@ exports.cchdoVocab = function(parameter) {
  * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
- * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findCCHDO = function(id,startDate,endDate,polygon,box,center,radius,metadata,woceline,cchdo_cruise,source,compression,mostrecent,data,presRange,verticalRange,batchmeta,page) {
+exports.findCCHDO = function(id,startDate,endDate,polygon,box,center,radius,metadata,woceline,cchdo_cruise,source,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
@@ -116,10 +115,9 @@ exports.findCCHDO = function(id,startDate,endDate,polygon,box,center,radius,meta
  * id String Unique ID to search for. (optional)
  * woceline String WOCE line to search for. See /cchdo/vocabulary?parameter=woceline for list of options. (optional)
  * cchdo_cruise BigDecimal CCHDO cruise ID to search for. See /cchdo/vocabulary?parameter=cchdo_cruise for list of options. (optional)
- * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findCCHDOmeta = function(id,woceline,cchdo_cruise,page) {
+exports.findCCHDOmeta = function(id,woceline,cchdo_cruise) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {

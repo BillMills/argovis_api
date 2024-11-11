@@ -13,8 +13,8 @@ module.exports.easyoceanVocab = function easyoceanVocab (req, res, next, paramet
     });
 };
 
-module.exports.findeasyocean = function findeasyocean (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, verticalRange, batchmeta, section_start_date, page) {
-  Easyocean.findeasyocean(id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, verticalRange, batchmeta, section_start_date, page)
+module.exports.findeasyocean = function findeasyocean (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, verticalRange, batchmeta, section_start_date) {
+  Easyocean.findeasyocean(id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, verticalRange, batchmeta, section_start_date)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -23,8 +23,8 @@ module.exports.findeasyocean = function findeasyocean (req, res, next, id, start
     });
 };
 
-module.exports.findeasyoceanmeta = function findeasyoceanmeta (req, res, next, woceline, page) {
-  Easyocean.findeasyoceanmeta(woceline, page)
+module.exports.findeasyoceanmeta = function findeasyoceanmeta (req, res, next, woceline) {
+  Easyocean.findeasyoceanmeta(woceline)
     .then(function (response) {
       utils.writeJson(res, response);
     })

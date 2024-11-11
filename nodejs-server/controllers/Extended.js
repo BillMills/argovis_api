@@ -13,8 +13,8 @@ module.exports.extendedVocab = function extendedVocab (req, res, next, extendedN
     });
 };
 
-module.exports.findExtended = function findExtended (req, res, next, extendedName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, page) {
-  Extended.findExtended(extendedName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, page)
+module.exports.findExtended = function findExtended (req, res, next, extendedName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta) {
+  Extended.findExtended(extendedName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -23,8 +23,8 @@ module.exports.findExtended = function findExtended (req, res, next, extendedNam
     });
 };
 
-module.exports.findextendedMeta = function findextendedMeta (req, res, next, id, page) {
-  Extended.findextendedMeta(id, page)
+module.exports.findextendedMeta = function findextendedMeta (req, res, next, id) {
+  Extended.findextendedMeta(id)
     .then(function (response) {
       utils.writeJson(res, response);
     })
