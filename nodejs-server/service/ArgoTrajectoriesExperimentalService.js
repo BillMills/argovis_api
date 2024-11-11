@@ -49,7 +49,6 @@ exports.argotrajectoryVocab = function(parameter) {
  * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data argotrajectory_data_keys Keys of data to include. Return only documents that have all data requested. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
- * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
 exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,compression,mostrecent,data,batchmeta,page) {
@@ -138,10 +137,9 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
  *
  * id String Unique ID to search for. (optional)
  * platform String Unique platform ID to search for. (optional)
- * page Integer Page number of paginated results to return. (optional)
  * returns List
  **/
-exports.findArgotrajectorymeta = function(res,id,platform,page) {
+exports.findArgotrajectorymeta = function(res,id,platform) {
   return new Promise(function(resolve, reject) {
     let match = {
         '_id': id,

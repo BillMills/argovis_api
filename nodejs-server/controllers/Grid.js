@@ -3,10 +3,10 @@ const apihits = require('../models/apihits');
 var Grid = require('../service/GridService');
 var helpers = require('../helpers/helpers')
 
-module.exports.findgrid = function findgrid (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta, page, gridName) {
+module.exports.findgrid = function findgrid (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta, gridName) {
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: gridName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
-  Grid.findgrid(res,gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta, page)
+  Grid.findgrid(res,gridName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, presRange, verticalRange, batchmeta)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
       helpers.lookupReject.bind(null, req, res)
@@ -14,11 +14,11 @@ module.exports.findgrid = function findgrid (req, res, next, id, startDate, endD
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findgridMeta = function findgridMeta (req, res, next, id, page) {
+module.exports.findgridMeta = function findgridMeta (req, res, next, id) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
-  Grid.findgridMeta(res,id, page)
+  Grid.findgridMeta(res,id)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, false)(pipefittings),
       helpers.lookupReject.bind(null, req, res)

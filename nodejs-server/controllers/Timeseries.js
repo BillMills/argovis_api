@@ -4,11 +4,11 @@ const apihits = require('../models/apihits');
 var Timeseries = require('../service/TimeseriesService');
 var helpers = require('../helpers/helpers')
 
-module.exports.findtimeseries = function findtimeseries (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, page, timeseriesName) {
+module.exports.findtimeseries = function findtimeseries (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, timeseriesName) {
 
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: timeseriesName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
-  Timeseries.findtimeseries(res, timeseriesName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, page)
+  Timeseries.findtimeseries(res, timeseriesName, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
       helpers.lookupReject.bind(null, req, res)
@@ -16,11 +16,11 @@ module.exports.findtimeseries = function findtimeseries (req, res, next, id, sta
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findtimeseriesMeta = function findtimeseriesMeta (req, res, next, id, page) {
+module.exports.findtimeseriesMeta = function findtimeseriesMeta (req, res, next, id) {
   
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
-  Timeseries.findtimeseriesMeta(res, id, page)
+  Timeseries.findtimeseriesMeta(res, id)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, false)(pipefittings),
       helpers.lookupReject.bind(null, req, res)
