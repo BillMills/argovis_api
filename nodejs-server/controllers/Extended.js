@@ -16,11 +16,11 @@ module.exports.extendedVocab = function extendedVocab (req, res, next, parameter
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findExtended = function findExtended (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, mostrecent, data, batchmeta, extendedName) {
+module.exports.findExtended = function findExtended (req, res, next, id, startDate, endDate, polygon, box, center, radius, compression, data, batchmeta, extendedName) {
   
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, product: extendedName, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
   
-  Extended.findExtended(res,extendedName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,batchmeta)
+  Extended.findExtended(res,extendedName,id,startDate,endDate,polygon,box,center,radius,compression,data,batchmeta)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
       helpers.lookupReject.bind(null, req, res)

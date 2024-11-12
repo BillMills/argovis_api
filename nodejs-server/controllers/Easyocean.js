@@ -15,11 +15,11 @@ module.exports.easyoceanVocab = function easyoceanVocab (req, res, next, paramet
     .catch(helpers.catchPipeline.bind(null, req, res));
 };
 
-module.exports.findeasyocean = function findeasyocean (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, verticalRange, batchmeta, section_start_date) {
+module.exports.findeasyocean = function findeasyocean (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, data, presRange, verticalRange, batchmeta, section_start_date) {
   
   apihits.apihits.create({metadata: req.openapi.openApiRoute, query: req.query, isWeb: req.headers.origin === 'https://argovis.colorado.edu', avhTelemetry: req.headers.hasOwnProperty('x-avh-telemetry') ? req.headers['x-avh-telemetry'] : null})
 
-  Easyocean.findeasyocean(res, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, verticalRange, batchmeta, section_start_date)
+  Easyocean.findeasyocean(res, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, data, presRange, verticalRange, batchmeta, section_start_date)
     .then(
       pipefittings => helpers.data_pipeline.bind(null, req, res, batchmeta)(pipefittings),
       helpers.lookupReject.bind(null, req, res)
