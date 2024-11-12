@@ -123,9 +123,6 @@
                   "$ref": "#/components/parameters/compression"
                },
                {
-                  "$ref": "#/components/parameters/mostrecent"
-               },
-               {
                   "name": "data",
                   "in": "query",
                   "description": "Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses.",
@@ -672,14 +669,6 @@
             "schema": {
                "type": "number",
                "example": 50
-            }
-         },
-         "mostrecent": {
-            "in": "query",
-            "name": "mostrecent",
-            "description": "get back only the n records with the most recent values of timestamp.",
-            "schema": {
-               "type": "number"
             }
          },
          "batchMeta": {

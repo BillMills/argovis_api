@@ -186,14 +186,6 @@ paths:
           type: string
           enum:
           - minimal
-      - name: mostrecent
-        in: query
-        description: get back only the n records with the most recent values of timestamp.
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: number
       - name: data
         in: query
         description: "Keys of data to include. Return only documents that have all\
@@ -825,15 +817,6 @@ components:
       schema:
         type: number
         example: 50
-    mostrecent:
-      name: mostrecent
-      in: query
-      description: get back only the n records with the most recent values of timestamp.
-      required: false
-      style: form
-      explode: true
-      schema:
-        type: number
     batchMeta:
       name: batchmeta
       in: query

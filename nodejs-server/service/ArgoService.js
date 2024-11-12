@@ -12,12 +12,10 @@ exports.argoBGC = function() {
     examples['application/json'] = {
   "summary" : [ {
     "_id" : "_id",
-    "n" : 0.8008281904610115,
-    "mostrecent" : "2010-01-01T00:00:00Z"
+    "n" : 0.8008281904610115
   }, {
     "_id" : "_id",
-    "n" : 0.8008281904610115,
-    "mostrecent" : "2010-01-01T00:00:00Z"
+    "n" : 0.8008281904610115
   } ],
   "_id" : "argo_bgc"
 };
@@ -41,12 +39,10 @@ exports.argoDACs = function() {
     examples['application/json'] = {
   "summary" : [ {
     "_id" : "_id",
-    "n" : 0.8008281904610115,
-    "mostrecent" : "2010-01-01T00:00:00Z"
+    "n" : 0.8008281904610115
   }, {
     "_id" : "_id",
-    "n" : 0.8008281904610115,
-    "mostrecent" : "2010-01-01T00:00:00Z"
+    "n" : 0.8008281904610115
   } ],
   "_id" : "argo_dacs"
 };
@@ -72,8 +68,7 @@ exports.argoOverview = function() {
     "datacenters" : [ "datacenters", "datacenters" ],
     "nCore" : 0.8008281904610115,
     "nBGC" : 6.027456183070403,
-    "nDeep" : 1.4658129805029452,
-    "mostrecent" : "2010-01-01T00:00:00Z"
+    "nDeep" : 1.4658129805029452
   },
   "_id" : "argo_overview"
 };
@@ -121,14 +116,13 @@ exports.argoVocab = function(parameter) {
  * positionqc List Argo position qc flag. (optional)
  * source List Experimental program source(s) to search for; document must match all sources to be returned. Accepts ~ negation to filter out documents. See /<data route>/vocabulary?parameter=source for list of options. (optional)
  * compression String Data minification strategy to apply. (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data argo_data_keys Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findArgo = function(id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
+exports.findArgo = function(id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,data,presRange,verticalRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ {
