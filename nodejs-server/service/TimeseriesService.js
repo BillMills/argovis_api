@@ -16,12 +16,11 @@ const summaries = require('../models/summary');
  * center List center to measure max radius from when defining circular region of interest; must be used in conjunction with query string parameter 'radius'. (optional)
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * compression String Data minification strategy to apply. (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,batchmeta) {
+exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygon,box,center,radius,compression,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // generic helper for all timeseries search and filter routes
     // input sanitization
@@ -32,9 +31,17 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
       return
     }
 
-    params.mostrecent = mostrecent
     params.batchmeta = batchmeta
     params.compression = compression
+    params.is_timeseries = true
+    params.archtypical_meta = true // any metadata document passed in to the datafilter from the metafilter has a globally applicable data_info, and possibly other fields.
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
+    params.metacollection = 'timeseriesMeta'
+    params.lookup_meta = false // there's just one per satellite, so we don't need to look up metadata for each data document
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -54,21 +61,9 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
       local_filter = []
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: null,
-        dateRange: [params.startDate, params.endDate],
-        //mostrecent: mostrecent, // mostrecent filtering done in mongo during stream for timeseries
-        suppress_meta: false,
-        batchmeta : batchmeta
-    }
-
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null){
-      projection = ['_id', 'metadata', 'geolocation']
+      params.projection = ['_id', 'metadata', 'geolocation']
     }
 
     // always fetch the metadata doc so we can pull the full list of timesteps off of it
@@ -76,13 +71,13 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
     params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Timeseries[timeseriesName], params, local_filter, projection, null))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Timeseries[timeseriesName], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
 
-          let stub = function(data, metadata){
-              // given a data and corresponding metadata document,
+          let stub = function(data){
+              // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
               return [
@@ -92,7 +87,7 @@ exports.findtimeseries = function(res,timeseriesName,id,startDate,endDate,polygo
                 data['metadata']
               ]
           }
-          let postprocess = helpers.post_xform(Timeseries['timeseriesMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
         })

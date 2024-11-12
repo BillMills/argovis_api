@@ -137,9 +137,9 @@ describe("GET /grids/rg09", function () {
 });
 
 describe("GET /grids/rg09", function () {
-  it("presRange is inclusive on boundaries", async function () {
+  it("presRange is exclusive on boundaries", async function () {
     const response = await request.get("/grids/rg09?id=20040115000000_39.5_-64.5&data=rg09_salinity&presRange=0,170").set({'x-argokey': 'developer'});
-    expect(response.body[0].levels).to.eql([2.5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170]);
+    expect(response.body[0].levels).to.eql([2.5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160]);
   });
 });
 
@@ -172,14 +172,14 @@ describe("GET /grids/meta", function () {
 describe("GET /grids/rg09", function () {
   it("fetch gridded data with pressure bracket", async function () {
     const response = await request.get("/grids/rg09?id=20040115000000_20.5_-64.5&presRange=10,100&data=rg09_temperature").set({'x-argokey': 'developer'});
-    expect(response.body[0]['data']).to.eql([[-0.076, -0.21, -0.593, -1.201, -1.598, -1.663, -1.569, -1.15, -0.603, -0.134]]);
+    expect(response.body[0]['data']).to.eql([[-0.076, -0.21, -0.593, -1.201, -1.598, -1.663, -1.569, -1.15, -0.603]]);
   });
 });
 
 describe("GET /grids/rg09", function () {
   it("check reported level range with pressure bracket", async function () {
     const response = await request.get("/grids/rg09?id=20040115000000_20.5_-64.5&presRange=10,100&data=rg09_temperature").set({'x-argokey': 'developer'});
-    expect(response.body[0]['levels']).to.eql([10,20,30,40,50,60,70,80,90,100]);
+    expect(response.body[0]['levels']).to.eql([10,20,30,40,50,60,70,80,90]);
   });
 });
 

@@ -39,14 +39,13 @@ exports.findgridMeta = function(res,id) {
  * center List center to measure max radius from when defining circular region of interest; must be used in conjunction with query string parameter 'radius'. (optional)
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * compression String Data minification strategy to apply. (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
+exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center,radius,compression,data,presRange,verticalRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     // generic helper for all grid search and filter routes
     // input sanitization
@@ -59,6 +58,15 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.metacollection = gridName+'Meta'
+    params.is_grid = true
+    params.verticalRange = presRange || verticalRange
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
+    params.lookup_meta = batchmeta || params.data_query || params.verticalRange
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
@@ -79,20 +87,9 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
         local_filter = [{$match:{'_id':id}}]
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange || verticalRange,
-        mostrecent: mostrecent,
-        batchmeta : batchmeta,
-        suppress_meta: false
-    }
-
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
-      projection = ['_id', 'metadata', 'geolocation', 'timestamp']
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp']
     }
 
     // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
@@ -100,12 +97,12 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
     params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Grid[gridName], params, local_filter, projection, null))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Grid[gridName], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
 
-          let stub = function(data, metadata){
+          let stub = function(data){
               // given a data and corresponding metadata document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
@@ -117,7 +114,7 @@ exports.findgrid = function(res,gridName,id,startDate,endDate,polygon,box,center
                 data['metadata']
               ]
           }
-          let postprocess = helpers.post_xform(Grid[gridName+'Meta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
         })

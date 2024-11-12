@@ -46,12 +46,11 @@ exports.argotrajectoryVocab = function(parameter) {
  * metadata String metadata pointer (optional)
  * platform String Unique platform ID to search for. (optional)
  * compression String Data minification strategy to apply. (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data argotrajectory_data_keys Keys of data to include. Return only documents that have all data requested. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,compression,mostrecent,data,batchmeta) {
+exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,compression,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
     let params = helpers.parameter_sanitization('trajectories',id,startDate,endDate,polygon,box,false,center,radius)
@@ -62,6 +61,13 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.metacollection = 'trajectoriesMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
+    params.lookup_meta = batchmeta || params.data_query
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -84,20 +90,9 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
       local_filter = []
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: null,
-        mostrecent: mostrecent,
-        batchmeta : batchmeta,
-        suppress_meta: false
-    }
-
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null){
-      projection = ['_id', 'metadata', 'geolocation', 'timestamp']
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp']
     }
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
@@ -109,13 +104,13 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, trajectories['argotrajectories'], params, local_filter, projection, null))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, trajectories['argotrajectories'], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
 
-          let stub = function(data, metadata){
-              // given a data and corresponding metadata document,
+          let stub = function(data){
+              // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
               return [
@@ -127,7 +122,7 @@ exports.findArgoTrajectory = function(res,id,startDate,endDate,polygon,box,cente
               ]
           }
 
-          let postprocess = helpers.post_xform(trajectories['argotrajectoriesMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
 
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])

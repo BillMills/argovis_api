@@ -492,34 +492,6 @@ describe("GET /argo", function () {
 });
 
 describe("GET /argo", function () {
-  it("gets correct time for most recent result", async function () {
-    const response = await request.get("/argo?platform=2902857&mostrecent=1").set({'x-argokey': 'developer'});
-      expect(response.body[0].timestamp).to.eql('2022-07-07T12:01:21.000Z');
-  });
-});
-
-describe("GET /argo", function () {
-  it("only gets one result", async function () {
-    const response = await request.get("/argo?platform=2902857&mostrecent=1").set({'x-argokey': 'developer'});
-      expect(response.body.length).to.eql(1);
-  });
-});
-
-describe("GET /argo", function () {
-  it("gets most recent 2 results", async function () {
-    const response = await request.get("/argo?platform=2902857&mostrecent=2").set({'x-argokey': 'developer'});
-      expect(response.body.length).to.eql(2);
-  });
-});
-
-describe("GET /argo", function () {
-  it("confirm mostrecent and data queries work together nicely", async function () {
-    const response = await request.get("/argo?platform=2902857&data=temperature_sfile&mostrecent=2").set({'x-argokey': 'developer'});
-      expect(response.body.length).to.eql(2);
-  });
-});
-
-describe("GET /argo", function () {
   it("check metadata batch request", async function () {
     const response = await request.get("/argo?metadata=2902857_m0").set({'x-argokey': 'developer'});
       expect(response.body.length).to.eql(3);
@@ -563,9 +535,9 @@ describe("GET /argo", function () {
 
 describe("GET /argo", function () {
   it("check QC requirements correctly suppress bad values", async function () {
-    const response = await request.get("/argo?id=2902857_001&data=bbp700,pressure").set({'x-argokey': 'developer'});
+    const response = await request.get("/argo?id=2902857_001&data=bbp700,pressure,bbp700_argoqc").set({'x-argokey': 'developer'});
     expect(response.body[0].data[0][6]).to.eql(0.004465);
-    const responseqc = await request.get("/argo?id=2902857_001&data=bbp700,1,pressure").set({'x-argokey': 'developer'});
+    const responseqc = await request.get("/argo?id=2902857_001&data=bbp700,1,pressure,bbp700_argoqc").set({'x-argokey': 'developer'});
     expect(responseqc.body[0].data[0][6]).to.eql(null);
   });
 });
@@ -671,5 +643,19 @@ describe("GET /argo", function () {
   it("check batch meta when a metadata filter has been applied", async function () {
     const response = await request.get("/argo?startDate=2022-01-07T12:02:21Z&endDate=2022-07-06T12:02:21Z&platform=2902857&batchmeta=true").set({'x-argokey': 'developer'});
     expect(response.body.length).to.eql(1);
+  });
+}); 
+
+describe("GET /argo", function () {
+  it("qc filtering doesnt break if data array is empty", async function () {
+    const response = await request.get("/argo?id=1900959_198&data=temperature,1").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(404);
+  });
+}); 
+
+describe("GET /argo", function () {
+  it("depth filtering doesnt break if data array is empty", async function () {
+    const response = await request.get("/argo?id=1900959_198&data=temperature&verticalRange=0,100").set({'x-argokey': 'developer'});
+    expect(response.status).to.eql(404);
   });
 }); 

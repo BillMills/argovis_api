@@ -38,7 +38,7 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
         }
     }
 
-    // local filter: fields in data collection other than geolocation and timestamp 
+    // local filter: fields in data collection other than geolocation and timestamp
     let local_filter = []
     if(forecastOrigin){
         local_filter.push({'$geoNear': {'near': forecastOrigin, 'maxDistance': 1, 'distanceField': 'dist',  'key': 'geolocation'}})
@@ -50,48 +50,47 @@ exports.findargone = function(res, id,forecastOrigin,forecastGeolocation,metadat
         local_filter.push({'$match':{'_id': id}})
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        junk: ['dist'],
-        suppress_meta: compression=='minimal' && !batchmeta,
-        batchmeta : batchmeta
-    }
-
-    // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
-    if(compression=='minimal' && data==null){
-      projection = ['_id', 'metadata', 'geolocation', 'geolocation_forecast']
-    }
-
-    // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
-    let metafilter = Promise.resolve([])
+    // metadata table filter: just get the sole solitary argon metadata doc
+    let metafilter = argone['argoneMeta'].find({_id:'argone'}).exec()
     let params = {
       'metafilter': false,
-      'batchmeta': batchmeta
+      'batchmeta': batchmeta,
+      'metacollection': 'argoneMeta',
+      'junk': ['dist'],
+      'compression': compression,
+      'batchmeta': batchmeta,
     }
-  
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
+    params.lookup_meta = false
+    params.archtypical_meta = true // there's just the one.
+
+    // can we afford to project data documents down to a subset in aggregation?
+    if(compression=='minimal' && data==null){
+      params.projection = ['_id', 'metadata', 'geolocation', 'geolocation_forecast']
+    }
+
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argone['argone'], params, local_filter, projection, null))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argone['argone'], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
-          let stub = function(data, metadata){
-              // given a data and corresponding metadata document,
+          let stub = function(data){
+              // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
               return [
                 data['_id'],
-                data.geolocation.coordinates[0], 
-                data.geolocation.coordinates[1], 
-                data.geolocation_forecast.coordinates[0], 
+                data.geolocation.coordinates[0],
+                data.geolocation.coordinates[1],
+                data.geolocation_forecast.coordinates[0],
                 data.geolocation_forecast.coordinates[1],
                 data['metadata']
               ]
           }
 
-          let postprocess = helpers.post_xform(argone['argoneMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
 
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])

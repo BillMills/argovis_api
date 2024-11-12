@@ -32,26 +32,6 @@ before(async function() {
   schema = await dereferenceSchema(rawspec);
 });
 
-describe("steradians", function () {
-  it("sanity check steradian caclulation", async function () {
-    const sum = helpers.geoWeightedSum([{value: 1, lons: [0,180], lats: [0,90]}, {value: 2, lons: [0,90], lats: [0,90]}])
-    expect(helpers.steradians([0,360], [-90,90])).to.eql(4*Math.PI)  
-  });
-}); 
-
-describe("steradians", function () {
-  it("compares the area of two zones", async function () {
-    expect(helpers.steradians([0,360], [89,90])).to.be.lessThan(helpers.steradians([0,360], [0,1]))  
-  });
-}); 
-
-describe("geoWeightedSum", function () {
-  it("checks a simple weighted sum over geo regions", async function () {
-    const sum = helpers.geoWeightedSum([{value: 1, lons: [0,180], lats: [0,90]}, {value: 2, lons: [0,90], lats: [0,90]}])
-    expect(sum).to.almost.equal(2*Math.PI)  
-  });
-}); 
-
 describe("validlonlat", function () {
   it("waives through valid longitude", async function () {
     points = [[175,70],[177,56],[-155,56],[-154,69],[175,70]]
@@ -219,3 +199,142 @@ describe("remove_laps", function () {
   });
 }); 
 
+describe("qc_filter", function () {
+  it("check basic behavior of qc filter", async function () {
+    data_query = helpers.parse_data_qsp('temp,doxy,1,4')
+    data = [[1,2,3], [10,20,30], [2,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_argoqc', 'doxy_argoqc']]
+    qc_suffix = '_argoqc'
+    expect(helpers.qc_filter(data_query, data, data_info, qc_suffix)).to.deep.equal([[1,2,3], [10,null,30], [2,2,2], [1,3,4]])
+  });
+}); 
+
+describe("qc_filter", function () {
+  it("qc filter - no qc conditions", async function () {
+    data_query = helpers.parse_data_qsp('temp,doxy')
+    data = [[1,2,3], [10,20,30], [2,2,2], [1,3,4] ]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.qc_filter(data_query, data, data_info, qc_suffix)).to.deep.equal([[1,2,3], [10,20,30], [2,2,2], [1,3,4]])
+  });
+}); 
+
+describe("qc_filter", function () {
+  it("qc filter - all", async function () {
+    data_query = helpers.parse_data_qsp('all,1')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4] ]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.qc_filter(data_query, data, data_info, qc_suffix)).to.deep.equal([[1,null,null], [10,null,null], [1,2,2], [1,3,4]])
+  });
+}); 
+
+describe("data_mask", function () {
+  it("data mask - negations", async function () {
+    data_query = helpers.parse_data_qsp('temp,~doxy')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4] ]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.data_mask(data_query, data, data_info, qc_suffix)).to.deep.equal([])
+  });
+}); 
+
+describe("data_mask", function () {
+  it("data mask - all", async function () {
+    data_query = helpers.parse_data_qsp('temp,all')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.data_mask(data_query, data, data_info, qc_suffix)).to.deep.equal([0,1,2,3])
+  });
+}); 
+
+describe("data_mask", function () {
+  it("data mask - nominal", async function () {
+    data_query = helpers.parse_data_qsp('temp')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    qc_suffix = '_qc'
+    expect(helpers.data_mask(data_query, data, data_info, qc_suffix)).to.deep.equal([0])
+  });
+}); 
+
+describe("vertical_bounds", function () {
+  it("vertical filter - nominal", async function () {
+    doc = {
+      data: [[0,0,0,0,0,0], [1,2,3,4,5,6]],
+      data_info: [['temp', 'pressure']]
+    }
+    verticalRange = [2.3,4.5]
+    expect(helpers.vertical_bounds(doc.data, doc.data_info, verticalRange)).to.deep.equal([2,4])
+  });
+}); 
+
+describe("timerange_bounds", function () {
+  it("timerange filter - nominal", async function () {
+    timeseries = ['2010-01-01T00:00:00Z', '2010-01-02T00:00:00Z', '2010-01-03T00:00:00Z', '2010-01-04T00:00:00Z'],
+    expect(helpers.timerange_bounds(timeseries, '2010-01-01T12:00:00Z', '2010-01-04T00:00:00Z')).to.deep.equal([1,3])
+  });
+}); 
+
+describe("level_filter", function () {
+  it("level filter - nominal", async function () {
+    data = [[0,null,0,0,0,0], [1,2,3,4,5,6]]
+    data_info = [['temp', 'pressure']]
+    coerced_pressure = true
+    expect(helpers.level_filter(data, data_info, coerced_pressure)).to.deep.equal([[0,0,0,0,0], [1,3,4,5,6]])
+  });
+});
+
+describe("sort_metadocs", function () {
+  it("sort metadata documents - nominal", async function () {
+    metadata = ['A', 'B']
+    metadocs = [{_id: 'B'}, {_id: 'A'}]
+    expect(helpers.sort_metadocs(metadata, metadocs)).to.deep.equal([{_id: 'A'}, {_id: 'B'}])
+  });
+});
+
+describe("merge_data_info", function () {
+  it("merge data_info blocks - nominal", async function () {
+    di1 = [['temp', 'pressure'], ['units'], ['C', 'dbar']]
+    di2 = [['doxy', 'salinity'], ['units'], ['umol/kg', 'psu']]
+    expect(helpers.merge_data_info([di1, di2])).to.deep.equal([['temp', 'pressure', 'doxy', 'salinity'], ['units'], ['C', 'dbar', 'umol/kg', 'psu']])  
+  });
+});
+
+describe("data_filter", function () {
+  it("data filter - nominal", async function () {
+    data_query = helpers.parse_data_qsp('temp')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
+    expect(helpers.data_filter([0], data, data_query)).to.deep.equal([[1,2,3]])
+    
+    data = [[], [10,20,30], [1,2,2], [1,3,4]]
+    expect(helpers.data_filter([0], data, data_query)).to.deep.equal([])
+  });
+});
+
+describe("data_info_filter", function () {
+  it("data_info filter - nominal", async function () {
+    di1 = [['temp', 'pressure'], ['units'], ['C', 'dbar']]
+    expect(helpers.data_info_filter([0], di1)).to.deep.equal([['temp'], ['units'], ['C']])
+  });
+});
+
+describe("correct_data_available", function () {
+  it("correct_data_available - nominal", async function () {
+    data_query = helpers.parse_data_qsp('temp')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    expect(helpers.correct_data_available(data_query, data, data_info)).to.deep.equal([[1,2,3], [10,20,30], [1,2,2], [1,3,4]])
+
+    data_query = helpers.parse_data_qsp('~temp')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    expect(helpers.correct_data_available(data_query, data, data_info)).to.deep.equal([])
+    
+    data_query = helpers.parse_data_qsp('temp,salinity')
+    data = [[1,2,3], [10,20,30], [1,2,2], [1,3,4]]
+    data_info = [['temp', 'doxy', 'temp_qc', 'doxy_qc']]
+    expect(helpers.correct_data_available(data_query, data, data_info)).to.deep.equal([])
+  });
+});

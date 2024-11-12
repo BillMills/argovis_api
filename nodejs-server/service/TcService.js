@@ -16,13 +16,12 @@ const summaries = require('../models/summary');
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * name String name of tropical cyclone (optional)
  * metadata String metadata pointer (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * compression String Data minification strategy to apply. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,name,metadata,mostrecent,compression,data,batchmeta) {
+exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,name,metadata,compression,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
     let params = helpers.parameter_sanitization('tc',id,startDate,endDate,polygon,box,false,center,radius)
@@ -33,6 +32,14 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.metacollection = 'tcMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
+    params.lookup_meta = batchmeta 
+    params.archtypical_meta = params.data_query
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, null, null) 
@@ -55,37 +62,28 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
       local_filter = []
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: null,
-        mostrecent: mostrecent,
-        suppress_meta: compression=='minimal' && !batchmeta, // don't need to look up tc metadata if making a minimal request
-        batchmeta : batchmeta
-    }
-
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null){
-      projection = ['_id', 'metadata', 'geolocation', 'timestamp']
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp']
     }
-
-    // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
-    let metafilter = Promise.resolve([])
-    params.metafilter = false
+    // metadata table filter: single arbitrary doc for data_info if nothing to filter metadata for, custom search otherwise
+    let metafilter = Promise.resolve([]) 
     if(name){
-        metafilter = tc['tcMeta'].aggregate([{$match: {'name': name}}]).exec()
-        params.metafilter = true
+      metafilter = tc['tcMeta'].aggregate([{$match: {'name': name}}]).exec()
+      params.metafilter = true
+    } else if(!batchmeta) {
+      // get an arbitrary metadata doc, unless we're getting specific ones from batchmeta
+      metafilter = tc['tcMeta'].find({}).limit(1).exec()
+      params.metafilter = false
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, tc['tc'], params, local_filter, projection, null))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, tc['tc'], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
 
-          let stub = function(data, metadata){
+          let stub = function(data){
               // given a data and corresponding metadata document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
@@ -98,7 +96,7 @@ exports.findTC = function(res,id,startDate,endDate,polygon,box,center,radius,nam
               ]
           }
 
-          let postprocess = helpers.post_xform(tc['tcMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
 

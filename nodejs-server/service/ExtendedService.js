@@ -38,12 +38,11 @@ exports.extendedVocab = function(extendedName,parameter) {
  * center List center to measure max radius from when defining circular region of interest; must be used in conjunction with query string parameter 'radius'. (optional)
  * radius BigDecimal km from centerpoint when defining circular region of interest; must be used in conjunction with query string parameter 'center'. (optional)
  * compression String Data minification strategy to apply. (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,box,center,radius,compression,mostrecent,data,batchmeta) {
+exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,box,center,radius,compression,data,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
 
@@ -73,10 +72,15 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
       return
     }
 
-    params.mostrecent = mostrecent
     params.extended = true // extended objects need a geointersects search instead of geowithin for polygons
     params.batchmeta = batchmeta
     params.compression = compression
+    params.metacollection = 'extendedMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
+    params.lookup_meta = false // there's only one AR meta document, just look it up once
+    params.archtypical_meta = params.data_query
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, null, false, null, null) 
@@ -96,34 +100,22 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
       local_filter = []
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        dateRange: [params.startDate, params.endDate],
-        mostrecent: mostrecent,
-        suppress_meta: compression=='minimal' && !batchmeta,
-        batchmeta : batchmeta
-    }
-
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal'){
-      projection = ['_id', 'metadata', 'timestamp', 'geolocation']
+      params.projection = ['_id', 'metadata', 'timestamp', 'geolocation']
     }
 
-    // metadata table filter: no-op promise stub, nothing to filter grid data docs on from metadata at the moment
-    let metafilter = Promise.resolve([])
+    // metadata table filter: just get a single metadoc, there's only one for ar objects
+    let metafilter = Extended['extendedMeta'].find({_id:'ar'}).exec()
     params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Extended[extendedName], params, local_filter, projection, null))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Extended[extendedName], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
-
-          let stub = function(data, metadata){
-              // given a data and corresponding metadata document,
+          let stub = function(data){
+              // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
               return [
@@ -133,7 +125,7 @@ exports.findExtended = function(res,extendedName,id,startDate,endDate,polygon,bo
                 data['metadata']
               ]
           }
-          let postprocess = helpers.post_xform(Extended['extendedMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
 
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])

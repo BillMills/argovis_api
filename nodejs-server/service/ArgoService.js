@@ -104,14 +104,13 @@ exports.argoVocab = function(parameter) {
  * positionqc List Argo position qc flag. (optional)
  * source List Experimental program source(s) to search for; document must match all sources to be returned. Accepts ~ negation to filter out documents. See /<data route>/vocabulary?parameter=source for list of options. (optional)
  * compression String Data minification strategy to apply. (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data argo_data_keys Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
+exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,platform,platform_type,positionqc,source,compression,data,presRange,verticalRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
     let params = helpers.parameter_sanitization('argo',id,startDate,endDate,polygon,box,false,center,radius)
@@ -122,6 +121,21 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.verticalRange = presRange || verticalRange
+    params.metacollection = 'argoMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+      params.qc_suffix = '_argoqc'
+
+      if(!('pressure' in params.data_query[0]) && !('pressure' in params.data_query[2])){
+        // pull pressure out of mongo by default
+        params.data_query[2]['pressure'] = []
+        params.coerced_pressure = true
+      }
+    }
+    params.lookup_meta = batchmeta
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,(center && radius),platform].some(x=>x)){
@@ -156,34 +170,9 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
       local_filter.push(helpers.source_filter(source))
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange || verticalRange,
-        mostrecent: mostrecent,
-        always_import: true, // add data_keys and everything in data_adjacent to data docs, no matter what
-        suppress_meta: params.batchmeta ? false : true, // argo doesn't use metadata in stubs, and data_info lives on the data doc, so no need for metadata in post unless we're returing batchmeta
-        qcsuffix: '_argoqc',
-        batchmeta : batchmeta
-    }
-
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
-      projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
-    }
-
-    // push data selection into mongo?
-    let data_filter = helpers.parse_data(data)
-    if(data_filter){
-      if(!data_filter[0].includes('pressure')){
-        // always pull pressure out of mongo
-        data_filter[0].push('pressure')
-      }
-
-      // qc suffix so we can bring the qc flags along if available
-      data_filter.push('argoqc')
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
     }
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
@@ -201,13 +190,13 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argo['argo'], params, local_filter, projection, data_filter))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, argo['argo'], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
 
-          let stub = function(data, metadata){
-              // given a data and corresponding metadata document,
+          let stub = function(data){
+              // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
               
@@ -223,7 +212,7 @@ exports.findArgo = function(res,id,startDate,endDate,polygon,box,center,radius,m
               ]
           }
 
-          let postprocess = helpers.post_xform(argo['argoMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
 
           res.status(404) // 404 by default
 

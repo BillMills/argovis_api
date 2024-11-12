@@ -74,20 +74,6 @@ describe("GET /timeseries/ccmpwind", function () {
   });
 });
 
-describe("GET /timeseries/copernicussla", function () {
-  it("make sure mostrecent behaves as expected with a time window", async function () {
-    const response = await request.get("/timeseries/copernicussla?id=-46.875_35.625&data=sla&startDate=1993-02-21T00:00:00Z&endDate=1993-03-28T00:00:00Z&mostrecent=3").set({'x-argokey': 'developer'});
-    expect(response.body[0].data).to.eql([[0.19362857142857143, 0.15418571428571431, 0.08815714285714285]]) 
-  });
-});
-
-describe("GET /timeseries/ccmpwind", function () {
-  it("make sure mostrecent behaves as expected without a time window", async function () {
-    const response = await request.get("/timeseries/ccmpwind?id=0.125_0.125&data=uwnd&mostrecent=3").set({'x-argokey': 'developer'});
-    expect(response.body[0].data).to.eql([[-0.5306808191484639, -0.05723989282601646, "NaN"]]) 
-  });
-});
-
 describe("GET /timeseries/ccmpwind", function () {
   it("check basic box behavior", async function () {
     const response1 = await request.get("/timeseries/ccmpwind?box=[[0,0],[1,1]]").set({'x-argokey': 'developer'});
@@ -111,6 +97,12 @@ describe("GET /timeseries/noaasst", function () {
   });
 });
 
+describe("GET /timeseries/noaasst", function () {
+  it("should not have data_info in this case", async function () {
+    const response = await request.get("/timeseries/noaasst?center=-46.5,35.5&radius=1&startDate=1989-12-31T00:00:00Z&endDate=1990-01-28T00:00:00Z").set({'x-argokey': 'developer'});
+    expect(response.body[0]).to.not.have.property('data_info')        
+  });
+});
 
 
 

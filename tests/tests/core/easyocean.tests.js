@@ -37,3 +37,32 @@ describe("GET /easyocean", function () {
     expect(response.body.length).to.eql(2); 
   });
 }); 
+
+describe("GET /easyocean", function () {
+  it("check basic vertical filter behavior", async function () {
+    const response = await request.get("/easyocean?id=woce_sr04_date_20101225_lat_-66-98_lon_-13-0&data=pressure,doxy&verticalRange=0,100").set({'x-argokey': 'developer'});
+    expect(response.body[0].data[response.body[0].data_info[0].indexOf('doxy')]).to.deep.eql([341.057,340.213,334.985,329.6,325.02,319.416,313.503,308.965,304.173]); 
+  });
+}); 
+
+describe("GET /easyocean", function () {
+  it("check basic data filter behavior", async function () {
+    const response = await request.get("/easyocean?id=woce_sr04_date_20101225_lat_-66-98_lon_-13-0&data=pressure,doxy").set({'x-argokey': 'developer'});
+    expect(response.body[0].data_info[0]).to.deep.eql(['pressure', 'doxy']); 
+  });
+}); 
+
+describe("GET /easyocean", function () {
+  it("check basic stubbing behavior", async function () {
+    const response = await request.get("/easyocean?id=woce_sr04_date_20101225_lat_-66-98_lon_-13-0&compression=minimal").set({'x-argokey': 'developer'});
+    expect(response.body[0]).to.deep.eql(["woce_sr04_date_20101225_lat_-66-98_lon_-13-0",-13,-66.98,"2010-12-25T00:00:00.000Z",["SR04"]]); 
+  });
+}); 
+
+describe("GET /easyocean", function () {
+  it("check basic batchmeta behavior", async function () {
+    const response = await request.get("/easyocean?startDate=2010-12-23T00:00:00Z&endDate=2010-12-26T00:00:00Z&batchmeta=true").set({'x-argokey': 'developer'});
+    expect(response.body.length).to.eql(1); 
+    expect(response.body[0]._id).to.eql("SR04"); 
+  });
+}); 

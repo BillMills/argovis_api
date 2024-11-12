@@ -256,9 +256,6 @@
                   "$ref": "#/components/parameters/metadata"
                },
                {
-                  "$ref": "#/components/parameters/mostrecent"
-               },
-               {
                   "$ref": "#/components/parameters/compression"
                },
                {
@@ -433,9 +430,6 @@
                },
                {
                   "$ref": "#/components/parameters/compression"
-               },
-               {
-                  "$ref": "#/components/parameters/mostrecent"
                },
                {
                   "name": "data",
@@ -622,9 +616,6 @@
                   "$ref": "#/components/parameters/compression"
                },
                {
-                  "$ref": "#/components/parameters/mostrecent"
-               },
-               {
                   "name": "data",
                   "in": "query",
                   "description": "Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses.",
@@ -801,9 +792,6 @@
                },
                {
                   "$ref": "#/components/parameters/compression"
-               },
-               {
-                  "$ref": "#/components/parameters/mostrecent"
                },
                {
                   "name": "data",
@@ -987,9 +975,6 @@
                   "$ref": "#/components/parameters/compression"
                },
                {
-                  "$ref": "#/components/parameters/mostrecent"
-               },
-               {
                   "name": "data",
                   "in": "query",
                   "description": "Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses.",
@@ -1167,9 +1152,6 @@
                },
                {
                   "$ref": "#/components/parameters/compression"
-               },
-               {
-                  "$ref": "#/components/parameters/mostrecent"
                },
                {
                   "name": "data",
@@ -1365,9 +1347,6 @@
                   "$ref": "#/components/parameters/compression"
                },
                {
-                  "$ref": "#/components/parameters/mostrecent"
-               },
-               {
                   "name": "data",
                   "in": "query",
                   "description": "Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses.",
@@ -1531,11 +1510,6 @@
                                     "nDeep": {
                                        "type": "number"
                                     },
-                                    "mostrecent": {                       
-                                       "type": "string",
-                                       "format": "date-time",
-                                       "example": "2010-01-01T00:00:00Z"
-                                    },
                                     "datacenters": {
                                        "type": "array",
                                        "items": {
@@ -1590,11 +1564,6 @@
                                        },
                                        "n": {
                                           "type": "number"
-                                       },
-                                       "mostrecent": {                       
-                                          "type": "string",
-                                          "format": "date-time",
-                                          "example": "2010-01-01T00:00:00Z"
                                        }
                                     }
                                  }
@@ -1645,11 +1614,6 @@
                                        },
                                        "n": {
                                           "type": "number"
-                                       },
-                                       "mostrecent": {                       
-                                          "type": "string",
-                                          "format": "date-time",
-                                          "example": "2010-01-01T00:00:00Z"
                                        }
                                     }
                                  }
@@ -1710,9 +1674,6 @@
                   "$ref": "#/components/parameters/compression"
                },
                {
-                  "$ref": "#/components/parameters/mostrecent"
-               },
-               {
                   "name": "data",
                   "in": "query",
                   "description": "Keys of data to include. Return only documents that have all data requested. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses.",
@@ -1766,6 +1727,9 @@
                },
                {
                   "$ref": "#/components/parameters/platformID"
+               },
+               {
+                  "$ref": "#/components/parameters/page"
                }
             ],
             "responses": {
@@ -3058,6 +3022,15 @@
                "example": 518
             } 
          },
+         "page": {
+            "in": "query",
+            "name": "page",
+            "description": "Page number of paginated results to return.",
+            "schema": {
+               "type": "integer",
+               "example": 0
+            } 
+         },
          "compression": {
             "in": "query",
             "name": "compression",
@@ -3153,14 +3126,6 @@
             "schema": {
                "type": "number",
                "example": 50
-            }
-         },
-         "mostrecent": {
-            "in": "query",
-            "name": "mostrecent",
-            "description": "get back only the n records with the most recent values of timestamp.",
-            "schema": {
-               "type": "number"
             }
          },
          "batchMeta": {

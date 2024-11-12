@@ -39,7 +39,6 @@ exports.easyoceanVocab = function(parameter) {
  * metadata String metadata pointer (optional)
  * woceline String WOCE line to search for. See /cchdo/vocabulary?parameter=woceline for list of options. (optional)
  * compression String Data minification strategy to apply. (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
@@ -47,7 +46,7 @@ exports.easyoceanVocab = function(parameter) {
  * section_start_date Date Start date of the section of interest; see metadata corresponding to the WOCE line of interest for valid options. (optional)
  * returns List
  **/
-exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,woceline,compression,mostrecent,data,presRange,verticalRange,batchmeta,section_start_date) {
+exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,woceline,compression,data,presRange,verticalRange,batchmeta,section_start_date) {
   return new Promise(function(resolve, reject) {
 
     // input sanitization
@@ -59,6 +58,14 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.metacollection = 'easyoceanMeta'
+    params.verticalRange = presRange || verticalRange
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+    }
+    params.lookup_meta = batchmeta
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     let bailout = helpers.request_sanitation(params.polygon, params.center, params.radius, params.box, false, presRange, verticalRange) 
@@ -84,29 +91,9 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
       local_filter = []
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange || verticalRange,
-        mostrecent: mostrecent,
-        suppress_meta: params.batchmeta ? false : true,
-        batchmeta : batchmeta
-    }
-
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
-      projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
-    }
-
-    // push data selection into mongo?
-    let data_filter = helpers.parse_data(data)
-    if(data_filter){
-      if(!data_filter[0].includes('pressure')){
-        // always pull pressure out of mongo
-        data_filter[0].push('pressure')
-      }
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
     }
 
     // metadata table filter: no-op promise, nothing to filter easy ocean on in metadata atm
@@ -114,13 +101,13 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
     params.metafilter = false
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, easyocean['easyocean'], params, local_filter, projection, data_filter))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, easyocean['easyocean'], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
           
-          let stub = function(data, metadata){
-              // given a data and corresponding metadata document,
+          let stub = function(data){
+              // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
               
@@ -135,7 +122,7 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
               ]
           }
 
-          let postprocess = helpers.post_xform(easyocean['easyoceanMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
         })

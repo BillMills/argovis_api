@@ -18,14 +18,13 @@ const helpers = require('../helpers/helpers')
  * cchdo_cruise BigDecimal CCHDO cruise ID to search for. See /cchdo/vocabulary?parameter=cchdo_cruise for list of options. (optional)
  * source List Experimental program source(s) to search for; document must match all sources to be returned. Accepts ~ negation to filter out documents. See /<data route>/vocabulary?parameter=source for list of options. (optional)
  * compression String Data minification strategy to apply. (optional)
- * mostrecent BigDecimal get back only the n records with the most recent values of timestamp. (optional)
  * data List Keys of data to include. Return only documents that have all data requested, within the pressure range if specified. Accepts ~ negation to filter out documents including the specified data. Omission of this parameter will result in metadata only responses. (optional)
  * presRange List DEPRICATED, please use verticalRange instead. Pressure range in dbar to filter for; levels outside this range will not be returned. (optional)
  * verticalRange List Vertical range to filter for in pressure or depth as appropriate for this dataset; levels outside this range will not be returned. (optional)
  * batchmeta String return the metadata documents corresponding to a temporospatial data search (optional)
  * returns List
  **/
-exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,woceline,cchdo_cruise,source,compression,mostrecent,data,presRange,verticalRange,batchmeta) {
+exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,metadata,woceline,cchdo_cruise,source,compression,data,presRange,verticalRange,batchmeta) {
   return new Promise(function(resolve, reject) {
     // input sanitization
     let params = helpers.parameter_sanitization('cchdo',id,startDate,endDate,polygon,box,false,center,radius)
@@ -36,6 +35,20 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     }
     params.batchmeta = batchmeta
     params.compression = compression
+    params.verticalRange = presRange || verticalRange
+    params.metacollection = 'cchdoMeta'
+    if(data && data.join(',') !== 'except-data-values'){
+      params.data_query = helpers.parse_data_qsp(data.join(','))
+      params.qc_suffix = '_woceqc'
+      if(!('pressure' in params.data_query[0]) && !('pressure' in params.data_query[2])){
+        // pull pressure out of mongo by default
+        params.data_query[2]['pressure'] = []
+        params.coerced_pressure = true
+      }
+    }
+    params.lookup_meta = batchmeta || (compression === 'minimal')
+    params.compression = compression
+    params.batchmeta = batchmeta
 
     // decide y/n whether to service this request
     if(source && ![id,(startDate && endDate),polygon,(center && radius),cchdo_cruise,woceline].some(x=>x)){
@@ -67,33 +80,9 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
       local_filter.push(helpers.source_filter(source))
     }
 
-    // postprocessing parameters
-    let pp_params = {
-        compression: compression,
-        data: JSON.stringify(data) === '["except-data-values"]' ? null : data, // ie `data=except-data-values` is the same as just omitting the data qsp
-        presRange: presRange || verticalRange,
-        mostrecent: mostrecent,
-        qcsuffix: '_woceqc',
-        suppress_meta: compression != 'minimal' && !batchmeta, // cchdo used metadata in stubs
-        batchmeta : batchmeta
-    }
-
     // can we afford to project data documents down to a subset in aggregation?
-    let projection = null
     if(compression=='minimal' && data==null && presRange==null && verticalRange==null){
-      projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source']
-    }
-
-    // push data selection into mongo?
-    let data_filter = helpers.parse_data(data)
-    if(data_filter){
-      if(!data_filter[0].includes('pressure')){
-        // always pull pressure out of mongo
-        data_filter[0].push('pressure')
-      }
-
-      // qc suffix so we can bring the qc flags along if available
-      data_filter.push('woceqc')
+      params.projection = ['_id', 'metadata', 'geolocation', 'timestamp', 'source', 'metadata_docs']
     }
 
     // metadata table filter: no-op promise if nothing to filter metadata for, custom search otherwise
@@ -111,16 +100,16 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, cchdo['cchdo'], params, local_filter, projection, data_filter))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, cchdo['cchdo'], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
           
-          let stub = function(data, metadata){
-              // given a data and corresponding metadata document,
+          let stub = function(data){
+              // given a data document,
               // return the record that should be returned when the compression=minimal API flag is set
               // should be id, long, lat, timestamp, and then anything needed to group this point together with other points in interesting ways.
-              
+
               let sourceset = new Set(data.source.map(x => x.source).flat())
 
               return [
@@ -129,13 +118,13 @@ exports.findCCHDO = function(res,id,startDate,endDate,polygon,box,center,radius,
                 data.geolocation.coordinates[1], 
                 data.timestamp,
                 Array.from(sourceset),
-                metadata[0].woce_lines,
-                metadata[0].cchdo_cruise_id,
+                data.metadata_docs[0].woce_lines,
+                data.metadata_docs[0].cchdo_cruise_id,
                 data['metadata']
               ]
           }
 
-          let postprocess = helpers.post_xform(cchdo['cchdoMeta'], pp_params, search_result, res, stub)
+          let postprocess = helpers.post_xform(params, search_result, res, stub)
           res.status(404) // 404 by default
           resolve([search_result[1], postprocess])
           
