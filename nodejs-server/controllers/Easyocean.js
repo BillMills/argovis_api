@@ -13,8 +13,8 @@ module.exports.easyoceanVocab = function easyoceanVocab (req, res, next, paramet
     });
 };
 
-module.exports.findeasyocean = function findeasyocean (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, verticalRange, batchmeta, section_start_date) {
-  Easyocean.findeasyocean(id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, mostrecent, data, presRange, verticalRange, batchmeta, section_start_date)
+module.exports.findeasyocean = function findeasyocean (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, data, presRange, verticalRange, batchmeta, section_start_date) {
+  Easyocean.findeasyocean(id, startDate, endDate, polygon, box, center, radius, metadata, woceline, compression, data, presRange, verticalRange, batchmeta, section_start_date)
     .then(function (response) {
       utils.writeJson(res, response);
     })

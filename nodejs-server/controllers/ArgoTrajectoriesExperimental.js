@@ -13,8 +13,8 @@ module.exports.argotrajectoryVocab = function argotrajectoryVocab (req, res, nex
     });
 };
 
-module.exports.findArgoTrajectory = function findArgoTrajectory (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, platform, compression, mostrecent, data, batchmeta) {
-  ArgoTrajectoriesExperimental.findArgoTrajectory(id, startDate, endDate, polygon, box, center, radius, metadata, platform, compression, mostrecent, data, batchmeta)
+module.exports.findArgoTrajectory = function findArgoTrajectory (req, res, next, id, startDate, endDate, polygon, box, center, radius, metadata, platform, compression, data, batchmeta) {
+  ArgoTrajectoriesExperimental.findArgoTrajectory(id, startDate, endDate, polygon, box, center, radius, metadata, platform, compression, data, batchmeta)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -23,8 +23,8 @@ module.exports.findArgoTrajectory = function findArgoTrajectory (req, res, next,
     });
 };
 
-module.exports.findArgotrajectorymeta = function findArgotrajectorymeta (req, res, next, id, platform) {
-  ArgoTrajectoriesExperimental.findArgotrajectorymeta(id, platform)
+module.exports.findArgotrajectorymeta = function findArgotrajectorymeta (req, res, next, id, platform, page) {
+  ArgoTrajectoriesExperimental.findArgotrajectorymeta(id, platform, page)
     .then(function (response) {
       utils.writeJson(res, response);
     })
