@@ -39,6 +39,13 @@ describe("GET /easyocean", function () {
 }); 
 
 describe("GET /easyocean", function () {
+  it("check woceline filtering", async function () {
+    const response = await request.get("/easyocean?box=[[-56,-67],[-55,-66]]&woceline=A10").set({'x-argokey': 'developer'});
+    expect(response.body.length).to.eql(0); 
+  });
+}); 
+
+describe("GET /easyocean", function () {
   it("check basic vertical filter behavior", async function () {
     const response = await request.get("/easyocean?id=woce_sr04_date_20101225_lat_-66-98_lon_-13-0&data=pressure,doxy&verticalRange=0,100").set({'x-argokey': 'developer'});
     expect(response.body[0].data[response.body[0].data_info[0].indexOf('doxy')]).to.deep.eql([341.057,340.213,334.985,329.6,325.02,319.416,313.503,308.965,304.173]); 
