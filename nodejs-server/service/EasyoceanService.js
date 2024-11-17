@@ -99,6 +99,15 @@ exports.findeasyocean = function(res,id,startDate,endDate,polygon,box,center,rad
     // metadata table filter: no-op promise, nothing to filter easy ocean on in metadata atm
     let metafilter = Promise.resolve([])
     params.metafilter = false
+    if(woceline){
+        let match = {
+            '_id': woceline,
+        }
+
+        metafilter = easyocean['easyoceanMeta'].aggregate([{$match: match}]).exec()
+        params.metafilter = true
+    }
+
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
     let datafilter = metafilter.then(helpers.datatable_stream.bind(null, easyocean['easyocean'], params, local_filter))
