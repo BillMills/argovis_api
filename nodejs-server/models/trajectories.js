@@ -53,7 +53,7 @@ const argotrajectoriesMetaSchema = Schema({
   sensor_type_flag: {type: Number, required: true},
   mission_flag: {type: Number, required: true},
   extrapolation_flag: {type: Number, required: true},
-  positioning_system: {type: String, required: true},
+  positioning_system: {type: String, required: false},
   platform_type: {type: String, required: true},
   data_info: [{type:[Schema.Types.Mixed], required: false}]
 });
