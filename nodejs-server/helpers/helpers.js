@@ -882,7 +882,7 @@ module.exports.final_records = function(dataset){
     'kg21': new Date("2020-12-15T00:00:01Z"),
     'rg09': new Date("2024-10-15T00:00:01Z"),
     'tc': new Date("2023-11-27T12:00:01Z"),
-    'trajectories': new Date("2021-01-01T01:13:27Z"),
+    'trajectories': new Date("2023-01-01T00:00:00Z"),
     'noaasst': new Date("2023-01-29T00:00:01Z"),
     'copernicussla': new Date("2022-07-31T00:00:01Z"),
     'ccmpwind': new Date("2019-12-29T00:00:01Z"),
