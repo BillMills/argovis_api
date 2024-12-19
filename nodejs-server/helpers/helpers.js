@@ -309,7 +309,7 @@ module.exports.datatable_stream = function(model, params, local_filter, foreign_
         data_info: {
           $function: {
             body: module.exports.merge_data_info.toString(),
-            args: ["$metadata_docs.data_info"],
+            args: ["$metadata_docs.data_info", "$data_info"],
             lang: 'js'
           }
         }
@@ -487,7 +487,10 @@ module.exports.sort_metadocs = function(metadata, metadata_docs){
   return metadata.map(id => metadata_docs.find(obj => obj._id === id))
 }
 
-module.exports.merge_data_info = function(di){
+module.exports.merge_data_info = function(di, di_original){
+  if(Array.isArray(di_original) && di_original.length == 3){
+    return di_original
+  }
 
   let data_info = [[],[],[]]
   di.forEach(d => {
@@ -658,7 +661,7 @@ module.exports.postprocess_stream = function(chunk, metadata, params, stub, res)
   // <stub>: function accepting one data document and its corresponding metadata document, returns appropriate representation for the compression=minimal flag.
   // returns chunk mutated into its final, user-facing form
   // or return false to drop this item from the stream (dont - drops should be in the agg pipeline)
-
+    
   // immediately return a minimal stub if requested and data has been projected off
   if(params.compression == 'minimal' && !chunk.hasOwnProperty('data')){
     res.status(200)
