@@ -619,6 +619,13 @@ describe("GET /cchdo", function () {
 });
 
 describe("GET /cchdo", function () {
+    it("ask for a vertical range and compression at the same time", async function () {
+      const response = await request.get("/cchdo?id=expo_08PD0196_1_sta_016_cast_001_type_ctd&verticalRange=0,20000&compression=minimal").set({'x-argokey': 'developer'});
+      expect(response.body.length).to.eql(1)
+    });
+  });
+
+describe("GET /cchdo", function () {
   it("explicitly asking for absent cchdo qc information", async function () {
     const response = await request.get("/cchdo?id=expo_08PD0196_1_sta_018_cast_001_type_btl&data=pressure,pressure_woceqc").set({'x-argokey': 'developer'});
     expect(response.status).to.eql(404);
