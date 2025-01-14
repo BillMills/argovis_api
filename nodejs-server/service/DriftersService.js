@@ -21,7 +21,7 @@ exports.drifterMetaSearch = function(res,id,platform,wmo) {
     }
     Object.keys(match).forEach((k) => match[k] === undefined && delete match[k]);
 
-    const query = Drifter['drifterMeta'].aggregate([{$match:match}]);
+    const query = Drifter['driftersMeta'].aggregate([{$match:match}]);
     let postprocess = helpers.meta_xform(res)
     res.status(404) // 404 by default
     resolve([query.cursor(), postprocess])
@@ -58,7 +58,7 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
     }
     params.batchmeta = batchmeta
     params.compression = compression
-    params.metacollection = 'drifterMeta'
+    params.metacollection = 'driftersMeta'
     params.archtypical_meta = true // any metadata document passed in to the datafilter from the metafilter has a globally applicable data_info, and possibly other fields.
     if(data && data.join(',') !== 'except-data-values'){
       params.data_query = helpers.parse_data_qsp(data.join(','))
@@ -102,15 +102,15 @@ exports.drifterSearch = function(res,id,startDate,endDate,polygon,box,center,rad
         }
         Object.keys(match).forEach((k) => match[k] === undefined && delete match[k]);
 
-        metafilter = Drifter['drifterMeta'].aggregate([{$match: match}]).exec()
+        metafilter = Drifter['driftersMeta'].aggregate([{$match: match}]).exec()
         params.metafilter = true
     } else {
-      metafilter = Drifter['drifterMeta'].find({}).limit(1).exec()
+      metafilter = Drifter['driftersMeta'].find({}).limit(1).exec()
       params.metafilter = false
     }
 
     // datafilter must run syncronously after metafilter in case metadata info is the only search parameter for the data collection
-    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Drifter['drifter'], params, local_filter))
+    let datafilter = metafilter.then(helpers.datatable_stream.bind(null, Drifter['drifters'], params, local_filter))
 
     Promise.all([metafilter, datafilter])
         .then(search_result => {
@@ -171,7 +171,7 @@ exports.drifterVocab = function(parameter) {
       ])
       return
     } else if(parameter == 'metadata'){
-      Drifter['drifter'].find().distinct('metadata', function (err, vocab) {
+      Drifter['drifters'].find().distinct('metadata', function (err, vocab) {
         if (err){
           reject({"code": 500, "message": "Server error"});
           return;
@@ -185,7 +185,7 @@ exports.drifterVocab = function(parameter) {
             'platform': 'platform'
         }
 
-        Drifter['drifterMeta'].find().distinct(lookup[parameter], function (err, vocab) {
+        Drifter['driftersMeta'].find().distinct(lookup[parameter], function (err, vocab) {
           if (err){
             reject({"code": 500, "message": "Server error"});
             return;

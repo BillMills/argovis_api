@@ -59,5 +59,5 @@ const argotrajectoriesMetaSchema = Schema({
 });
 
 module.exports = {}
-module.exports.argotrajectoriesMeta = mongoose.model('trajectoriesMeta', argotrajectoriesMetaSchema, 'trajectoriesMeta');
-module.exports.argotrajectories = mongoose.model('trajectories', argotrajectoriesSchema, 'trajectories');
+module.exports.argotrajectoriesMeta = mongoose.model('argotrajectoriesMeta', argotrajectoriesMetaSchema, 'argotrajectoriesMeta');
+module.exports.argotrajectories = mongoose.model('argotrajectories', argotrajectoriesSchema, 'argotrajectories');
