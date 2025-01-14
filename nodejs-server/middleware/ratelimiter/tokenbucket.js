@@ -10,7 +10,9 @@ const hgetAsync = util.promisify(client.hget).bind(client);
 const hgetallAsync = util.promisify(client.hgetall).bind(client);
 const hsetAsync = util.promisify(client.hset).bind(client);
 const userModel = require('../../models/user');
+const summaryModel = require('../../models/summary');
 const promclient = require('prom-client');
+const user = require('../../models/user');
 
 module.exports = {}
 
@@ -42,7 +44,7 @@ module.exports.tokenbucket = function (req, res, next) {
 	}
 
 	// allow all requests to docs
-	if(req['url'] == '/docs/'){
+	if(req['url'] == '/docs/' || req['url'] == '/favicon.ico'){
 		next()
 		return
 	}
@@ -63,7 +65,14 @@ module.exports.tokenbucket = function (req, res, next) {
 			return {"key": argokey, "ntokens": Number(userbucket.ntokens), "lastUpdate": Number(userbucket.lastUpdate), "superuser": userbucket.superuser==='true'}
 		}
 	})
-	.then(userbucket => {
+    .then(userbucket => {
+        return summaryModel.find({_id: 'ratelimiter'}).lean().then(summaries => {
+            return [userbucket, summaries[0]]
+        })
+    })
+	.then(data => {
+        let userbucket = data[0]
+        let summaries = data[1]
 		if(userbucket.superuser) {
 			next()
 			return
@@ -71,7 +80,7 @@ module.exports.tokenbucket = function (req, res, next) {
 		let d = new Date()
 		let t = d.getTime()
 		let tokensnow = Math.min(userbucket.ntokens + Math.round((t - userbucket.lastUpdate)/tokenrespawntime), bucketsize)
-		requestCost = helpers.cost(req['url'], requestCost, cellprice, metaDiscount, maxbulk, maxbulk_timeseries)
+		requestCost = helpers.cost(req['url'], requestCost, cellprice, metaDiscount, maxbulk, maxbulk_timeseries, summaries)
 		if(requestCost.hasOwnProperty('code')){
 			hsetAsync(userbucket.key, "ntokens", tokensnow-1, "lastUpdate", t) // penalize spamming us with bad requests a little
 			denyCounter.inc({ endpoint: req.path, code: requestCost.code });

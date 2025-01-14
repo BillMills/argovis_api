@@ -851,54 +851,7 @@ module.exports.lookup_key = function(userModel, apikey, resolve, reject){
     }
 }
 
-module.exports.earliest_records = function(dataset){
-  // return a date representing the earliest record for the named dataset
-
-  let dates = {
-    'argo': new Date("1997-07-28T20:26:20.002Z"),
-    'cchdo': new Date("1972-07-24T09:11:00Z"),
-    'drifters': new Date("1987-10-02T13:00:00Z"),
-    'kg21': new Date("2005-01-15T00:00:00Z"),
-    'rg09': new Date("2004-01-15T00:00:00Z"),
-    'tc': new Date("1851-06-25T00:00:00Z"),
-    "trajectories": new Date("2001-01-04T22:46:33Z"),
-    'noaasst': new Date("1989-12-31T00:00:00.000Z"),
-    'copernicussla': new Date("1993-01-03T00:00:00Z"),
-    'ccmpwind': new Date("1993-01-03T00:00:00Z"),
-    'glodap': new Date('1000-01-01T00:00:00Z'),
-    'ar': new Date("2000-01-01T00:00:00Z"),
-    'easyocean': new Date("1983-10-08T00:00:00Z")
-  }
-
-  return dates[dataset]
-
-}
-
-module.exports.final_records = function(dataset){
-  // return a date representing the last record for the named dataset, plus 1s
-  // (used to coerce in an endDate when none provided, in which case we want to be inclusive of the last date as opposed to our usual exclusive, hence the +1s)
-
-  let dates = {
-    'argo': new Date(),
-    'cchdo': new Date("2024-03-28T05:31:00Z"),
-    'drifters': new Date("2020-06-30T23:00:01Z"),
-    'kg21': new Date("2020-12-15T00:00:01Z"),
-    'rg09': new Date("2024-10-15T00:00:01Z"),
-    'tc': new Date("2023-11-27T12:00:01Z"),
-    'trajectories': new Date("2023-01-01T00:00:00Z"),
-    'noaasst': new Date("2023-01-29T00:00:01Z"),
-    'copernicussla': new Date("2022-07-31T00:00:01Z"),
-    'ccmpwind': new Date("2019-12-29T00:00:01Z"),
-    'glodap': new Date('1000-01-01T00:00:01Z'),
-    'ar': new Date("2022-01-01T00:00:01Z"),
-    'easyocean': new Date("2022-10-16T00:00:01Z")
-  }
-
-  return dates[dataset]
-
-}
-
-module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk_timeseries){
+module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk_timeseries, summaries){
   // return the tokenbucket price for this URL.
   // c == defualt cost
   // cellprice == token cost of 1 sq deg day
@@ -913,7 +866,7 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
   let qString = new URLSearchParams(url.split('?')[1]);
 
   /// handle standardized routes
-  let standard_routes = ['argo', 'cchdo', 'drifters', 'tc', 'grids', 'trajectories', 'timeseries', 'extended', 'easyocean']
+  let standard_routes = ['argo', 'cchdo', 'drifters', 'tc', 'grids', 'argotrajectories', 'timeseries', 'extended', 'easyocean']
 
   if(standard_routes.includes(path[0])){
     //// metadata routes
@@ -922,31 +875,24 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
     }
     //// core data routes
     if(path.length==1 || (path[0]=='grids' && (path[1]=='rg09' || path[1]=='kg21' || path[1]=='glodap')) || (path[0]=='timeseries' && (path[1]=='noaasst' || path[1]=='copernicussla' || path[1]=='ccmpwind')) || (path[0]=='extended' && (path[1]=='ar')) ){
-      ///// any query parameter that specifies a particular record or small set of records can get waived through
-      if(qString.get('id') || qString.get('wmo') || qString.get('name')){
+      let params = module.exports.parameter_sanitization(path[path.length-1], null,qString.get('startDate'),qString.get('endDate'),qString.get('polygon'),qString.get('box'),false,qString.get('center'),qString.get('radius'), true)
+
+      ///// discount queries
+      if(summaries['metadata'][params['dataset']]['metagroups'].some(key => qString.has(key)) || url.includes('compression=minimal')){
         c = c/5
       }
-      //// query parameters that specify a larger but still circumscribed number of records
-      else if(qString.get('woceline') || qString.get('cchdo_cruise') || qString.get('platform') || (!['grids', 'timeseries', 'extended'].includes(path[0]) && qString.get('metadata')) ){
-        c = c/1
-        if(url.includes('compression=minimal')) {
-          c = c/5
-        }
-      }
-
       ///// assume a temporospatial query absent the above (and if _nothing_ is provided, assumes and rejects an all-space-and-time request)
       else{
         ///// parameter cleaning and coercing; don't coerce coords to be mongo appropriate here, causes problems with area computation
-        let params = module.exports.parameter_sanitization(path[path.length-1], null,qString.get('startDate'),qString.get('endDate'),qString.get('polygon'),qString.get('box'),false,qString.get('center'),qString.get('radius'), true)
         if(params.hasOwnProperty('code')){
           return params
         }
         // request costs infer a startDate and endDate if not provided
         if(!(params.hasOwnProperty('startDate'))){
-          params.startDate = module.exports.earliest_records(params['dataset'])
+          params.startDate = new Date(summaries['metadata'][params['dataset']].startDate) 
         }
         if(!(params.hasOwnProperty('endDate'))){
-          params.endDate = module.exports.final_records(params['dataset'])
+          params.endDate = new Date(summaries['metadata'][params['dataset']].endDate)
         }
 
         ///// cost out request; timeseries limited only by geography since entire time span for each matched lat/long must be pulled off disk in any case.
