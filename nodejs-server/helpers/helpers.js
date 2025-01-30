@@ -859,7 +859,6 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
   // maxbulk == maximum allowed size of ndays x area[sq km]/13000sqkm; set to prevent OOM crashes
   // maxbulk_timeseries == maximum allowed size of area[sq km]/13000sqkm; set to prevent OOM crashes
   /// determine path steps
-
   let path = url.split('?')[0].replace(/\/+$/, "").replace(/\/+$/, "").split('/').slice(1)
 
   /// tokenize query string
@@ -874,9 +873,12 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
       return c/metaDiscount
     }
     //// core data routes
-    if(path.length==1 || (path[0]=='grids' && (path[1]=='rg09' || path[1]=='kg21' || path[1]=='glodap')) || (path[0]=='timeseries' && (path[1]=='noaasst' || path[1]=='copernicussla' || path[1]=='ccmpwind')) || (path[0]=='extended' && (path[1]=='ar')) ){
+    if( path.length==1 || 
+        (path.length==2 && path[0]=='grids' && (path[1]=='rg09' || path[1]=='kg21' || path[1]=='glodap')) || 
+        (path.length==2 && path[0]=='timeseries' && (path[1]=='noaasst' || path[1]=='copernicussla' || path[1]=='ccmpwind')) || 
+        (path.length==2 && path[0]=='extended' && (path[1]=='ar')) ){
       let params = module.exports.parameter_sanitization(path[path.length-1], null,qString.get('startDate'),qString.get('endDate'),qString.get('polygon'),qString.get('box'),false,qString.get('center'),qString.get('radius'), true)
-
+      
       ///// discount queries
       if(summaries['metadata'][params['dataset']]['metagroups'].some(key => qString.has(key)) || url.includes('compression=minimal')){
         c = c/5
@@ -894,7 +896,6 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
         if(!(params.hasOwnProperty('endDate'))){
           params.endDate = new Date(summaries['metadata'][params['dataset']].endDate)
         }
-
         ///// cost out request; timeseries limited only by geography since entire time span for each matched lat/long must be pulled off disk in any case.
         let geospan = module.exports.geoarea(params.polygon,params.box,params.radius) / 13000 // 1 sq degree is about 13k sq km at eq
         let dayspan = Math.round(Math.abs((params.endDate - params.startDate) / (24*60*60*1000) )); // n days of request
@@ -909,11 +910,11 @@ module.exports.cost = function(url, c, cellprice, metaDiscount, maxbulk, maxbulk
         if(isNaN(c)){
           c = 1 // protect against NaNs messing up user's token alotment
         }
-
         ///// metadata discount
         if(!url.includes('data') || url.includes('except-data-values') || url.includes('compression=minimal')){
           c /= metaDiscount
         }
+        
       }
     } 
     //// */vocabulary routes unconstrained for now  
